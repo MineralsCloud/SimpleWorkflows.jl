@@ -67,6 +67,8 @@ Base.:(==)(a::T, b::T) where {T<:Job} = a.id == b.id
 
 getstatus(x::AtomicJob) = x.ref.status
 
+ispending(x::AtomicJob) = getstatus(x) isa Pending
+
 isrunning(x::AtomicJob) = getstatus(x) isa Running
 
 issucceeded(x::AtomicJob) = getstatus(x) isa Succeeded
@@ -79,6 +81,23 @@ starttime(x::AtomicJob) = unix2datetime(x.timer.start)
 
 stoptime(x::AtomicJob) = isrunning(x) ? nothing : unix2datetime(x.timer.stop)
 
-timecost(x::AtomicJob) = isrunning(x) ? time() - starttime(x) : stoptime(x) - starttime(x)
+timecost(x::AtomicJob) = (isrunning(x) ? time() : x.timer.stop) - x.timer.start
+
+function Base.show(io::IO, job::AtomicJob)
+    printstyled(io, " ", job.cmd; bold = true)
+    if !ispending(job)
+        printstyled(
+            io,
+            " start at ",
+            starttime(job),
+            ", uses ",
+            timecost(job),
+            " seconds...";
+            color = :light_black,
+        )
+    else
+        print("\npending...")
+    end
+end
 
 end
