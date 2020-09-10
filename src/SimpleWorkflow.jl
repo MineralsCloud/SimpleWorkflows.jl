@@ -29,17 +29,18 @@ struct ExternalAtomicJob
     cmd
     name::String
     id::UUID
+    ref::JobRef
     timer::Timer
     logger
-    ExternalAtomicJob(cmd, name = "Unnamed") = new(cmd, name, uuid4(), Timer(), "")
+    ExternalAtomicJob(cmd, name = "Unnamed") =
+        new(cmd, name, uuid4(), JobRef(), Timer(), "")
 end
 
-function _launch(cmd::Base.AbstractCmd)
-    x = ExternalAtomicJob(cmd)
+function Base.run(x::ExternalAtomicJob)
     x.ref.ref = @spawn begin
         x.timer.start = time()
         ref = try
-            run(cmd; wait = true)  # Must wait
+            run(x.cmd; wait = true)  # Must wait
         catch e
             e
         finally
