@@ -47,7 +47,7 @@ function _launch(cmd::Base.AbstractCmd)
         end
         if ref isa Exception  # Include all cases?
             if ref isa InterruptException
-                x.ref.status = Succeeded()
+                x.ref.status = Interrupted()
             else
                 x.ref.status = Failed()
             end
