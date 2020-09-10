@@ -47,15 +47,20 @@ struct ExternalAtomicJob <: AtomicJob
 end
 
 function Base.run(x::ExternalAtomicJob)
+    out = Pipe()
+    err = Pipe()
     x.ref.ref = @spawn begin
         x.ref.status = Running()
         x.timer.start = time()
         ref = try
-            run(x.cmd; wait = true)  # Must wait
+            run(pipeline(x.cmd, stdin = devnull, stdout = out, stderr = err))
         catch e
+            @warn("could not spawn $(x.cmd)!")
             e
         finally
             x.timer.stop = time()
+            close(out.in)
+            close(err.in)
         end
         if ref isa Exception  # Include all cases?
             if ref isa InterruptException
@@ -63,8 +68,10 @@ function Base.run(x::ExternalAtomicJob)
             else
                 x.ref.status = Failed()
             end
+            x.log.err = String(read(err))
         else
             x.ref.status = Succeeded()
+            x.log.out = String(read(out))
         end
         ref
     end
