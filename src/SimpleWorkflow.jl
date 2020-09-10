@@ -99,6 +99,10 @@ stoptime(x::AtomicJob) = isrunning(x) ? nothing : unix2datetime(x.timer.stop)
 
 elapsed(x::AtomicJob) = (isrunning(x) ? time() : x.timer.stop) - x.timer.start
 
+outmsg(x::AtomicJob) = isrunning(x) ? nothing : x.log.out
+
+errmsg(x::AtomicJob) = isrunning(x) ? nothing : x.log.err
+
 function Base.show(io::IO, job::AtomicJob)
     printstyled(io, " ", job.cmd; bold = true)
     if !ispending(job)
