@@ -87,17 +87,31 @@ ispending(x::AtomicJob) = getstatus(x) isa Pending
 
 isrunning(x::AtomicJob) = getstatus(x) isa Running
 
+isexited(x::AtomicJob) = getstatus(x) isa Exited
+
 issucceeded(x::AtomicJob) = getstatus(x) isa Succeeded
 
 isfailed(x::AtomicJob) = getstatus(x) isa Failed
 
 isinterrupted(x::AtomicJob) = getstatus(x) isa Interrupted
 
-starttime(x::AtomicJob) = unix2datetime(x.timer.start)
+starttime(x::AtomicJob) = ispending(x) ? nothing : unix2datetime(x.timer.start)
 
-stoptime(x::AtomicJob) = isrunning(x) ? nothing : unix2datetime(x.timer.stop)
+stoptime(x::AtomicJob) = isexited(x) ? unix2datetime(x.timer.stop) : nothing
 
-elapsed(x::AtomicJob) = (isrunning(x) ? time() : x.timer.stop) - x.timer.start
+function elapsed(x::AtomicJob)
+    start = unix2datetime(x.timer.start)
+    if ispending(x)
+        return
+    elseif isrunning(x)
+        return unix2datetime(time()) - start
+    else  # Exited
+        return unix2datetime(x.timer.stop) - start
+    end
+end
+
+elapsed(x::AtomicJob) = ispending(x) ? nothing :
+    (isrunning(x) ? unix2datetime(time()) : stoptime(x)) - starttime(x)
 
 outmsg(x::AtomicJob) = isrunning(x) ? nothing : x.log.out
 
