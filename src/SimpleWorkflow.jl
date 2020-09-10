@@ -1,6 +1,6 @@
 module SimpleWorkflow
 
-using Dates: unix2datetime
+using Dates: unix2datetime, format
 using Distributed: Future, @spawn
 using UUIDs: UUID, uuid4
 
@@ -90,17 +90,18 @@ elapsed(x::AtomicJob) = (isrunning(x) ? time() : x.timer.stop) - x.timer.start
 function Base.show(io::IO, job::AtomicJob)
     printstyled(io, " ", job.cmd; bold = true)
     if !ispending(job)
-        printstyled(
+        print(
             io,
-            " start at ",
-            starttime(job),
+            " from ",
+            format(starttime(job), "HH:MM:SS u dd, yyyy"),
+            isrunning(job) ? ", still running..." :
+            ", to " * format(stoptime(job), "HH:MM:SS u dd, yyyy"),
             ", uses ",
             elapsed(job),
-            " seconds...";
-            color = :light_black,
+            " seconds.",
         )
     else
-        print("\npending...")
+        print(" pending...")
     end
 end
 
