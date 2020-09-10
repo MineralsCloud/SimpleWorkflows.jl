@@ -5,6 +5,7 @@ using Distributed: Future, @spawn
 using UUIDs: UUID, uuid4
 
 abstract type JobStatus end
+struct Pending <: JobStatus end
 struct Running <: JobStatus end
 abstract type Exited <: JobStatus end
 struct Succeeded <: Exited end
@@ -18,9 +19,9 @@ mutable struct Timer
 end
 
 mutable struct JobRef
-    ref::Future
     status::JobStatus
-    JobRef() = new()
+    ref::Future
+    JobRef() = new(Pending())
 end
 
 abstract type Job end
@@ -38,6 +39,7 @@ end
 
 function Base.run(x::ExternalAtomicJob)
     x.ref.ref = @spawn begin
+        x.ref.status = Running()
         x.timer.start = time()
         ref = try
             run(x.cmd; wait = true)  # Must wait
