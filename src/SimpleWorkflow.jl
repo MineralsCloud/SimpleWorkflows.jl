@@ -22,6 +22,11 @@ mutable struct Timer
     Timer() = new()
 end
 
+mutable struct Logger
+    out::String
+    err::String
+end
+
 mutable struct JobRef
     status::JobStatus
     ref::Future
@@ -36,9 +41,9 @@ struct ExternalAtomicJob <: AtomicJob
     id::UUID
     ref::JobRef
     timer::Timer
-    logger
+    log::Logger
     ExternalAtomicJob(cmd, name = "Unnamed") =
-        new(cmd, name, uuid4(), JobRef(), Timer(), "")
+        new(cmd, name, uuid4(), JobRef(), Timer(), Logger("", ""))
 end
 
 function Base.run(x::ExternalAtomicJob)
