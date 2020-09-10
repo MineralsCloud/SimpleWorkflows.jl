@@ -4,6 +4,10 @@ using Dates: unix2datetime
 using Distributed: Future, @spawn
 using UUIDs: UUID, uuid4
 
+export ExternalAtomicJob
+export getstatus,
+    ispending, isrunning, issucceeded, isfailed, isinterrupted, starttime, stoptime, elapsed
+
 abstract type JobStatus end
 struct Pending <: JobStatus end
 struct Running <: JobStatus end
@@ -81,7 +85,7 @@ starttime(x::AtomicJob) = unix2datetime(x.timer.start)
 
 stoptime(x::AtomicJob) = isrunning(x) ? nothing : unix2datetime(x.timer.stop)
 
-timecost(x::AtomicJob) = (isrunning(x) ? time() : x.timer.stop) - x.timer.start
+elapsed(x::AtomicJob) = (isrunning(x) ? time() : x.timer.stop) - x.timer.start
 
 function Base.show(io::IO, job::AtomicJob)
     printstyled(io, " ", job.cmd; bold = true)
@@ -91,7 +95,7 @@ function Base.show(io::IO, job::AtomicJob)
             " start at ",
             starttime(job),
             ", uses ",
-            timecost(job),
+            elapsed(job),
             " seconds...";
             color = :light_black,
         )
