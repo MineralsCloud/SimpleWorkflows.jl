@@ -6,9 +6,10 @@ using UUIDs: UUID, uuid4
 
 abstract type JobStatus end
 struct Running <: JobStatus end
-abstract type Finished <: JobStatus end
-struct Succeeded <: Finished end
-struct Failed <: Finished end
+abstract type Exited <: JobStatus end
+struct Succeeded <: Exited end
+struct Failed <: Exited end
+struct Interrupted <: Exited end
 
 mutable struct Timer
     start::Float64
