@@ -25,7 +25,7 @@ end
 
 abstract type Job end
 abstract type AtomicJob <: Job end
-struct ExternalAtomicJob
+struct ExternalAtomicJob <: AtomicJob
     cmd
     name::String
     id::UUID
@@ -60,9 +60,22 @@ function Base.run(x::ExternalAtomicJob)
     return x
 end
 
+Base.:(==)(a::Job, b::Job) = false
+Base.:(==)(a::T, b::T) where {T<:Job} = a.id == b.id
+
+getstatus(x::AtomicJob) = x.ref.status
+
+isrunning(x::AtomicJob) = getstatus(x) isa Running
+
+issucceeded(x::AtomicJob) = getstatus(x) isa Succeeded
+
+isfailed(x::AtomicJob) = getstatus(x) isa Failed
+
+isinterrupted(x::AtomicJob) = getstatus(x) isa Interrupted
+
 starttime(x::AtomicJob) = unix2datetime(x.timer.start)
 
-stoptime(x::AtomicJob) = isrunning(x) ? nothing : x.timer.stop
+stoptime(x::AtomicJob) = isrunning(x) ? nothing : unix2datetime(x.timer.stop)
 
 timecost(x::AtomicJob) = isrunning(x) ? time() - starttime(x) : stoptime(x) - starttime(x)
 
