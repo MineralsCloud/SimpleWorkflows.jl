@@ -6,7 +6,17 @@ using UUIDs: UUID, uuid4
 
 export ExternalAtomicJob
 export getstatus,
-    ispending, isrunning, issucceeded, isfailed, isinterrupted, starttime, stoptime, elapsed
+    ispending,
+    isrunning,
+    issucceeded,
+    isfailed,
+    isinterrupted,
+    starttime,
+    stoptime,
+    elapsed,
+    outmsg,
+    errmsg,
+    run!
 
 abstract type JobStatus end
 struct Pending <: JobStatus end
@@ -46,9 +56,8 @@ struct ExternalAtomicJob <: AtomicJob
         new(cmd, name, uuid4(), JobRef(), Timer(), Logger("", ""))
 end
 
-function Base.run(x::ExternalAtomicJob)
-    out = Pipe()
-    err = Pipe()
+function run!(x::ExternalAtomicJob)
+    out, err = Pipe(), Pipe()
     x.ref.ref = @spawn begin
         x.ref.status = Running()
         x.timer.start = time()
