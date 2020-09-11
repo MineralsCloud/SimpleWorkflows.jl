@@ -119,9 +119,6 @@ function elapsed(x::AtomicJob)
     end
 end
 
-elapsed(x::AtomicJob) = ispending(x) ? nothing :
-    (isrunning(x) ? unix2datetime(time()) : stoptime(x)) - starttime(x)
-
 outmsg(x::AtomicJob) = isrunning(x) ? nothing : x.log.out
 
 errmsg(x::AtomicJob) = isrunning(x) ? nothing : x.log.err
