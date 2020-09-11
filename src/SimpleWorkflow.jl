@@ -1,12 +1,22 @@
 module SimpleWorkflow
 
-using Dates: unix2datetime
+using Dates: unix2datetime, format
 using Distributed: Future, @spawn
 using UUIDs: UUID, uuid4
 
 export ExternalAtomicJob
 export getstatus,
-    ispending, isrunning, issucceeded, isfailed, isinterrupted, starttime, stoptime, elapsed
+    ispending,
+    isrunning,
+    issucceeded,
+    isfailed,
+    isinterrupted,
+    starttime,
+    stoptime,
+    elapsed,
+    outmsg,
+    errmsg,
+    run!
 
 abstract type JobStatus end
 struct Pending <: JobStatus end
@@ -20,6 +30,11 @@ mutable struct Timer
     start::Float64
     stop::Float64
     Timer() = new()
+end
+
+mutable struct Logger
+    out::String
+    err::String
 end
 
 mutable struct JobRef
@@ -36,21 +51,25 @@ struct ExternalAtomicJob <: AtomicJob
     id::UUID
     ref::JobRef
     timer::Timer
-    logger
+    log::Logger
     ExternalAtomicJob(cmd, name = "Unnamed") =
-        new(cmd, name, uuid4(), JobRef(), Timer(), "")
+        new(cmd, name, uuid4(), JobRef(), Timer(), Logger("", ""))
 end
 
-function Base.run(x::ExternalAtomicJob)
+function run!(x::ExternalAtomicJob)
+    out, err = Pipe(), Pipe()
     x.ref.ref = @spawn begin
         x.ref.status = Running()
         x.timer.start = time()
         ref = try
-            run(x.cmd; wait = true)  # Must wait
+            run(pipeline(x.cmd, stdin = devnull, stdout = out, stderr = err))
         catch e
+            @warn("could not spawn $(x.cmd)!")
             e
         finally
             x.timer.stop = time()
+            close(out.in)
+            close(err.in)
         end
         if ref isa Exception  # Include all cases?
             if ref isa InterruptException
@@ -58,8 +77,10 @@ function Base.run(x::ExternalAtomicJob)
             else
                 x.ref.status = Failed()
             end
+            x.log.err = String(read(err))
         else
             x.ref.status = Succeeded()
+            x.log.out = String(read(out))
         end
         ref
     end
@@ -75,32 +96,51 @@ ispending(x::AtomicJob) = getstatus(x) isa Pending
 
 isrunning(x::AtomicJob) = getstatus(x) isa Running
 
+isexited(x::AtomicJob) = getstatus(x) isa Exited
+
 issucceeded(x::AtomicJob) = getstatus(x) isa Succeeded
 
 isfailed(x::AtomicJob) = getstatus(x) isa Failed
 
 isinterrupted(x::AtomicJob) = getstatus(x) isa Interrupted
 
-starttime(x::AtomicJob) = unix2datetime(x.timer.start)
+starttime(x::AtomicJob) = ispending(x) ? nothing : unix2datetime(x.timer.start)
 
-stoptime(x::AtomicJob) = isrunning(x) ? nothing : unix2datetime(x.timer.stop)
+stoptime(x::AtomicJob) = isexited(x) ? unix2datetime(x.timer.stop) : nothing
 
-elapsed(x::AtomicJob) = (isrunning(x) ? time() : x.timer.stop) - x.timer.start
+function elapsed(x::AtomicJob)
+    start = unix2datetime(x.timer.start)
+    if ispending(x)
+        return
+    elseif isrunning(x)
+        return unix2datetime(time()) - start
+    else  # Exited
+        return unix2datetime(x.timer.stop) - start
+    end
+end
+
+elapsed(x::AtomicJob) = ispending(x) ? nothing :
+    (isrunning(x) ? unix2datetime(time()) : stoptime(x)) - starttime(x)
+
+outmsg(x::AtomicJob) = isrunning(x) ? nothing : x.log.out
+
+errmsg(x::AtomicJob) = isrunning(x) ? nothing : x.log.err
 
 function Base.show(io::IO, job::AtomicJob)
     printstyled(io, " ", job.cmd; bold = true)
     if !ispending(job)
-        printstyled(
+        print(
             io,
-            " start at ",
-            starttime(job),
+            " from ",
+            format(starttime(job), "HH:MM:SS u dd, yyyy"),
+            isrunning(job) ? ", still running..." :
+            ", to " * format(stoptime(job), "HH:MM:SS u dd, yyyy"),
             ", uses ",
             elapsed(job),
-            " seconds...";
-            color = :light_black,
+            " seconds.",
         )
     else
-        print("\npending...")
+        print(" pending...")
     end
 end
 
