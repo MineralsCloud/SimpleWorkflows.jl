@@ -85,9 +85,6 @@ function run!(x::ExternalAtomicJob)
     return x
 end
 
-Base.:(==)(a::Job, b::Job) = false
-Base.:(==)(a::T, b::T) where {T<:Job} = a.id == b.id
-
 getstatus(x::AtomicJob) = x.ref.status
 
 ispending(x::AtomicJob) = getstatus(x) isa Pending
