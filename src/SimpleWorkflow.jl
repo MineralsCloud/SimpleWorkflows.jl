@@ -2,7 +2,6 @@ module SimpleWorkflow
 
 using Dates: unix2datetime, format
 using Distributed: Future, @spawn
-using UUIDs: UUID, uuid4
 
 export ExternalAtomicJob
 export getstatus,
@@ -48,12 +47,11 @@ abstract type AtomicJob <: Job end
 struct ExternalAtomicJob <: AtomicJob
     cmd
     name::String
-    id::UUID
     ref::JobRef
     timer::Timer
     log::Logger
     ExternalAtomicJob(cmd, name = "Unnamed") =
-        new(cmd, name, uuid4(), JobRef(), Timer(), Logger("", ""))
+        new(cmd, name, JobRef(), Timer(), Logger("", ""))
 end
 
 function run!(x::ExternalAtomicJob)
