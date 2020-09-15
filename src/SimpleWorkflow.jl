@@ -118,6 +118,8 @@ outmsg(x::AtomicJob) = isrunning(x) ? nothing : x.log.out
 
 errmsg(x::AtomicJob) = isrunning(x) ? nothing : x.log.err
 
+Base.wait(x::Job) = wait(x.ref.ref)
+
 function Base.show(io::IO, job::AtomicJob)
     printstyled(io, " ", job.cmd; bold = true)
     if !ispending(job)
