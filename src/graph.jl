@@ -28,6 +28,8 @@ struct WorkflowIndex
 end
 
 Base.getindex(w::Workflow, i::Integer) = WorkflowIndex(w, i)
+Base.firstindex(w::Workflow) = 1
+Base.lastindex(w::Workflow) = nv(w.graph)
 
 function Base.:|>(a::Job, b::Job)
     g = DiGraph(2, 1)
