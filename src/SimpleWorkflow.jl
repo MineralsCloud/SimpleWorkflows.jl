@@ -43,6 +43,12 @@ mutable struct JobRef
 end
 
 abstract type Job end
+struct EmptyJob <: Job
+    name::String
+    ref::JobRef
+    timer::Timer
+    EmptyJob(name = "Unnamed") = new(name, JobRef(), Timer())
+end
 abstract type AtomicJob <: Job end
 struct ExternalAtomicJob <: AtomicJob
     cmd
@@ -84,26 +90,34 @@ function run!(x::ExternalAtomicJob)
     end
     return x
 end
+function run!(x::EmptyJob)
+    x.ref.ref = @spawn begin
+        x.timer.start = x.timer.stop = time()
+        x.ref.status = Succeeded()
+        nothing
+    end
+    return x
+end
 
-getstatus(x::AtomicJob) = x.ref.status
+getstatus(x::Job) = x.ref.status
 
-ispending(x::AtomicJob) = getstatus(x) isa Pending
+ispending(x::Job) = getstatus(x) isa Pending
 
-isrunning(x::AtomicJob) = getstatus(x) isa Running
+isrunning(x::Job) = getstatus(x) isa Running
 
-isexited(x::AtomicJob) = getstatus(x) isa Exited
+isexited(x::Job) = getstatus(x) isa Exited
 
-issucceeded(x::AtomicJob) = getstatus(x) isa Succeeded
+issucceeded(x::Job) = getstatus(x) isa Succeeded
 
-isfailed(x::AtomicJob) = getstatus(x) isa Failed
+isfailed(x::Job) = getstatus(x) isa Failed
 
-isinterrupted(x::AtomicJob) = getstatus(x) isa Interrupted
+isinterrupted(x::Job) = getstatus(x) isa Interrupted
 
-starttime(x::AtomicJob) = ispending(x) ? nothing : unix2datetime(x.timer.start)
+starttime(x::Job) = ispending(x) ? nothing : unix2datetime(x.timer.start)
 
-stoptime(x::AtomicJob) = isexited(x) ? unix2datetime(x.timer.stop) : nothing
+stoptime(x::Job) = isexited(x) ? unix2datetime(x.timer.stop) : nothing
 
-function elapsed(x::AtomicJob)
+function elapsed(x::Job)
     start = unix2datetime(x.timer.start)
     if ispending(x)
         return
@@ -115,8 +129,10 @@ function elapsed(x::AtomicJob)
 end
 
 outmsg(x::AtomicJob) = isrunning(x) ? nothing : x.log.out
+outmsg(::EmptyJob) = ""
 
 errmsg(x::AtomicJob) = isrunning(x) ? nothing : x.log.err
+errmsg(::EmptyJob) = ""
 
 Base.wait(x::Job) = wait(x.ref.ref)
 
@@ -137,5 +153,7 @@ function Base.show(io::IO, job::AtomicJob)
         print(" pending...")
     end
 end
+
+include("graph.jl")
 
 end
