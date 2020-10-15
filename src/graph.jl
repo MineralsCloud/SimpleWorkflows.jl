@@ -42,12 +42,12 @@ function Base.:|>(wi::WorkflowIndex, j::Job)
 end
 function Base.:|>(j::Job, wi::WorkflowIndex)
     g = DiGraph(1)
-    h = _merge(g, wi.wf.graph)
+    h = g ⊕ wi.wf.graph
     add_edge!(h, 1, wi.i + 1)
     return Workflow(h, pushfirst!!(wi.wf.nodes, j))
 end
 function Base.:|>(a::WorkflowIndex, b::WorkflowIndex)
-    g = _merge(a.wf.graph, b.wf.graph)
+    g = a.wf.graph ⊕ b.wf.graph
     add_edge!(g, a.i, b.i + nv(a.wf.graph))
     return Workflow(g, append!!(a.wf.nodes, b.wf.nodes))
 end
@@ -81,7 +81,7 @@ function run!(w::Workflow)
     return w
 end
 
-function _merge(g::AbstractGraph, b::AbstractGraph)
+function ⊕(g::AbstractGraph, b::AbstractGraph)
     a = copy(g)
     add_vertices!(a, nv(b))
     for e in edges(b)
