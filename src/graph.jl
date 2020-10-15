@@ -15,7 +15,7 @@ using BangBang: push!!, pushfirst!!, append!!
 
 import ...run!
 
-export Workflow, ∥
+export Workflow, eachjob, ∥
 
 struct Workflow{T}
     graph::DiGraph
@@ -60,6 +60,8 @@ function ∥(a::Job, b::Job)
     add_edge!(g, 3, 4)
     return Workflow(g, (EmptyJob(), a, b, EmptyJob()))
 end
+
+eachjob(w::Workflow) = (w.nodes[i] for i in vertices(w.graph))
 
 function run!(w::Workflow)
     g, n = w.graph, w.nodes
