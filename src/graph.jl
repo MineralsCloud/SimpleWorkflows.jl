@@ -17,6 +17,10 @@ import ...run!
 
 export Workflow, eachjob, ∥
 
+struct ExecutorError
+    msg::String
+end
+
 struct Workflow{T}
     graph::DiGraph
     nodes::T
@@ -66,9 +70,7 @@ eachjob(w::Workflow) = (w.nodes[i] for i in vertices(w.graph))
 function run!(w::Workflow)
     g, n = w.graph, w.nodes
     if is_cyclic(g)
-        throw(ErrorException(
-            "Dispatcher can only run graphs without circular dependencies",
-        ))
+        throw(ExecutorError("Dispatcher can only run graphs without circular dependencies"))
     end
     for i in vertices(g)
         inn = inneighbors(g, i)
