@@ -43,7 +43,7 @@ mutable struct JobRef
 end
 
 abstract type Job end
-abstract type EmptyJob <: Job end
+struct EmptyJob <: Job end
 abstract type AtomicJob <: Job end
 struct ExternalAtomicJob <: AtomicJob
     cmd
