@@ -11,14 +11,15 @@ using LightGraphs:
     edges,
     src,
     dst
+using BangBang: push!!, pushfirst!!, append!!
 
 import ...run!
 
 export Workflow, ∥
 
-struct Workflow
+struct Workflow{T}
     graph::DiGraph
-    nodes::Vector{<:Job}
+    nodes::T
 end
 
 struct WorkflowIndex
@@ -30,30 +31,30 @@ Base.getindex(w::Workflow, i::Integer) = WorkflowIndex(w, i)
 
 function Base.:|>(a::Job, b::Job)
     g = DiGraph(2, 1)
-    return Workflow(g, [a, b])
+    return Workflow(g, (a, b))
 end
 function Base.:|>(wi::WorkflowIndex, j::Job)
     add_vertex!(wi.wf.graph)
     add_edge!(wi.wf.graph, wi.i, nv(wi.wf.graph))
-    return Workflow(wi.wf.graph, push!(wi.wf.nodes, j))
+    return Workflow(wi.wf.graph, push!!(wi.wf.nodes, j))
 end
 function Base.:|>(j::Job, wi::WorkflowIndex)
     g = DiGraph(1)
     h = _merge(g, wi.wf.graph)
     add_edge!(h, 1, wi.i + 1)
-    return Workflow(h, pushfirst!(wi.wf.nodes, j))
+    return Workflow(h, pushfirst!!(wi.wf.nodes, j))
 end
 function Base.:|>(a::WorkflowIndex, b::WorkflowIndex)
     g = _merge(a.wf.graph, b.wf.graph)
     add_edge!(g, a.i, b.i + nv(a.wf.graph))
-    return Workflow(g, append!(a.wf.nodes, b.wf.nodes))
+    return Workflow(g, append!!(a.wf.nodes, b.wf.nodes))
 end
 
 function ∥(a::Job, b::Job)
     g = DiGraph(3)
     add_edge!(g, 1, 2)
     add_edge!(g, 1, 3)
-    return Workflow(g, [EmptyJob(), a, b])
+    return Workflow(g, (EmptyJob(), a, b))
 end
 
 function _merge(g::AbstractGraph, b::AbstractGraph)
