@@ -5,10 +5,10 @@ using LightGraphs:
     add_vertex!,
     add_vertices!,
     nv,
-    outdegree,
     is_cyclic,
     vertices,
     edges,
+    inneighbors,
     src,
     dst
 using BangBang: push!!, pushfirst!!, append!!
@@ -60,6 +60,25 @@ function ∥(a::Job, b::Job)
     add_edge!(g, 3, 4)
     return Workflow(g, (EmptyJob(), a, b, EmptyJob()))
 end
+
+function run!(w::Workflow)
+    g, n = w.graph, w.nodes
+    if is_cyclic(g)
+        throw(ErrorException(
+            "Dispatcher can only run graphs without circular dependencies",
+        ))
+    end
+    for i in vertices(g)
+        inn = inneighbors(g, i)
+        if !isempty(inn)
+            if all(isexited(n[j]) for j in inn)
+                run!(n[i])
+            else
+                @sync [wait(run!(n[j])) for j in inn]
+            end
+        end
+    end
+    return w
 end
 
 function _merge(g::AbstractGraph, b::AbstractGraph)

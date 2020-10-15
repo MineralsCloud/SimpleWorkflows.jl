@@ -91,6 +91,7 @@ end
 run!(x::EmptyJob) = x
 
 getstatus(x::AtomicJob) = x.ref.status
+getstatus(::EmptyJob) = Succeeded()
 
 ispending(x::AtomicJob) = getstatus(x) isa Pending
 ispending(x::EmptyJob) = false
