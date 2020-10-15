@@ -44,8 +44,10 @@ end
 
 abstract type Job end
 struct EmptyJob <: Job
+    name::String
+    ref::JobRef
     timer::Timer
-    EmptyJob() = new(Timer())
+    EmptyJob(name = "Unnamed") = new(name, JobRef(), Timer())
 end
 abstract type AtomicJob <: Job end
 struct ExternalAtomicJob <: AtomicJob
@@ -88,10 +90,16 @@ function run!(x::ExternalAtomicJob)
     end
     return x
 end
-run!(x::EmptyJob) = x
+function run!(x::EmptyJob)
+    x.ref.ref = @spawn begin
+        x.timer.start = x.timer.stop = time()
+        x.ref.status = Succeeded()
+        nothing
+    end
+    return x
+end
 
-getstatus(x::AtomicJob) = x.ref.status
-getstatus(::EmptyJob) = Succeeded()
+getstatus(x::Job) = x.ref.status
 
 ispending(x::Job) = getstatus(x) isa Pending
 
@@ -105,11 +113,11 @@ isfailed(x::Job) = getstatus(x) isa Failed
 
 isinterrupted(x::Job) = getstatus(x) isa Interrupted
 
-starttime(x::AtomicJob) = ispending(x) ? nothing : unix2datetime(x.timer.start)
+starttime(x::Job) = ispending(x) ? nothing : unix2datetime(x.timer.start)
 
-stoptime(x::AtomicJob) = isexited(x) ? unix2datetime(x.timer.stop) : nothing
+stoptime(x::Job) = isexited(x) ? unix2datetime(x.timer.stop) : nothing
 
-function elapsed(x::AtomicJob)
+function elapsed(x::Job)
     start = unix2datetime(x.timer.start)
     if ispending(x)
         return
@@ -121,8 +129,10 @@ function elapsed(x::AtomicJob)
 end
 
 outmsg(x::AtomicJob) = isrunning(x) ? nothing : x.log.out
+outmsg(::EmptyJob) = ""
 
 errmsg(x::AtomicJob) = isrunning(x) ? nothing : x.log.err
+errmsg(::EmptyJob) = ""
 
 Base.wait(x::Job) = wait(x.ref.ref)
 
