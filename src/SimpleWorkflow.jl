@@ -139,4 +139,6 @@ function Base.show(io::IO, job::AtomicJob)
     end
 end
 
+include("graph.jl")
+
 end
