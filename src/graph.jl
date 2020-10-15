@@ -53,10 +53,13 @@ function Base.:|>(a::WorkflowIndex, b::WorkflowIndex)
 end
 
 function ∥(a::Job, b::Job)
-    g = DiGraph(3)
+    g = DiGraph(4)
     add_edge!(g, 1, 2)
     add_edge!(g, 1, 3)
-    return Workflow(g, (EmptyJob(), a, b))
+    add_edge!(g, 2, 4)
+    add_edge!(g, 3, 4)
+    return Workflow(g, (EmptyJob(), a, b, EmptyJob()))
+end
 end
 
 function _merge(g::AbstractGraph, b::AbstractGraph)
