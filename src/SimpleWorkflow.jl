@@ -43,7 +43,7 @@ mutable struct JobRef
 end
 
 abstract type Job end
-struct EmptyJob
+struct EmptyJob <: Job
     timer::Timer
     EmptyJob() = new(Timer())
 end
@@ -93,23 +93,17 @@ run!(x::EmptyJob) = x
 getstatus(x::AtomicJob) = x.ref.status
 getstatus(::EmptyJob) = Succeeded()
 
-ispending(x::AtomicJob) = getstatus(x) isa Pending
-ispending(x::EmptyJob) = false
+ispending(x::Job) = getstatus(x) isa Pending
 
-isrunning(x::AtomicJob) = getstatus(x) isa Running
-isrunning(x::EmptyJob) = false
+isrunning(x::Job) = getstatus(x) isa Running
 
-isexited(x::AtomicJob) = getstatus(x) isa Exited
-isexited(x::EmptyJob) = true
+isexited(x::Job) = getstatus(x) isa Exited
 
-issucceeded(x::AtomicJob) = getstatus(x) isa Succeeded
-issucceeded(x::EmptyJob) = true
+issucceeded(x::Job) = getstatus(x) isa Succeeded
 
-isfailed(x::AtomicJob) = getstatus(x) isa Failed
-isfailed(x::EmptyJob) = false
+isfailed(x::Job) = getstatus(x) isa Failed
 
-isinterrupted(x::AtomicJob) = getstatus(x) isa Interrupted
-isinterrupted(x::EmptyJob) = false
+isinterrupted(x::Job) = getstatus(x) isa Interrupted
 
 starttime(x::AtomicJob) = ispending(x) ? nothing : unix2datetime(x.timer.start)
 
