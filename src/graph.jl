@@ -15,7 +15,11 @@ using BangBang: push!!, pushfirst!!, append!!
 
 import ...run!
 
-export Workflow, ∥
+export Workflow, eachjob, ∥
+
+struct ExecutorError
+    msg::String
+end
 
 struct Workflow{T}
     graph::DiGraph
@@ -61,12 +65,12 @@ function ∥(a::Job, b::Job)
     return Workflow(g, (EmptyJob(), a, b, EmptyJob()))
 end
 
+eachjob(w::Workflow) = (w.nodes[i] for i in vertices(w.graph))
+
 function run!(w::Workflow)
     g, n = w.graph, w.nodes
     if is_cyclic(g)
-        throw(ErrorException(
-            "Dispatcher can only run graphs without circular dependencies",
-        ))
+        throw(ExecutorError("Dispatcher can only run graphs without circular dependencies"))
     end
     for i in vertices(g)
         inn = inneighbors(g, i)
