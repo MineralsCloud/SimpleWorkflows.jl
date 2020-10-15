@@ -75,12 +75,13 @@ function run!(w::Workflow)
     for i in vertices(g)
         inn = inneighbors(g, i)
         if !isempty(inn)
-            if all(isexited(n[j]) for j in inn)
-                run!(n[i])
-            else
-                @sync [wait(run!(n[j])) for j in inn]
+            for j in inn
+                if !isexited(n[j])
+                    wait(n[j])
+                end
             end
         end
+        run!(n[i])
     end
     return w
 end
