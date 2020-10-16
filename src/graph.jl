@@ -29,12 +29,12 @@ struct Workflow
     end
 end
 
-struct WorkflowIndex
-    wf::Workflow
-    i::UInt
+struct TieInPoint
+    workflow::Workflow
+    index::UInt
 end
 
-Base.getindex(w::Workflow, i::Integer) = WorkflowIndex(w, UInt(i))
+Base.getindex(w::Workflow, i::Integer) = TieInPoint(w, UInt(i))
 Base.firstindex(w::Workflow) = 1
 Base.lastindex(w::Workflow) = nv(w.graph)
 
@@ -45,24 +45,24 @@ function →(a::Job, b::Job, c::Job, xs::Job...)  # See https://github.com/Julia
     map(i -> add_edge!(g, i, i + 1), 1:(2+n))
     return Workflow(g, (a, b, c, xs...))
 end
-function →(wi::WorkflowIndex, j::Job)
-    add_vertex!(wi.wf.graph)
-    add_edge!(wi.wf.graph, wi.i, nv(wi.wf.graph))
-    return Workflow(wi.wf.graph, push!!(wi.wf.nodes, j))
+function →(wi::TieInPoint, j::Job)
+    add_vertex!(wi.workflow.graph)
+    add_edge!(wi.workflow.graph, wi.index, nv(wi.workflow.graph))
+    return Workflow(wi.workflow.graph, push!!(wi.workflow.nodes, j))
 end
-function →(j::Job, wi::WorkflowIndex)
+function →(j::Job, wi::TieInPoint)
     g = DiGraph(1)
-    h = g ⊕ wi.wf.graph
-    add_edge!(h, 1, wi.i + 1)
-    return Workflow(h, pushfirst!!(wi.wf.nodes, j))
+    h = g ⊕ wi.workflow.graph
+    add_edge!(h, 1, wi.index + 1)
+    return Workflow(h, pushfirst!!(wi.workflow.nodes, j))
 end
-function →(a::WorkflowIndex, b::WorkflowIndex)
-    g = a.wf.graph ⊕ b.wf.graph
-    add_edge!(g, a.i, b.i + nv(a.wf.graph))
-    return Workflow(g, append!!(a.wf.nodes, b.wf.nodes))
+function →(a::TieInPoint, b::TieInPoint)
+    g = a.workflow.graph ⊕ b.workflow.graph
+    add_edge!(g, a.index, b.index + nv(a.workflow.graph))
+    return Workflow(g, append!!(a.workflow.nodes, b.workflow.nodes))
 end
 
-←(a::Union{Job,WorkflowIndex}, b::Union{Job,WorkflowIndex}) = →(b, a)
+←(a::Union{Job,TieInPoint}, b::Union{Job,TieInPoint}) = →(b, a)
     n = nv(g)
     for i in 2:(n-1)
         add_edge!(g, 1, i)
@@ -70,10 +70,10 @@ end
     end
     return Workflow(g, (EmptyJob(), a, b..., EmptyJob()))
 end
-function ∥(w::WorkflowIndex, b::Job)
-    @assert length(inneighbors(w.wf.graph, w.i)) == 1
-    p = inneighbors(w.wf.graph, w.i)
-    g = w.wf.graph
+function ∥(w::TieInPoint, b::Job)
+    @assert length(inneighbors(w.workflow.graph, w.index)) == 1
+    p = inneighbors(w.workflow.graph, w.index)
+    g = w.workflow.graph
     add_vertex!(g)
     add_edge!(g, only(p), nv(g))
     return Workflow(g, push!!(w.wf.nodes, b))
