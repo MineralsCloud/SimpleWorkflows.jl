@@ -3,7 +3,7 @@ module SimpleWorkflow
 using Dates: unix2datetime, format
 using Distributed: Future, @spawn
 
-export ExternalAtomicJob
+export ExternalAtomicJob, InternalAtomicJob
 export getstatus,
     ispending,
     isrunning,
@@ -59,6 +59,15 @@ struct ExternalAtomicJob <: AtomicJob
     ExternalAtomicJob(cmd, name = "Unnamed") =
         new(cmd, name, JobRef(), Timer(), Logger("", ""))
 end
+struct InternalAtomicJob <: AtomicJob
+    fun::Function
+    name::String
+    ref::JobRef
+    timer::Timer
+    log::Logger
+    InternalAtomicJob(fun, name = "Unnamed") =
+        new(fun, name, JobRef(), Timer(), Logger("", ""))
+end
 
 function run!(x::ExternalAtomicJob)
     out, err = Pipe(), Pipe()
@@ -85,6 +94,31 @@ function run!(x::ExternalAtomicJob)
         else
             x.ref.status = Succeeded()
             x.log.out = String(read(out))
+        end
+        ref
+    end
+    return x
+end
+function run!(x::InternalAtomicJob)
+    x.ref.ref = @spawn begin
+        x.ref.status = Running()
+        x.timer.start = time()
+        ref = try
+            x.fun()
+        catch e
+            @warn("could not run function $(x.fun)!")
+            e
+        finally
+            x.timer.stop = time()
+        end
+        if ref isa Exception  # Include all cases?
+            if ref isa InterruptException
+                x.ref.status = Interrupted()
+            else
+                x.ref.status = Failed()
+            end
+        else
+            x.ref.status = Succeeded()
         end
         ref
     end
