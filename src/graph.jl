@@ -13,8 +13,6 @@ using LightGraphs:
     dst
 using BangBang: push!!, pushfirst!!, append!!
 
-import ...run!
-
 export Workflow, eachjob, ←, →, ∥
 
 struct Workflow
@@ -63,12 +61,16 @@ function →(a::TieInPoint, b::TieInPoint)
 end
 
 ←(a::Union{Job,TieInPoint}, b::Union{Job,TieInPoint}) = →(b, a)
+←(c::Job, b::Job, a::Job, xs::Job...) = →(xs..., a, b, c)
+
+function ∥(a::Job, b::Job, xs::Job...)
+    g = DiGraph(4 + length(xs))
     n = nv(g)
     for i in 2:(n-1)
         add_edge!(g, 1, i)
         add_edge!(g, i, n)
     end
-    return Workflow(g, (EmptyJob(), a, b..., EmptyJob()))
+    return Workflow(g, (EmptyJob(), a, b, xs..., EmptyJob()))
 end
 function ∥(w::TieInPoint, b::Job)
     @assert length(inneighbors(w.workflow.graph, w.index)) == 1
@@ -76,7 +78,21 @@ function ∥(w::TieInPoint, b::Job)
     g = w.workflow.graph
     add_vertex!(g)
     add_edge!(g, only(p), nv(g))
-    return Workflow(g, push!!(w.wf.nodes, b))
+    return Workflow(g, push!!(w.workflow.nodes, b))
+end
+∥(j::Job, w::TieInPoint) = ∥(w, j)
+function ∥(a::TieInPoint, b::TieInPoint)
+    g = DiGraph(1) ⊕ a.workflow.graph ⊕ b.workflow.graph
+    add_edge!(g, 1, a.index + 1)
+    add_edge!(g, 1, b.index + 1 + nv(a.workflow.graph))
+    return Workflow(g, (EmptyJob(), a.workflow.nodes..., b.workflow.nodes...))
+end
+
+for op in (:→, :←, :∥)
+    @eval begin
+        ($op)(a::TieInPoint, b::TieInPoint, c::TieInPoint, xs::TieInPoint...) =
+            Base.afoldl(($op), a, b, c, xs...)
+    end
 end
 
 eachjob(w::Workflow) = (w.nodes[i] for i in vertices(w.graph))
