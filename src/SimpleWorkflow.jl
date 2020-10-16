@@ -3,7 +3,7 @@ module SimpleWorkflow
 using Dates: unix2datetime, format
 using Distributed: Future, @spawn
 
-export ExternalAtomicJob, InternalAtomicJob
+export ExternalAtomicJob, InternalAtomicJob, Script
 export getstatus,
     getresult,
     ispending,
@@ -25,6 +25,14 @@ abstract type Exited <: JobStatus end
 struct Succeeded <: Exited end
 struct Failed <: Exited end
 struct Interrupted <: Exited end
+
+struct Script
+    content::String
+    path::String
+    chdir::Bool
+    mode::Integer
+end
+Script(content, path; chdir = false, mode = 0o777) = Script(content, path, chdir, mode)
 
 mutable struct Timer
     start::Float64
@@ -51,14 +59,14 @@ struct EmptyJob <: Job
     EmptyJob(name = "Unnamed") = new(name, JobRef(), Timer())
 end
 abstract type AtomicJob <: Job end
-struct ExternalAtomicJob <: AtomicJob
-    cmd
+struct ExternalAtomicJob{T} <: AtomicJob
+    cmd::T
     name::String
     ref::JobRef
     timer::Timer
     log::Logger
-    ExternalAtomicJob(cmd, name = "Unnamed") =
-        new(cmd, name, JobRef(), Timer(), Logger("", ""))
+    ExternalAtomicJob(cmd::T, name = "Unnamed") where {T} =
+        new{T}(cmd, name, JobRef(), Timer(), Logger("", ""))
 end
 struct InternalAtomicJob <: AtomicJob
     fun::Function
