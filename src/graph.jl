@@ -121,3 +121,9 @@ function ⊕(g::AbstractGraph, b::AbstractGraph)
     end
     return a
 end
+
+function Base.show(io::IO, wf::Workflow)
+    for node in wf.nodes
+        println(io, node)
+    end
+end
