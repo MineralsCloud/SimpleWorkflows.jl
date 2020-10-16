@@ -17,18 +17,22 @@ import ...run!
 
 export Workflow, eachjob, ∥
 
-
-struct Workflow{T}
+struct Workflow
     graph::DiGraph
-    nodes::T
+    nodes::Tuple
+    function Workflow(graph, nodes)
+        @assert !is_cyclic(graph) "`graph` is not an acyclic graph!"
+        @assert nv(graph) == length(nodes)
+        return new(graph, nodes)
+    end
 end
 
 struct WorkflowIndex
     wf::Workflow
-    i::Integer
+    i::UInt
 end
 
-Base.getindex(w::Workflow, i::Integer) = WorkflowIndex(w, i)
+Base.getindex(w::Workflow, i::Integer) = WorkflowIndex(w, UInt(i))
 Base.firstindex(w::Workflow) = 1
 Base.lastindex(w::Workflow) = nv(w.graph)
 
