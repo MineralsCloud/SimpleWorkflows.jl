@@ -57,13 +57,22 @@ function Base.:|>(a::WorkflowIndex, b::WorkflowIndex)
     return Workflow(g, append!!(a.wf.nodes, b.wf.nodes))
 end
 
-function ∥(a::Job, b::Job)
-    g = DiGraph(4)
-    add_edge!(g, 1, 2)
-    add_edge!(g, 1, 3)
-    add_edge!(g, 2, 4)
-    add_edge!(g, 3, 4)
-    return Workflow(g, (EmptyJob(), a, b, EmptyJob()))
+function ∥(a::Job, b::Job...)
+    g = DiGraph(3 + length(b))
+    n = nv(g)
+    for i in 2:(n-1)
+        add_edge!(g, 1, i)
+        add_edge!(g, i, n)
+    end
+    return Workflow(g, (EmptyJob(), a, b..., EmptyJob()))
+end
+function ∥(w::WorkflowIndex, b::Job)
+    @assert length(inneighbors(w.wf.graph, w.i)) == 1
+    p = inneighbors(w.wf.graph, w.i)
+    g = w.wf.graph
+    add_vertex!(g)
+    add_edge!(g, only(p), nv(g))
+    return Workflow(g, push!!(w.wf.nodes, b))
 end
 
 eachjob(w::Workflow) = (w.nodes[i] for i in vertices(w.graph))
