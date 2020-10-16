@@ -38,9 +38,12 @@ Base.getindex(w::Workflow, i::Integer) = WorkflowIndex(w, UInt(i))
 Base.firstindex(w::Workflow) = 1
 Base.lastindex(w::Workflow) = nv(w.graph)
 
-←(a::Union{Job,WorkflowIndex}, b::Union{Job,WorkflowIndex}) = →(b, a)
-function →(a::Job, b::Job)
-    return Workflow(DiGraph(2, 1), (a, b))
+→(a::Job, b::Job) = Workflow(DiGraph(2, 1), (a, b))
+function →(a::Job, b::Job, c::Job, xs::Job...)  # See https://github.com/JuliaLang/julia/blob/be54a6c/base/operators.jl#L540
+    n = length(xs)
+    g = DiGraph(3 + n)
+    map(i -> add_edge!(g, i, i + 1), 1:(2+n))
+    return Workflow(g, (a, b, c, xs...))
 end
 function →(wi::WorkflowIndex, j::Job)
     add_vertex!(wi.wf.graph)
@@ -59,8 +62,7 @@ function →(a::WorkflowIndex, b::WorkflowIndex)
     return Workflow(g, append!!(a.wf.nodes, b.wf.nodes))
 end
 
-function ∥(a::Job, b::Job...)
-    g = DiGraph(3 + length(b))
+←(a::Union{Job,WorkflowIndex}, b::Union{Job,WorkflowIndex}) = →(b, a)
     n = nv(g)
     for i in 2:(n-1)
         add_edge!(g, 1, i)
