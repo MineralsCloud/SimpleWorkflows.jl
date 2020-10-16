@@ -26,6 +26,7 @@ struct Workflow
         return new(graph, nodes)
     end
 end
+Workflow() = Workflow(DiGraph(), ())
 
 struct TieInPoint
     workflow::Workflow
