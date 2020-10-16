@@ -172,7 +172,7 @@ Base.wait(x::Job) = wait(x.ref.ref)
 
 Base.show(io::IO, ::EmptyJob) = print(io, " empty job")
 function Base.show(io::IO, job::AtomicJob)
-    printstyled(io, " ", job.cmd; bold = true)
+    printstyled(io, " ", job isa ExternalAtomicJob ? job.cmd : job.fun; bold = true)
     if !ispending(job)
         print(
             io,
