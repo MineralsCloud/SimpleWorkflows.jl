@@ -5,6 +5,7 @@ using Distributed: Future, @spawn
 
 export ExternalAtomicJob, InternalAtomicJob
 export getstatus,
+    getresult,
     ispending,
     isrunning,
     issucceeded,
@@ -150,6 +151,8 @@ isinterrupted(x::Job) = getstatus(x) isa Interrupted
 starttime(x::Job) = ispending(x) ? nothing : unix2datetime(x.timer.start)
 
 stoptime(x::Job) = isexited(x) ? unix2datetime(x.timer.stop) : nothing
+
+getresult(x::Job) = isexited(x) ? Some(fetch(x.ref.ref)) : nothing
 
 function elapsed(x::Job)
     start = unix2datetime(x.timer.start)
