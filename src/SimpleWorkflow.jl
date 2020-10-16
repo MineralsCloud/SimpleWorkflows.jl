@@ -3,7 +3,7 @@ module SimpleWorkflow
 using Dates: unix2datetime, format
 using Distributed: Future, @spawn
 
-export ExternalAtomicJob, InternalAtomicJob
+export ExternalAtomicJob, InternalAtomicJob, Script
 export getstatus,
     getresult,
     ispending,
@@ -25,6 +25,14 @@ abstract type Exited <: JobStatus end
 struct Succeeded <: Exited end
 struct Failed <: Exited end
 struct Interrupted <: Exited end
+
+struct Script
+    content::String
+    path::String
+    chdir::Bool
+    mode::Integer
+end
+Script(content, path; chdir = false, mode = 0o777) = Script(content, path, chdir, mode)
 
 mutable struct Timer
     start::Float64
@@ -51,14 +59,14 @@ struct EmptyJob <: Job
     EmptyJob(name = "Unnamed") = new(name, JobRef(), Timer())
 end
 abstract type AtomicJob <: Job end
-struct ExternalAtomicJob <: AtomicJob
-    cmd
+struct ExternalAtomicJob{T} <: AtomicJob
+    cmd::T
     name::String
     ref::JobRef
     timer::Timer
     log::Logger
-    ExternalAtomicJob(cmd, name = "Unnamed") =
-        new(cmd, name, JobRef(), Timer(), Logger("", ""))
+    ExternalAtomicJob(cmd::T, name = "Unnamed") where {T} =
+        new{T}(cmd, name, JobRef(), Timer(), Logger("", ""))
 end
 struct InternalAtomicJob <: AtomicJob
     fun::Function
@@ -70,7 +78,7 @@ struct InternalAtomicJob <: AtomicJob
         new(fun, name, JobRef(), Timer(), Logger("", ""))
 end
 
-function run!(x::ExternalAtomicJob)
+function run!(x::ExternalAtomicJob{<:Base.AbstractCmd})
     out, err = Pipe(), Pipe()
     x.ref.ref = @spawn begin
         x.ref.status = Running()
@@ -97,6 +105,49 @@ function run!(x::ExternalAtomicJob)
             x.log.out = String(read(out))
         end
         ref
+    end
+    return x
+end
+function run!(x::ExternalAtomicJob{Script})
+    out, err = Pipe(), Pipe()
+    path = abspath(expanduser(x.cmd.path))
+    mkpath(basename(path))
+    open(path, "w") do io
+        write(io, x.cmd.content)
+    end
+    chmod(path, x.cmd.mode)
+    if x.cmd.chdir == true
+        cwd = pwd()
+        cd(basename(path))
+    end
+    x.ref.ref = @spawn begin
+        x.ref.status = Running()
+        x.timer.start = time()
+        ref = try
+            run(pipeline(`$path`, stdin = devnull, stdout = out, stderr = err))
+        catch e
+            @warn("could not spawn $(x.cmd)!")
+            e
+        finally
+            x.timer.stop = time()
+            close(out.in)
+            close(err.in)
+        end
+        if ref isa Exception  # Include all cases?
+            if ref isa InterruptException
+                x.ref.status = Interrupted()
+            else
+                x.ref.status = Failed()
+            end
+            x.log.err = String(read(err))
+        else
+            x.ref.status = Succeeded()
+            x.log.out = String(read(out))
+        end
+        ref
+    end
+    if @isdefined cwd
+        cd(cwd)
     end
     return x
 end
