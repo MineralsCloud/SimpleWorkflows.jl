@@ -18,11 +18,13 @@ import ...run!
 export Workflow, eachjob, ←, →, ∥
 
 struct Workflow
-    graph::DiGraph
+    graph::DiGraph{Int}
     nodes::Tuple
     function Workflow(graph, nodes)
-        @assert !is_cyclic(graph) "`graph` is not an acyclic graph!"
-        @assert nv(graph) == length(nodes)
+        @assert !is_cyclic(graph) "`graph` must be an acyclic graph!"
+        if nv(graph) != length(nodes)
+            throw(DimensionMismatch("`graph`'s size is different from `nodes`!"))
+        end
         return new(graph, nodes)
     end
 end
