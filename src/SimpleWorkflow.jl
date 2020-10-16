@@ -136,6 +136,7 @@ errmsg(::EmptyJob) = ""
 
 Base.wait(x::Job) = wait(x.ref.ref)
 
+Base.show(io::IO, ::EmptyJob) = print(io, " empty job")
 function Base.show(io::IO, job::AtomicJob)
     printstyled(io, " ", job.cmd; bold = true)
     if !ispending(job)
