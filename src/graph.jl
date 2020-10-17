@@ -33,7 +33,8 @@ struct TieInPoint
     index::UInt
 end
 
-Base.getindex(w::Workflow, i::Integer) = TieInPoint(w, UInt(i))
+Base.getindex(w::Workflow, i::Number) = TieInPoint(w, UInt(i))
+Base.getindex(w::Workflow, I) = Workflow(w.graph[I], w.nodes[I])
 Base.firstindex(w::Workflow) = 1
 Base.lastindex(w::Workflow) = nv(w.graph)
 
