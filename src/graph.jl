@@ -12,6 +12,7 @@ using LightGraphs:
     src,
     dst
 using BangBang: push!!, pushfirst!!, append!!
+using MetaGraphs: MetaGraph, set_prop!
 
 export Workflow, eachjob, chain, backchain, parallel, ←, →, ∥
 
@@ -119,6 +120,24 @@ function run!(w::Workflow)
         end
     end
     return w
+end
+
+function getstatus(w::Workflow)
+    st = map(getstatus, w.nodes)
+    mg = MetaGraph(w.graph)
+    for i in vertices(w.graph)
+        set_prop!(mg, i, :status, getstatus(w.nodes[i]))
+    end
+    return mg
+end
+
+function description(w::Workflow)
+    st = map(description, w.nodes)
+    mg = MetaGraph(w.graph)
+    for i in vertices(w.graph)
+        set_prop!(mg, i, :desc, description(w.nodes[i]))
+    end
+    return mg
 end
 
 function ⊕(g::AbstractGraph, b::AbstractGraph)

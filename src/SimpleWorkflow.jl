@@ -1,11 +1,14 @@
 module SimpleWorkflow
 
+using ColorTypes: RGB
 using Dates: unix2datetime, format
 using Distributed: Future, @spawn
 
 export ExternalAtomicJob, InternalAtomicJob, Script
-export getstatus,
+export color,
+    getstatus,
     getresult,
+    description,
     ispending,
     isrunning,
     issucceeded,
@@ -53,29 +56,29 @@ end
 
 abstract type Job end
 struct EmptyJob <: Job
-    name::String
+    desc::String
     ref::JobRef
     timer::Timer
-    EmptyJob(name = "Unnamed") = new(name, JobRef(), Timer())
+    EmptyJob(desc = "Unnamed") = new(desc, JobRef(), Timer())
 end
 abstract type AtomicJob <: Job end
 struct ExternalAtomicJob{T} <: AtomicJob
     cmd::T
-    name::String
+    desc::String
     ref::JobRef
     timer::Timer
     log::Logger
-    ExternalAtomicJob(cmd::T, name = "Unnamed") where {T} =
-        new{T}(cmd, name, JobRef(), Timer(), Logger("", ""))
+    ExternalAtomicJob(cmd::T, desc = "Unnamed") where {T} =
+        new{T}(cmd, desc, JobRef(), Timer(), Logger("", ""))
 end
 struct InternalAtomicJob <: AtomicJob
     fun::Function
-    name::String
+    desc::String
     ref::JobRef
     timer::Timer
     log::Logger
-    InternalAtomicJob(fun, name = "Unnamed") =
-        new(fun, name, JobRef(), Timer(), Logger("", ""))
+    InternalAtomicJob(fun, desc = "Unnamed") =
+        new(fun, desc, JobRef(), Timer(), Logger("", ""))
 end
 
 function run!(x::ExternalAtomicJob{<:Base.AbstractCmd})
@@ -185,6 +188,12 @@ function run!(x::EmptyJob)
     return x
 end
 
+color(::Pending) = RGB(0.0, 0.0, 1.0)  # Blue
+color(::Running) = RGB(1.0, 1.0, 0.0)  # Yellow
+color(::Succeeded) = RGB(0.0, 0.502, 0.0)  # Green
+color(::Failed) = RGB(1.0, 0.0, 0.0)  # Red
+color(::Interrupted) = RGB(1.0, 0.647, 0.0)  # Orange
+
 getstatus(x::Job) = x.ref.status
 
 ispending(x::Job) = getstatus(x) isa Pending
@@ -204,6 +213,8 @@ starttime(x::Job) = ispending(x) ? nothing : unix2datetime(x.timer.start)
 stoptime(x::Job) = isexited(x) ? unix2datetime(x.timer.stop) : nothing
 
 getresult(x::Job) = isexited(x) ? Some(fetch(x.ref.ref)) : nothing
+
+description(x::Job) = x.desc
 
 function elapsed(x::Job)
     start = unix2datetime(x.timer.start)
