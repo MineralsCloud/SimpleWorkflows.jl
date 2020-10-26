@@ -5,6 +5,7 @@ version = "0.1.0"
 
 [deps]
 BangBang = "198e06fe-97b7-11e9-32a5-e1d131e6ad66"
+ColorTypes = "3da002f7-5984-5a60-b8a6-cbb66c0b333f"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 LightGraphs = "093fc24a-ae57-5d10-9952-331d41423f4d"
