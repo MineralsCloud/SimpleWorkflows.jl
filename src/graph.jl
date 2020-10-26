@@ -131,6 +131,15 @@ function getstatus(w::Workflow)
     return mg
 end
 
+function description(w::Workflow)
+    st = map(description, w.nodes)
+    mg = MetaGraph(w.graph)
+    for i in vertices(w.graph)
+        set_prop!(mg, i, :desc, description(w.nodes[i]))
+    end
+    return mg
+end
+
 function ⊕(g::AbstractGraph, b::AbstractGraph)
     a = copy(g)
     add_vertices!(a, nv(b))
