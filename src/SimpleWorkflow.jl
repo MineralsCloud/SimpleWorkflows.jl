@@ -8,6 +8,7 @@ export ExternalAtomicJob, InternalAtomicJob, Script
 export color,
     getstatus,
     getresult,
+    description,
     ispending,
     isrunning,
     issucceeded,
@@ -212,6 +213,8 @@ starttime(x::Job) = ispending(x) ? nothing : unix2datetime(x.timer.start)
 stoptime(x::Job) = isexited(x) ? unix2datetime(x.timer.stop) : nothing
 
 getresult(x::Job) = isexited(x) ? Some(fetch(x.ref.ref)) : nothing
+
+description(x::Job) = x.desc
 
 function elapsed(x::Job)
     start = unix2datetime(x.timer.start)
