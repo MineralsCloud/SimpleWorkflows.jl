@@ -106,15 +106,17 @@ eachjob(w::Workflow) = (w.nodes[i] for i in vertices(w.graph))
 function run!(w::Workflow)
     g, n = w.graph, w.nodes
     for i in vertices(g)
-        inn = inneighbors(g, i)
-        if !isempty(inn)
-            for j in inn
-                if !isexited(n[j])
-                    wait(n[j])
+        if !issucceeded(n[i])
+            inn = inneighbors(g, i)
+            if !isempty(inn)
+                for j in inn
+                    if !isexited(n[j])
+                        wait(n[j])
+                    end
                 end
             end
+            run!(n[i])
         end
-        run!(n[i])
     end
     return w
 end
