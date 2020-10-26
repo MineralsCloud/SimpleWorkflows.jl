@@ -53,29 +53,29 @@ end
 
 abstract type Job end
 struct EmptyJob <: Job
-    name::String
+    metadata::String
     ref::JobRef
     timer::Timer
-    EmptyJob(name = "Unnamed") = new(name, JobRef(), Timer())
+    EmptyJob(metadata = "Unnamed") = new(metadata, JobRef(), Timer())
 end
 abstract type AtomicJob <: Job end
 struct ExternalAtomicJob{T} <: AtomicJob
     cmd::T
-    name::String
+    metadata::String
     ref::JobRef
     timer::Timer
     log::Logger
-    ExternalAtomicJob(cmd::T, name = "Unnamed") where {T} =
-        new{T}(cmd, name, JobRef(), Timer(), Logger("", ""))
+    ExternalAtomicJob(cmd::T, metadata = "Unnamed") where {T} =
+        new{T}(cmd, metadata, JobRef(), Timer(), Logger("", ""))
 end
 struct InternalAtomicJob <: AtomicJob
     fun::Function
-    name::String
+    metadata::String
     ref::JobRef
     timer::Timer
     log::Logger
-    InternalAtomicJob(fun, name = "Unnamed") =
-        new(fun, name, JobRef(), Timer(), Logger("", ""))
+    InternalAtomicJob(fun, metadata = "Unnamed") =
+        new(fun, metadata, JobRef(), Timer(), Logger("", ""))
 end
 
 function run!(x::ExternalAtomicJob{<:Base.AbstractCmd})
