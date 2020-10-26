@@ -1,10 +1,12 @@
 module SimpleWorkflow
 
+using ColorTypes: RGB
 using Dates: unix2datetime, format
 using Distributed: Future, @spawn
 
 export ExternalAtomicJob, InternalAtomicJob, Script
-export getstatus,
+export color,
+    getstatus,
     getresult,
     ispending,
     isrunning,
@@ -184,6 +186,12 @@ function run!(x::EmptyJob)
     end
     return x
 end
+
+color(::Pending) = RGB(0.0, 0.0, 1.0)  # Blue
+color(::Running) = RGB(1.0, 1.0, 0.0)  # Yellow
+color(::Succeeded) = RGB(0.0, 0.502, 0.0)  # Green
+color(::Failed) = RGB(1.0, 0.0, 0.0)  # Red
+color(::Interrupted) = RGB(1.0, 0.647, 0.0)  # Orange
 
 getstatus(x::Job) = x.ref.status
 
