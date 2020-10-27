@@ -19,7 +19,10 @@ export color,
     elapsed,
     outmsg,
     errmsg,
-    run!
+    run!,
+    @fun,
+    @shell,
+    @script
 
 abstract type JobStatus end
 struct Pending <: JobStatus end
@@ -114,7 +117,7 @@ end
 function run!(x::ExternalAtomicJob{Script})
     out, err = Pipe(), Pipe()
     path = abspath(expanduser(x.cmd.path))
-    mkpath(basename(path))
+    mkpath(dirname(path))
     open(path, "w") do io
         write(io, x.cmd.content)
     end
@@ -186,6 +189,18 @@ function run!(x::EmptyJob)
         nothing
     end
     return x
+end
+
+macro fun(x)
+    return :(InternalAtomicJob(() -> $(esc(x))))
+end
+
+macro shell(x)
+    return :(ExternalAtomicJob($(esc(x))))
+end
+
+macro script(cmd, file = mktemp(cleanup = false))
+    return :(ExternalAtomicJob(Script($(esc(cmd)), $(esc(file)))))
 end
 
 color(::Pending) = RGB(0.0, 0.0, 1.0)  # Blue
