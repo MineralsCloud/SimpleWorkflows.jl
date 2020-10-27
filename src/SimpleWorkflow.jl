@@ -199,7 +199,7 @@ macro shell(x)
     return :(ExternalAtomicJob($(esc(x))))
 end
 
-macro script(cmd, file = mktemp(cleanup = false))
+macro script(cmd, file = mktemp(cleanup = false)[1])
     return :(ExternalAtomicJob(Script($(esc(cmd)), $(esc(file)))))
 end
 
