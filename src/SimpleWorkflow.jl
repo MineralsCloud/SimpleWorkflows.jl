@@ -117,7 +117,7 @@ end
 function run!(x::ExternalAtomicJob{Script})
     out, err = Pipe(), Pipe()
     path = abspath(expanduser(x.cmd.path))
-    mkpath(basename(path))
+    mkpath(dirname(path))
     open(path, "w") do io
         write(io, x.cmd.content)
     end
