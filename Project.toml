@@ -1,7 +1,7 @@
 name = "SimpleWorkflow"
 uuid = "6a97d125-85da-4b66-b300-4bba10360563"
 authors = ["Qi Zhang <singularitti@outlook.com>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 BangBang = "198e06fe-97b7-11e9-32a5-e1d131e6ad66"
