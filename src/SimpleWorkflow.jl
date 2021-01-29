@@ -92,7 +92,7 @@ function run!(x::ExternalAtomicJob{<:Base.AbstractCmd})
         ref = try
             run(pipeline(x.cmd, stdin = devnull, stdout = out, stderr = err))
         catch e
-            @error "could not spawn $(x.cmd)! Come across `$e`!"
+            @error "could not spawn process `$(x.cmd)`! Come across `$e`!"
             e
         finally
             x.timer.stop = time()
@@ -132,7 +132,7 @@ function run!(x::ExternalAtomicJob{Script})
         ref = try
             run(pipeline(`$path`, stdin = devnull, stdout = out, stderr = err))
         catch e
-            @error "could not spawn $(x.cmd)! Come across `$e`!"
+            @error "could not spawn process `$(x.cmd)`! Come across `$e`!"
             e
         finally
             x.timer.stop = time()
@@ -164,7 +164,7 @@ function run!(x::InternalAtomicJob)
         ref = try
             x.fun()
         catch e
-            @error "could not spawn $(x.fun)! Come across `$e`!"
+            @error "could not spawn process `$(x.fun)`! Come across `$e`!"
             e
         finally
             x.timer.stop = time()
