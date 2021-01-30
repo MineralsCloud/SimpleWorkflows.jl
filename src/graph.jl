@@ -14,7 +14,7 @@ using LightGraphs:
 using BangBang: push!!, pushfirst!!, append!!
 using MetaGraphs: MetaGraph, set_prop!
 
-export Workflow, eachjob, chain, backchain, parallel, ←, →, ∥
+export Workflow, eachjob, chain, backchain, parallel, reset!, ←, →, ∥
 
 struct Workflow
     graph::DiGraph{Int}
@@ -120,6 +120,19 @@ function run!(w::Workflow)
         end
     end
     return w
+end
+
+function reset!(w::Workflow)
+    nodes = map(w.nodes) do node
+        if node isa ExternalAtomicJob
+            ExternalAtomicJob(node.cmd, node.desc)
+        elseif node isa InternalAtomicJob
+            InternalAtomicJob(node.fun, node.desc)
+        else  # EmptyJob
+            EmptyJob(node.desc)
+        end
+    end
+    return Workflow(w.graph, nodes)
 end
 
 function getstatus(w::Workflow)
