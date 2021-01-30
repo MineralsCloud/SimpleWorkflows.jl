@@ -124,7 +124,7 @@ function run!(x::ExternalAtomicJob{Script})
     chmod(path, x.cmd.mode)
     if x.cmd.chdir == true
         cwd = pwd()
-        cd(basename(path))
+        cd(dirname(path))
     end
     x.ref.ref = @spawn begin
         x.ref.status = Running()
