@@ -29,6 +29,8 @@ struct Workflow
 end
 Workflow() = Workflow(DiGraph(), ())
 
+const WORKFLOW_REGISTRY = IdDict()
+
 struct TieInPoint
     workflow::Workflow
     index::UInt
@@ -105,18 +107,21 @@ const ∥ = parallel
 eachjob(w::Workflow) = (w.nodes[i] for i in vertices(w.graph))
 
 function run!(w::Workflow)
+    WORKFLOW_REGISTRY[w] = w
     g, n = w.graph, w.nodes
     for i in vertices(g)
-        if !issucceeded(n[i])
+        if !issucceeded(n[i])  # If not succeeded, prepare to run
             inn = inneighbors(g, i)
-            if !isempty(inn)
+            if !isempty(inn)  # First, see if previous jobs were finished
                 for j in inn
                     if !isexited(n[j])
-                        wait(n[j])
+                        wait(n[j])  # Wait until all previous jobs are finished
+                        WORKFLOW_REGISTRY[w] = w
                     end
                 end
             end
-            run!(n[i])
+            run!(n[i])  # Finally, run the job
+            WORKFLOW_REGISTRY[w] = w
         end
     end
     return w
