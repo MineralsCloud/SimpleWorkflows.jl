@@ -1,5 +1,6 @@
 module SimpleWorkflow
 
+using AbInitioSoftwareBase: load
 using ColorTypes: RGB
 using Dates: unix2datetime, format
 using Distributed: Future, @spawn
@@ -20,6 +21,7 @@ export color,
     outmsg,
     errmsg,
     run!,
+    fromfile,
     @fun,
     @shell,
     @script
@@ -247,6 +249,22 @@ outmsg(::EmptyJob) = ""
 
 errmsg(x::AtomicJob) = isrunning(x) ? nothing : x.log.err
 errmsg(::EmptyJob) = ""
+
+function fromfile(cfgfile)
+    config = load(cfgfile)
+    @assert haskey(config, "actions")
+    map(config["actions"]) do rule
+        @assert all(haskey(rule, key) for key in ("inputs", "outputs"))
+        if haskey(rule, "command")
+            return ExternalAtomicJob(Script(rule["command"], mktemp()))
+        elseif haskey(rule, "function")
+            return InternalAtomicJob(() -> evalfile(rule["function"]))
+        else
+            @error "unknown action provided! It should be either `\"command\"` or `\"function\"`!"
+            return EmptyJob()
+        end
+    end
+end
 
 Base.wait(x::Job) = wait(x.ref.ref)
 
