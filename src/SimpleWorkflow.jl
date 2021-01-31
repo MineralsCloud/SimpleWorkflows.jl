@@ -40,7 +40,7 @@ struct Script
     chdir::Bool
     mode::Integer
 end
-Script(content, path; chdir = false, mode = 0o777) = Script(content, path, chdir, mode)
+Script(content, path; chdir = true, mode = 0o777) = Script(content, path, chdir, mode)
 
 mutable struct Timer
     start::Float64
