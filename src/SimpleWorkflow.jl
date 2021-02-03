@@ -122,11 +122,6 @@ end
 function run!(x::ExternalAtomicJob{Script})
     out, err = Pipe(), Pipe()
     path = abspath(expanduser(x.cmd.path))
-    mkpath(dirname(path))
-    open(path, "w") do io
-        write(io, x.cmd.content)
-    end
-    chmod(path, x.cmd.mode)
     if x.cmd.chdir == true
         cwd = pwd()
         cd(dirname(path))
