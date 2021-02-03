@@ -35,12 +35,16 @@ struct Failed <: Exited end
 struct Interrupted <: Exited end
 
 struct Script
-    content::String
     path::String
     chdir::Bool
     mode::Integer
+    function Script(path, chdir, mode)
+        @assert isfile(path)
+        chmod(path, mode)
+        return new(path, chdir, mode)
+    end
 end
-Script(content, path; chdir = true, mode = 0o777) = Script(content, path, chdir, mode)
+Script(path; chdir = true, mode = 0o777) = Script(path, chdir, mode)
 
 mutable struct Timer
     start::Float64
