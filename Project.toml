@@ -1,7 +1,7 @@
 name = "SimpleWorkflow"
 uuid = "6a97d125-85da-4b66-b300-4bba10360563"
 authors = ["Qi Zhang <singularitti@outlook.com>"]
-version = "0.1.2"
+version = "0.2.0"
 
 [deps]
 AbInitioSoftwareBase = "df5135bc-470e-46c6-b451-292e27ca5b84"
