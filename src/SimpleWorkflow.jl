@@ -23,8 +23,7 @@ export color,
     run!,
     fromfile,
     @fun,
-    @shell,
-    @script
+    @shell
 
 abstract type JobStatus end
 struct Pending <: JobStatus end
@@ -203,10 +202,6 @@ end
 
 macro shell(x)
     return :(ExternalAtomicJob($(esc(x))))
-end
-
-macro script(cmd, file = mktemp(cleanup = false)[1])
-    return :(ExternalAtomicJob(Script($(esc(cmd)), $(esc(file)))))
 end
 
 color(::Pending) = RGB(0.0, 0.0, 1.0)  # Blue
