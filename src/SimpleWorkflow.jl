@@ -23,8 +23,7 @@ export color,
     run!,
     fromfile,
     @fun,
-    @shell,
-    @script
+    @shell
 
 abstract type JobStatus end
 struct Pending <: JobStatus end
@@ -35,12 +34,16 @@ struct Failed <: Exited end
 struct Interrupted <: Exited end
 
 struct Script
-    content::String
     path::String
     chdir::Bool
     mode::Integer
+    function Script(path, chdir, mode)
+        @assert isfile(path)
+        chmod(path, mode)
+        return new(path, chdir, mode)
+    end
 end
-Script(content, path; chdir = true, mode = 0o777) = Script(content, path, chdir, mode)
+Script(path; chdir = true, mode = 0o777) = Script(path, chdir, mode)
 
 mutable struct Timer
     start::Float64
@@ -119,11 +122,6 @@ end
 function run!(x::ExternalAtomicJob{Script})
     out, err = Pipe(), Pipe()
     path = abspath(expanduser(x.cmd.path))
-    mkpath(dirname(path))
-    open(path, "w") do io
-        write(io, x.cmd.content)
-    end
-    chmod(path, x.cmd.mode)
     if x.cmd.chdir == true
         cwd = pwd()
         cd(dirname(path))
@@ -199,10 +197,6 @@ end
 
 macro shell(x)
     return :(ExternalAtomicJob($(esc(x))))
-end
-
-macro script(cmd, file = mktemp(cleanup = false)[1])
-    return :(ExternalAtomicJob(Script($(esc(cmd)), $(esc(file)))))
 end
 
 color(::Pending) = RGB(0.0, 0.0, 1.0)  # Blue
