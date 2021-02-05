@@ -127,16 +127,17 @@ function run!(w::Workflow)
     return w
 end
 
-function reset!(w::Workflow)
-    nodes = map(w.nodes) do node
-        if node isa ExternalAtomicJob
-            ExternalAtomicJob(node.cmd, node.desc)
-        elseif node isa InternalAtomicJob
-            InternalAtomicJob(node.fun, node.desc)
-        else  # EmptyJob
-            EmptyJob(node.desc)
-        end
+function reset!(job::Job)
+    if job isa ExternalAtomicJob
+        return ExternalAtomicJob(job.cmd, job.desc)
+    elseif job isa InternalAtomicJob
+        return InternalAtomicJob(job.fun, job.desc)
+    else  # EmptyJob
+        return EmptyJob(job.desc)
     end
+end
+function reset!(w::Workflow)
+    nodes = map(reset!, w.nodes)
     return Workflow(w.graph, nodes)
 end
 
