@@ -12,22 +12,18 @@ using LightGraphs:
     src,
     dst
 using BangBang: push!!, pushfirst!!, append!!
-using MetaGraphs: MetaGraph, set_prop!
+using MetaGraphs: MetaGraph, MetaDiGraph, has_prop, get_prop, props, set_prop!
 
 export Workflow, eachjob, chain, backchain, parallel, reset!, ←, →, ∥
 
 struct Workflow
-    graph::DiGraph{Int}
-    nodes::Tuple
-    function Workflow(graph, nodes)
+    graph::MetaDiGraph{Int,Float64}
+    function Workflow(graph = MetaDiGraph())
         @assert !is_cyclic(graph) "`graph` must be an acyclic graph!"
-        if nv(graph) != length(nodes)
-            throw(DimensionMismatch("`graph`'s size is different from `nodes`!"))
-        end
-        return new(graph, nodes)
+        # @assert all(has_prop(graph, v, :job) for v in vertices(graph)) "all nodes must have property `:job`!"
+        return new(graph)
     end
 end
-Workflow() = Workflow(DiGraph(), ())
 
 const WORKFLOW_REGISTRY = IdDict()
 
@@ -37,45 +33,59 @@ struct TieInPoint
 end
 
 Base.getindex(w::Workflow, i::Number) = TieInPoint(w, UInt(i))
-Base.getindex(w::Workflow, I) = Workflow(w.graph[I], w.nodes[I])
+Base.getindex(w::Workflow, I) = Workflow(w.graph[I])
 Base.firstindex(w::Workflow) = 1
 Base.lastindex(w::Workflow) = nv(w.graph)
 
-chain(a::Job, b::Job) = Workflow(DiGraph(2, 1), (a, b))
+function chain(a::Job, b::Job)
+    g = MetaDiGraph(DiGraph(2, 1))
+    set_prop!(g, 1, :job, a)
+    set_prop!(g, 2, :job, b)
+    return Workflow(g)
+end
 function chain(a::Job, b::Job, c::Job, xs::Job...)  # See https://github.com/JuliaLang/julia/blob/be54a6c/base/operators.jl#L540
     n = length(xs)
     g = DiGraph(3 + n)
-    map(i -> add_edge!(g, i, i + 1), 1:(2+n))
-    return Workflow(g, (a, b, c, xs...))
+    foreach(i -> add_edge!(g, i, i + 1), 1:(2+n))
+    g = MetaDiGraph(g)
+    for (i, job) in zip(1:(3+n), (a, b, c, xs...))
+        set_prop!(g, i, :job, job)
+    end
+    return Workflow(g)
 end
 function chain(wi::TieInPoint, j::Job)
     add_vertex!(wi.workflow.graph)
     add_edge!(wi.workflow.graph, wi.index, nv(wi.workflow.graph))
-    return Workflow(wi.workflow.graph, push!!(wi.workflow.nodes, j))
+    set_prop!(wi.workflow.graph, nv(wi.workflow.graph), :job, j)
+    return Workflow(wi.workflow.graph)
 end
 function chain(j::Job, wi::TieInPoint)
-    g = DiGraph(1)
+    g = MetaDiGraph(DiGraph(1))
     h = g ⊕ wi.workflow.graph
     add_edge!(h, 1, wi.index + 1)
-    return Workflow(h, pushfirst!!(wi.workflow.nodes, j))
+    set_prop!(h, 1, :job, j)
+    return Workflow(h)
 end
 function chain(a::TieInPoint, b::TieInPoint)
     g = a.workflow.graph ⊕ b.workflow.graph
     add_edge!(g, a.index, b.index + nv(a.workflow.graph))
-    return Workflow(g, append!!(a.workflow.nodes, b.workflow.nodes))
+    return Workflow(g)
 end
 
 backchain(a::Union{Job,TieInPoint}, b::Union{Job,TieInPoint}) = chain(b, a)
 backchain(c::Job, b::Job, a::Job, xs::Job...) = chain(xs..., a, b, c)
 
 function parallel(a::Job, b::Job, xs::Job...)
-    g = DiGraph(4 + length(xs))
+    g = MetaDiGraph(DiGraph(4 + length(xs)))
     n = nv(g)
-    for i in 2:(n-1)
+    for (i, job) in zip(2:(n-1), (a, b, xs...))
         add_edge!(g, 1, i)
         add_edge!(g, i, n)
+        set_prop!(g, i, :job, job)
     end
-    return Workflow(g, (EmptyJob(), a, b, xs..., EmptyJob()))
+    set_prop!(g, 1, :job, EmptyJob())
+    set_prop!(g, n, :job, EmptyJob())
+    return Workflow(g)
 end
 function parallel(w::TieInPoint, b::Job)
     @assert length(inneighbors(w.workflow.graph, w.index)) == 1
@@ -83,14 +93,16 @@ function parallel(w::TieInPoint, b::Job)
     g = w.workflow.graph
     add_vertex!(g)
     add_edge!(g, only(p), nv(g))
-    return Workflow(g, push!!(w.workflow.nodes, b))
+    set_prop!(g, nv(g), :job, b)
+    return Workflow(g)
 end
 parallel(j::Job, w::TieInPoint) = parallel(w, j)
 function parallel(a::TieInPoint, b::TieInPoint)
-    g = DiGraph(1) ⊕ a.workflow.graph ⊕ b.workflow.graph
+    g = MetaDiGraph(DiGraph(1) ⊕ a.workflow.graph ⊕ b.workflow.graph)
     add_edge!(g, 1, a.index + 1)
     add_edge!(g, 1, b.index + 1 + nv(a.workflow.graph))
-    return Workflow(g, (EmptyJob(), a.workflow.nodes..., b.workflow.nodes...))
+    set_prop!(g, 1, :job, EmptyJob())
+    return Workflow(g)
 end
 
 for op in (:chain, :backchain, :parallel)
@@ -104,23 +116,25 @@ const → = chain
 const ← = backchain
 const ∥ = parallel
 
-eachjob(w::Workflow) = (w.nodes[i] for i in vertices(w.graph))
+eachjob(w::Workflow) = (get_prop(w.graph, i, :job) for i in vertices(w.graph))
 
 function run!(w::Workflow)
     WORKFLOW_REGISTRY[w] = w
-    g, n = w.graph, w.nodes
+    g = w.graph
     for i in vertices(g)
-        if !issucceeded(n[i])  # If not succeeded, prepare to run
+        node = get_prop(g, i, :job)
+        if !issucceeded(node)  # If not succeeded, prepare to run
             inn = inneighbors(g, i)
             if !isempty(inn)  # First, see if previous jobs were finished
                 for j in inn
-                    if !isexited(n[j])
-                        wait(n[j])  # Wait until all previous jobs are finished
+                    innode = get_prop(g, j, :job)
+                    if !isexited(innode)
+                        wait(innode)  # Wait until all previous jobs are finished
                         WORKFLOW_REGISTRY[w] = w
                     end
                 end
             end
-            run!(n[i])  # Finally, run the job
+            run!(node)  # Finally, run the job
             WORKFLOW_REGISTRY[w] = w
         end
     end
@@ -137,31 +151,26 @@ function reset!(job::Job)
     end
 end
 function reset!(w::Workflow)
-    nodes = map(reset!, w.nodes)
-    return Workflow(w.graph, nodes)
+    for i in w.graph
+        set_prop!(w.graph, i, :job, reset!(get_prop(w.graph, i, :job)))
+    end
+    return w
 end
 
 function getstatus(w::Workflow)
-    st = map(getstatus, w.nodes)
-    mg = MetaGraph(w.graph)
-    for i in vertices(w.graph)
-        set_prop!(mg, i, :status, getstatus(w.nodes[i]))
-    end
-    return mg
+    return map(getstatus, eachjob(w))
 end
 
 function description(w::Workflow)
-    st = map(description, w.nodes)
-    mg = MetaGraph(w.graph)
-    for i in vertices(w.graph)
-        set_prop!(mg, i, :desc, description(w.nodes[i]))
-    end
-    return mg
+    return map(description, eachjob(w))
 end
 
-function ⊕(g::AbstractGraph, b::AbstractGraph)
+function ⊕(g::MetaDiGraph, b::MetaDiGraph)
     a = copy(g)
     add_vertices!(a, nv(b))
+    for i in 1:nv(b)
+        set_prop!(a, i + nv(g), :job, get_prop(b, i, :job))
+    end
     for e in edges(b)
         add_edge!(a, src(e) + nv(g), dst(e) + nv(g))
     end
@@ -169,7 +178,7 @@ function ⊕(g::AbstractGraph, b::AbstractGraph)
 end
 
 function Base.show(io::IO, wf::Workflow)
-    for node in wf.nodes
+    for node in eachjob(wf)
         println(io, node)
     end
 end
