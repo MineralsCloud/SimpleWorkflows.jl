@@ -64,6 +64,7 @@ function chain(a::TieInPoint, b::TieInPoint)
     add_edge!(g, a.index, b.index + nv(a.workflow.graph))
     return Workflow(g, append!!(a.workflow.nodes, b.workflow.nodes))
 end
+chain(a::Workflow, b::Workflow) = chain(a[end], b[1])
 
 backchain(a::Union{Job,TieInPoint}, b::Union{Job,TieInPoint}) = chain(b, a)
 backchain(c::Job, b::Job, a::Job, xs::Job...) = chain(xs..., a, b, c)
