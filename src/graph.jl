@@ -65,6 +65,8 @@ function chain(a::TieInPoint, b::TieInPoint)
     return Workflow(g, append!!(a.workflow.nodes, b.workflow.nodes))
 end
 chain(a::Workflow, b::Workflow) = chain(a[end], b[1])
+chain(a::Job, b::Workflow) = chain(a, b[1])
+chain(a::Workflow, b::Job) = chain(a[end], b)
 
 backchain(a::Union{Job,TieInPoint}, b::Union{Job,TieInPoint}) = chain(b, a)
 backchain(c::Job, b::Job, a::Job, xs::Job...) = chain(xs..., a, b, c)
