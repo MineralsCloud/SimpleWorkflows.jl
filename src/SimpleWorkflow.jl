@@ -207,6 +207,19 @@ color(::Failed) = RGB(1.0, 0.0, 0.0)  # Red
 color(::Interrupted) = RGB(1.0, 0.647, 0.0)  # Orange
 
 getstatus(x::Job) = x.ref.status
+function getstatus(w::Workflow)
+    if all(issucceeded.(w.nodes))
+        return Succeeded()
+    elseif all(ispending.(w.nodes))
+        return Pending()
+    elseif any(isinterrupted.(w.nodes))
+        return Interrupted()
+    elseif all(isfailed.(w.nodes))
+        return Failed()
+    else
+        return Running()
+    end
+end
 
 ispending(x::Job) = getstatus(x) isa Pending
 
