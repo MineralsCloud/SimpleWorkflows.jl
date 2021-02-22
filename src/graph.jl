@@ -109,8 +109,12 @@ const ∥ = parallel
 
 eachjob(w::Workflow) = (w.nodes[i] for i in vertices(w.graph))
 
-function run!(w::Workflow)
-    WORKFLOW_REGISTRY[w] = w
+function run!(w::Workflow, saveas = mktemp(; cleanup = false))
+    if !isfile(saveas)
+        touch(saveas)
+    end
+    println("the workflow will be saved as a binary to $saveas.")
+    WORKFLOW_REGISTRY[w] = saveas
     g, n = w.graph, w.nodes
     for i in vertices(g)
         if !issucceeded(n[i])  # If not succeeded, prepare to run
@@ -119,12 +123,16 @@ function run!(w::Workflow)
                 for j in inn
                     if !isexited(n[j])
                         wait(n[j])  # Wait until all previous jobs are finished
-                        WORKFLOW_REGISTRY[w] = w
+                        open(saveas, "w") do io
+                            serialize(io, w)
+                        end
                     end
                 end
             end
             run!(n[i])  # Finally, run the job
-            WORKFLOW_REGISTRY[w] = w
+            open(saveas, "w") do io
+                serialize(io, w)
+            end
         end
     end
     return w

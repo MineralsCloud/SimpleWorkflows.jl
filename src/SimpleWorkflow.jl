@@ -4,6 +4,7 @@ using AbInitioSoftwareBase: load
 using ColorTypes: RGB
 using Dates: unix2datetime, format
 using Distributed: Future, @spawn
+using Serialization: serialize, deserialize
 
 export ExternalAtomicJob, InternalAtomicJob, Script
 export color,
