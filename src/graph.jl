@@ -110,7 +110,16 @@ const ∥ = parallel
 eachjob(w::Workflow) = (w.nodes[i] for i in vertices(w.graph))
 
 function run!(w::Workflow, saveas = mktemp(; cleanup = false))
-    if !isfile(saveas)
+    if isfile(saveas)
+        try
+            open(saveas, "r") do io
+                w = deserialize(io)
+            end
+        catch
+            println("cannot deserialize file $saveas to a `Workflow`! Will start from new!")
+            rm(saveas)
+        end
+    else
         touch(saveas)
     end
     println("the workflow will be saved as a binary to $saveas.")
