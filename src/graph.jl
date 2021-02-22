@@ -109,7 +109,7 @@ const ∥ = parallel
 
 eachjob(w::Workflow) = (w.nodes[i] for i in vertices(w.graph))
 
-function run!(w::Workflow, saveas = mktemp(; cleanup = false))
+function run!(w::Workflow, saveas = tempname(; cleanup = false))
     if isfile(saveas)
         try
             open(saveas, "r") do io
