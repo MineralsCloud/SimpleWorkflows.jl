@@ -15,7 +15,7 @@ Serialization = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
 
 [compat]
 BangBang = "0.3"
-ColorTypes = "0.10"
+ColorTypes = "0.10, 0.11"
 LightGraphs = "1.3"
 MetaGraphs = "0.6"
 julia = "1"
