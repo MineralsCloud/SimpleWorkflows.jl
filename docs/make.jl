@@ -1,10 +1,12 @@
 using SimpleWorkflow
 using Documenter
 
+DocMeta.setdocmeta!(SimpleWorkflow, :DocTestSetup, :(using SimpleWorkflow); recursive=true)
+
 makedocs(;
     modules=[SimpleWorkflow],
     authors="Qi Zhang <singularitti@outlook.com>",
-    repo="https://github.com/MineralsCloud/SimpleWorkflow.jl/blob/{commit}{path}#L{line}",
+    repo="https://github.com/MineralsCloud/SimpleWorkflow.jl/blob/{commit}{path}#{line}",
     sitename="SimpleWorkflow.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
