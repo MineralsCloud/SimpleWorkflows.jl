@@ -148,12 +148,12 @@ function run!(w::Workflow, saveas = tempname(; cleanup = false))
 end
 
 function reset!(job::Job)
-    if job isa ExternalAtomicJob
-        return ExternalAtomicJob(job.cmd, job.desc)
-    elseif job isa InternalAtomicJob
-        return InternalAtomicJob(job.fun, job.desc)
-    else  # EmptyJob
+    if job isa AtomicJob
+        return AtomicJob(job.def, job.desc)
+    elseif job isa EmptyJob
         return EmptyJob(job.desc)
+    else
+        @assert false "this should not happen!"
     end
 end
 function reset!(w::Workflow)
