@@ -22,7 +22,6 @@ export color,
     outmsg,
     errmsg,
     run!,
-    fromfile,
     @job
 
 abstract type JobStatus end
