@@ -6,7 +6,7 @@ using Dates: unix2datetime, format
 using Distributed: Future, @spawn
 using Serialization: serialize, deserialize
 
-export ExternalAtomicJob, InternalAtomicJob, Script
+export ExternalAtomicJob, InternalAtomicJob
 export color,
     getstatus,
     getresult,
@@ -33,18 +33,6 @@ abstract type Exited <: JobStatus end
 struct Succeeded <: Exited end
 struct Failed <: Exited end
 struct Interrupted <: Exited end
-
-struct Script
-    path::String
-    chdir::Bool
-    mode::Integer
-    function Script(path, chdir, mode)
-        @assert isfile(path)
-        chmod(path, mode)
-        return new(path, chdir, mode)
-    end
-end
-Script(path; chdir = true, mode = 0o777) = Script(path, chdir, mode)
 
 mutable struct Timer
     start::Float64
