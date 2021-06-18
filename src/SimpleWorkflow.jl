@@ -23,8 +23,7 @@ export color,
     errmsg,
     run!,
     fromfile,
-    @fun,
-    @shell
+    @job
 
 abstract type JobStatus end
 struct Pending <: JobStatus end
@@ -132,12 +131,11 @@ function run!(x::EmptyJob)
     return x
 end
 
-macro fun(x, desc = "No description here.")
-    return :(InternalAtomicJob(() -> $(esc(x)), $desc))
+macro job(x::Function, desc = "No description here.")
+    return :(AtomicJob(() -> x, $desc))
 end
-
-macro shell(x, desc = "No description here.")
-    return :(ExternalAtomicJob($(esc(x)), $desc))
+macro job(x::Base.AbstractCmd, desc = "No description here.")
+    return :(AtomicJob(x, $desc))
 end
 
 color(::Pending) = RGB(0.0, 0.0, 1.0)  # Blue
