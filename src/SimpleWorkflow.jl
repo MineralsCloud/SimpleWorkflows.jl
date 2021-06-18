@@ -108,44 +108,6 @@ function run!(x::ExternalAtomicJob{<:Base.AbstractCmd})
     end
     return x
 end
-function run!(x::ExternalAtomicJob{Script})
-    out, err = Pipe(), Pipe()
-    path = abspath(expanduser(x.cmd.path))
-    if x.cmd.chdir == true
-        cwd = pwd()
-        cd(dirname(path))
-    end
-    x.ref.ref = @spawn begin
-        x.ref.status = Running()
-        x.timer.start = time()
-        ref = try
-            run(pipeline(`$path`, stdin = devnull, stdout = out, stderr = err))
-        catch e
-            @error "could not spawn process `$(x.cmd)`! Come across `$e`!"
-            e
-        finally
-            x.timer.stop = time()
-            close(out.in)
-            close(err.in)
-        end
-        if ref isa Exception  # Include all cases?
-            if ref isa InterruptException
-                x.ref.status = Interrupted()
-            else
-                x.ref.status = Failed()
-            end
-            x.log.err = String(read(err))
-        else
-            x.ref.status = Succeeded()
-            x.log.out = String(read(out))
-        end
-        ref
-    end
-    if @isdefined cwd
-        cd(cwd)
-    end
-    return x
-end
 function run!(x::InternalAtomicJob)
     x.ref.ref = @spawn begin
         x.ref.status = Running()
