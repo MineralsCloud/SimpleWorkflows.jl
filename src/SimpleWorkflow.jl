@@ -32,10 +32,10 @@ struct Succeeded <: Exited end
 struct Failed <: Exited end
 struct Interrupted <: Exited end
 
-mutable struct Timer
+mutable struct Stopwatch
     start::Float64
     stop::Float64
-    Timer() = new()
+    Stopwatch() = new()
 end
 
 mutable struct Logger
@@ -53,17 +53,17 @@ abstract type Job end
 struct EmptyJob <: Job
     desc::String
     ref::JobRef
-    timer::Timer
-    EmptyJob(desc = "No description here.") = new(desc, JobRef(), Timer())
+    timer::Stopwatch
+    EmptyJob(desc = "No description here.") = new(desc, JobRef(), Stopwatch())
 end
 struct AtomicJob{T} <: Job
     def::T
     desc::String
     ref::JobRef
-    timer::Timer
+    timer::Stopwatch
     log::Logger
     AtomicJob(def::T, desc = "No description here.") where {T} =
-        new{T}(def, desc, JobRef(), Timer(), Logger("", ""))
+        new{T}(def, desc, JobRef(), Stopwatch(), Logger("", ""))
 end
 
 function run!(x::AtomicJob{<:Base.AbstractCmd})
