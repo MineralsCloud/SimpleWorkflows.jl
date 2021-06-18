@@ -129,6 +129,25 @@ function run!(x::AtomicJob{<:Function})
     end
     return x
 end
+function run!(x::DistributedJob)
+    x.ref.ref = @spawn begin
+        x.ref.status = Running()
+        x.timer.start = time()
+        ref = map(x.def) do job
+            run!(job)
+        end
+        x.timer.stop = time()
+        if all(issucceeded(job) for job in x.def)
+            x.ref.status = Succeeded()
+        elseif any(isinterrupted(job) for job in x.def)
+            x.ref.status = Interrupted()
+        else
+            x.ref.status = Failed()
+        end
+        ref
+    end
+    return x
+end
 function run!(x::EmptyJob)
     x.ref.ref = @spawn begin
         x.timer.start = x.timer.stop = time()
