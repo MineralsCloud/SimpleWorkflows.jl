@@ -6,7 +6,7 @@ using Dates: unix2datetime, format
 using Distributed: Future, @spawn
 using Serialization: serialize, deserialize
 
-export ExternalAtomicJob, InternalAtomicJob
+export AtomicJob
 export color,
     getstatus,
     getresult,
@@ -58,24 +58,14 @@ struct EmptyJob <: Job
     timer::Timer
     EmptyJob(desc = "No description here.") = new(desc, JobRef(), Timer())
 end
-abstract type AtomicJob <: Job end
-struct ExternalAtomicJob{T} <: AtomicJob
-    cmd::T
+struct AtomicJob{T} <: Job
+    def::T
     desc::String
     ref::JobRef
     timer::Timer
     log::Logger
-    ExternalAtomicJob(cmd::T, desc = "No description here.") where {T} =
-        new{T}(cmd, desc, JobRef(), Timer(), Logger("", ""))
-end
-struct InternalAtomicJob <: AtomicJob
-    fun::Function
-    desc::String
-    ref::JobRef
-    timer::Timer
-    log::Logger
-    InternalAtomicJob(fun, desc = "No description here.") =
-        new(fun, desc, JobRef(), Timer(), Logger("", ""))
+    AtomicJob(def::T, desc = "No description here.") where {T} =
+        new{T}(def, desc, JobRef(), Timer(), Logger("", ""))
 end
 
 function run!(x::ExternalAtomicJob{<:Base.AbstractCmd})
@@ -215,7 +205,7 @@ Base.wait(x::Job) = wait(x.ref.ref)
 
 Base.show(io::IO, ::EmptyJob) = print(io, " empty job")
 function Base.show(io::IO, job::AtomicJob)
-    printstyled(io, " ", job isa ExternalAtomicJob ? job.cmd : job.fun; bold = true)
+    printstyled(io, " ", job.def; bold = true)
     if !ispending(job)
         print(
             io,
