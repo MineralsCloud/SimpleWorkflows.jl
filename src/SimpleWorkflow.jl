@@ -192,12 +192,12 @@ function run!(x::EmptyJob)
     return x
 end
 
-macro fun(x)
-    return :(InternalAtomicJob(() -> $(esc(x))))
+macro fun(x, desc = "No description here.")
+    return :(InternalAtomicJob(() -> $(esc(x)), $desc))
 end
 
-macro shell(x)
-    return :(ExternalAtomicJob($(esc(x))))
+macro shell(x, desc = "No description here.")
+    return :(ExternalAtomicJob($(esc(x)), $desc))
 end
 
 color(::Pending) = RGB(0.0, 0.0, 1.0)  # Blue
