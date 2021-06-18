@@ -6,7 +6,7 @@ using Dates: unix2datetime, format
 using Distributed: Future, @spawn
 using Serialization: serialize, deserialize
 
-export ExternalAtomicJob, InternalAtomicJob, Script
+export AtomicJob
 export color,
     getstatus,
     getresult,
@@ -22,9 +22,7 @@ export color,
     outmsg,
     errmsg,
     run!,
-    fromfile,
-    @fun,
-    @shell
+    @job
 
 abstract type JobStatus end
 struct Pending <: JobStatus end
@@ -33,18 +31,6 @@ abstract type Exited <: JobStatus end
 struct Succeeded <: Exited end
 struct Failed <: Exited end
 struct Interrupted <: Exited end
-
-struct Script
-    path::String
-    chdir::Bool
-    mode::Integer
-    function Script(path, chdir, mode)
-        @assert isfile(path)
-        chmod(path, mode)
-        return new(path, chdir, mode)
-    end
-end
-Script(path; chdir = true, mode = 0o777) = Script(path, chdir, mode)
 
 mutable struct Timer
     start::Float64
@@ -70,35 +56,25 @@ struct EmptyJob <: Job
     timer::Timer
     EmptyJob(desc = "No description here.") = new(desc, JobRef(), Timer())
 end
-abstract type AtomicJob <: Job end
-struct ExternalAtomicJob{T} <: AtomicJob
-    cmd::T
+struct AtomicJob{T} <: Job
+    def::T
     desc::String
     ref::JobRef
     timer::Timer
     log::Logger
-    ExternalAtomicJob(cmd::T, desc = "No description here.") where {T} =
-        new{T}(cmd, desc, JobRef(), Timer(), Logger("", ""))
-end
-struct InternalAtomicJob <: AtomicJob
-    fun::Function
-    desc::String
-    ref::JobRef
-    timer::Timer
-    log::Logger
-    InternalAtomicJob(fun, desc = "No description here.") =
-        new(fun, desc, JobRef(), Timer(), Logger("", ""))
+    AtomicJob(def::T, desc = "No description here.") where {T} =
+        new{T}(def, desc, JobRef(), Timer(), Logger("", ""))
 end
 
-function run!(x::ExternalAtomicJob{<:Base.AbstractCmd})
+function run!(x::AtomicJob{<:Base.AbstractCmd})
     out, err = Pipe(), Pipe()
     x.ref.ref = @spawn begin
         x.ref.status = Running()
         x.timer.start = time()
         ref = try
-            run(pipeline(x.cmd, stdin = devnull, stdout = out, stderr = err))
+            run(pipeline(x.def, stdin = devnull, stdout = out, stderr = err))
         catch e
-            @error "could not spawn process `$(x.cmd)`! Come across `$e`!"
+            @error "could not spawn process `$(x.def)`! Come across `$e`!"
             e
         finally
             x.timer.stop = time()
@@ -120,52 +96,14 @@ function run!(x::ExternalAtomicJob{<:Base.AbstractCmd})
     end
     return x
 end
-function run!(x::ExternalAtomicJob{Script})
-    out, err = Pipe(), Pipe()
-    path = abspath(expanduser(x.cmd.path))
-    if x.cmd.chdir == true
-        cwd = pwd()
-        cd(dirname(path))
-    end
+function run!(x::AtomicJob{<:Function})
     x.ref.ref = @spawn begin
         x.ref.status = Running()
         x.timer.start = time()
         ref = try
-            run(pipeline(`$path`, stdin = devnull, stdout = out, stderr = err))
+            x.def()
         catch e
-            @error "could not spawn process `$(x.cmd)`! Come across `$e`!"
-            e
-        finally
-            x.timer.stop = time()
-            close(out.in)
-            close(err.in)
-        end
-        if ref isa Exception  # Include all cases?
-            if ref isa InterruptException
-                x.ref.status = Interrupted()
-            else
-                x.ref.status = Failed()
-            end
-            x.log.err = String(read(err))
-        else
-            x.ref.status = Succeeded()
-            x.log.out = String(read(out))
-        end
-        ref
-    end
-    if @isdefined cwd
-        cd(cwd)
-    end
-    return x
-end
-function run!(x::InternalAtomicJob)
-    x.ref.ref = @spawn begin
-        x.ref.status = Running()
-        x.timer.start = time()
-        ref = try
-            x.fun()
-        catch e
-            @error "could not spawn process `$(x.fun)`! Come across `$e`!"
+            @error "could not spawn process `$(x.def)`! Come across `$e`!"
             e
         finally
             x.timer.stop = time()
@@ -192,12 +130,11 @@ function run!(x::EmptyJob)
     return x
 end
 
-macro fun(x, desc = "No description here.")
-    return :(InternalAtomicJob(() -> $(esc(x)), $desc))
+macro job(x::Function, desc = "No description here.")
+    return :(AtomicJob(() -> x, $desc))
 end
-
-macro shell(x, desc = "No description here.")
-    return :(ExternalAtomicJob($(esc(x)), $desc))
+macro job(x::Base.AbstractCmd, desc = "No description here.")
+    return :(AtomicJob(x, $desc))
 end
 
 color(::Pending) = RGB(0.0, 0.0, 1.0)  # Blue
@@ -245,27 +182,27 @@ outmsg(::EmptyJob) = ""
 errmsg(x::AtomicJob) = isrunning(x) ? nothing : x.log.err
 errmsg(::EmptyJob) = ""
 
-function fromfile(cfgfile)
-    config = load(cfgfile)
-    @assert haskey(config, "actions")
-    map(config["actions"]) do rule
-        @assert all(haskey(rule, key) for key in ("inputs", "outputs"))
-        if haskey(rule, "command")
-            return ExternalAtomicJob(Script(rule["command"], mktemp()))
-        elseif haskey(rule, "function")
-            return InternalAtomicJob(() -> evalfile(rule["function"]))
-        else
-            @error "unknown action provided! It should be either `\"command\"` or `\"function\"`!"
-            return EmptyJob()
-        end
-    end
-end
+# function fromfile(cfgfile)
+#     config = load(cfgfile)
+#     @assert haskey(config, "actions")
+#     map(config["actions"]) do rule
+#         @assert all(haskey(rule, key) for key in ("inputs", "outputs"))
+#         if haskey(rule, "command")
+#             return AtomicJob(Script(rule["command"], mktemp()))
+#         elseif haskey(rule, "function")
+#             return AtomicJob(() -> evalfile(rule["function"]))
+#         else
+#             @error "unknown action provided! It should be either `\"command\"` or `\"function\"`!"
+#             return EmptyJob()
+#         end
+#     end
+# end
 
 Base.wait(x::Job) = wait(x.ref.ref)
 
 Base.show(io::IO, ::EmptyJob) = print(io, " empty job")
 function Base.show(io::IO, job::AtomicJob)
-    printstyled(io, " ", job isa ExternalAtomicJob ? job.cmd : job.fun; bold = true)
+    printstyled(io, " ", job.def; bold = true)
     if !ispending(job)
         print(
             io,
