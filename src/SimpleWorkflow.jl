@@ -68,15 +68,15 @@ struct AtomicJob{T} <: Job
         new{T}(def, desc, JobRef(), Timer(), Logger("", ""))
 end
 
-function run!(x::ExternalAtomicJob{<:Base.AbstractCmd})
+function run!(x::AtomicJob{<:Base.AbstractCmd})
     out, err = Pipe(), Pipe()
     x.ref.ref = @spawn begin
         x.ref.status = Running()
         x.timer.start = time()
         ref = try
-            run(pipeline(x.cmd, stdin = devnull, stdout = out, stderr = err))
+            run(pipeline(x.def, stdin = devnull, stdout = out, stderr = err))
         catch e
-            @error "could not spawn process `$(x.cmd)`! Come across `$e`!"
+            @error "could not spawn process `$(x.def)`! Come across `$e`!"
             e
         finally
             x.timer.stop = time()
@@ -98,14 +98,14 @@ function run!(x::ExternalAtomicJob{<:Base.AbstractCmd})
     end
     return x
 end
-function run!(x::InternalAtomicJob)
+function run!(x::AtomicJob{<:Function})
     x.ref.ref = @spawn begin
         x.ref.status = Running()
         x.timer.start = time()
         ref = try
-            x.fun()
+            x.def()
         catch e
-            @error "could not spawn process `$(x.fun)`! Come across `$e`!"
+            @error "could not spawn process `$(x.def)`! Come across `$e`!"
             e
         finally
             x.timer.stop = time()
