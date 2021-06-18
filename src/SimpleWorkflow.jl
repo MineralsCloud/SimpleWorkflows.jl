@@ -65,6 +65,14 @@ struct AtomicJob{T} <: Job
     AtomicJob(def::T, desc = "No description here.") where {T} =
         new{T}(def, desc, JobRef(), Stopwatch(), Logger("", ""))
 end
+struct DistributedJob{T<:Job} <: Job
+    def::Vector{T}
+    desc::String
+    ref::JobRef
+    timer::Stopwatch
+    DistributedJob(def::T, desc = "No description here.") where {T} =
+        new{T}(def, desc, JobRef(), Stopwatch())
+end
 
 function run!(x::AtomicJob{<:Base.AbstractCmd})
     out, err = Pipe(), Pipe()
