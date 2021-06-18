@@ -68,7 +68,7 @@ struct EmptyJob <: Job
     desc::String
     ref::JobRef
     timer::Timer
-    EmptyJob(desc = "Unnamed") = new(desc, JobRef(), Timer())
+    EmptyJob(desc = "No description here.") = new(desc, JobRef(), Timer())
 end
 abstract type AtomicJob <: Job end
 struct ExternalAtomicJob{T} <: AtomicJob
@@ -77,7 +77,7 @@ struct ExternalAtomicJob{T} <: AtomicJob
     ref::JobRef
     timer::Timer
     log::Logger
-    ExternalAtomicJob(cmd::T, desc = "Unnamed") where {T} =
+    ExternalAtomicJob(cmd::T, desc = "No description here.") where {T} =
         new{T}(cmd, desc, JobRef(), Timer(), Logger("", ""))
 end
 struct InternalAtomicJob <: AtomicJob
@@ -86,7 +86,7 @@ struct InternalAtomicJob <: AtomicJob
     ref::JobRef
     timer::Timer
     log::Logger
-    InternalAtomicJob(fun, desc = "Unnamed") =
+    InternalAtomicJob(fun, desc = "No description here.") =
         new(fun, desc, JobRef(), Timer(), Logger("", ""))
 end
 
