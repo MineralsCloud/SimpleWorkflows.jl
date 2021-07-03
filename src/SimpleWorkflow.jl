@@ -134,7 +134,7 @@ function run!(x::DistributedJob)
         x.ref.status = Running()
         x.timer.start = time()
         ref = map(x.def) do job
-            run!(job)
+            @async run!(job)
         end
         x.timer.stop = time()
         if all(issucceeded(job) for job in x.def)
