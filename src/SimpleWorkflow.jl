@@ -21,8 +21,7 @@ export color,
     elapsed,
     outmsg,
     errmsg,
-    run!,
-    @job
+    run!
 
 abstract type JobStatus end
 struct Pending <: JobStatus end
@@ -157,13 +156,6 @@ function run!(x::EmptyJob)
     return x
 end
 
-macro job(x::Function, desc = "No description here.")
-    return :(AtomicJob(() -> x, $desc))
-end
-macro job(x::Base.AbstractCmd, desc = "No description here.")
-    return :(AtomicJob(x, $desc))
-end
-
 color(::Pending) = RGB(0.0, 0.0, 1.0)  # Blue
 color(::Running) = RGB(1.0, 1.0, 0.0)  # Yellow
 color(::Succeeded) = RGB(0.0, 0.502, 0.0)  # Green
@@ -228,23 +220,23 @@ errmsg(::EmptyJob) = ""
 Base.wait(x::Job) = wait(x.ref.ref)
 
 Base.show(io::IO, ::EmptyJob) = print(io, " empty job")
-function Base.show(io::IO, job::AtomicJob)
-    printstyled(io, " ", job.def; bold = true)
-    if !ispending(job)
-        print(
-            io,
-            " from ",
-            format(starttime(job), "HH:MM:SS u dd, yyyy"),
-            isrunning(job) ? ", still running..." :
-            ", to " * format(stoptime(job), "HH:MM:SS u dd, yyyy"),
-            ", uses ",
-            elapsed(job),
-            " seconds.",
-        )
-    else
-        print(" pending...")
-    end
-end
+# function Base.show(io::IO, job::AtomicJob)
+#     printstyled(io, " ", job.def; bold = true)
+#     if !ispending(job)
+#         print(
+#             io,
+#             " from ",
+#             format(starttime(job), "HH:MM:SS u dd, yyyy"),
+#             isrunning(job) ? ", still running..." :
+#             ", to " * format(stoptime(job), "HH:MM:SS u dd, yyyy"),
+#             ", uses ",
+#             elapsed(job),
+#             " seconds.",
+#         )
+#     else
+#         print(" pending...")
+#     end
+# end
 
 include("graph.jl")
 
