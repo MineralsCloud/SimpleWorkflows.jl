@@ -228,23 +228,23 @@ errmsg(::EmptyJob) = ""
 Base.wait(x::Job) = wait(x.ref.ref)
 
 Base.show(io::IO, ::EmptyJob) = print(io, " empty job")
-function Base.show(io::IO, job::AtomicJob)
-    printstyled(io, " ", job.def; bold = true)
-    if !ispending(job)
-        print(
-            io,
-            " from ",
-            format(starttime(job), "HH:MM:SS u dd, yyyy"),
-            isrunning(job) ? ", still running..." :
-            ", to " * format(stoptime(job), "HH:MM:SS u dd, yyyy"),
-            ", uses ",
-            elapsed(job),
-            " seconds.",
-        )
-    else
-        print(" pending...")
-    end
-end
+# function Base.show(io::IO, job::AtomicJob)
+#     printstyled(io, " ", job.def; bold = true)
+#     if !ispending(job)
+#         print(
+#             io,
+#             " from ",
+#             format(starttime(job), "HH:MM:SS u dd, yyyy"),
+#             isrunning(job) ? ", still running..." :
+#             ", to " * format(stoptime(job), "HH:MM:SS u dd, yyyy"),
+#             ", uses ",
+#             elapsed(job),
+#             " seconds.",
+#         )
+#     else
+#         print(" pending...")
+#     end
+# end
 
 include("graph.jl")
 
