@@ -70,7 +70,7 @@ struct DistributedJob{T<:Job} <: Job
     desc::String
     ref::JobRef
     timer::Stopwatch
-    DistributedJob(def::T, desc = "No description here.") where {T} =
+    DistributedJob(def::Vector{T}, desc = "No description here.") where {T} =
         new{T}(def, desc, JobRef(), Stopwatch())
 end
 
