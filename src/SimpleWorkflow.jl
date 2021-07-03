@@ -65,6 +65,14 @@ struct AtomicJob{T} <: Job
     AtomicJob(def::T, desc = "No description here.") where {T} =
         new{T}(def, desc, JobRef(), Stopwatch(), Logger("", ""))
 end
+struct DistributedJob{T<:Job} <: Job
+    def::Vector{T}
+    desc::String
+    ref::JobRef
+    timer::Stopwatch
+    DistributedJob(def::Vector{T}, desc = "No description here.") where {T} =
+        new{T}(def, desc, JobRef(), Stopwatch())
+end
 
 function run!(x::AtomicJob{<:Base.AbstractCmd})
     out, err = Pipe(), Pipe()
@@ -116,6 +124,25 @@ function run!(x::AtomicJob{<:Function})
             end
         else
             x.ref.status = Succeeded()
+        end
+        ref
+    end
+    return x
+end
+function run!(x::DistributedJob)
+    x.ref.ref = @spawn begin
+        x.ref.status = Running()
+        x.timer.start = time()
+        ref = map(x.def) do job
+            @async run!(job)
+        end
+        x.timer.stop = time()
+        if all(issucceeded(job) for job in x.def)
+            x.ref.status = Succeeded()
+        elseif any(isinterrupted(job) for job in x.def)
+            x.ref.status = Interrupted()
+        else
+            x.ref.status = Failed()
         end
         ref
     end
