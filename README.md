@@ -8,3 +8,4 @@
 [![pipeline status](https://gitlab.com/singularitti/SimpleWorkflow.jl/badges/master/pipeline.svg)](https://gitlab.com/singularitti/SimpleWorkflow.jl/-/pipelines)
 [![Build Status](https://api.cirrus-ci.com/github/MineralsCloud/SimpleWorkflow.jl.svg)](https://cirrus-ci.com/github/MineralsCloud/SimpleWorkflow.jl)
 [![Coverage](https://codecov.io/gh/MineralsCloud/SimpleWorkflow.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/MineralsCloud/SimpleWorkflow.jl)
+[![Open in Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/organization/repository)
