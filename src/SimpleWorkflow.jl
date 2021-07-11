@@ -122,7 +122,7 @@ function run!(x::AtomicJob{<:Function})
     return x
 end
 
-getstatus(x::Job) = x.ref.status
+getstatus(x::Job) = x.status
 
 ispending(x::Job) = getstatus(x) isa Pending
 
@@ -136,30 +136,28 @@ isfailed(x::Job) = getstatus(x) isa Failed
 
 isinterrupted(x::Job) = getstatus(x) isa Interrupted
 
-starttime(x::Job) = ispending(x) ? nothing : unix2datetime(x.timer.start)
+starttime(x::Job) = ispending(x) ? nothing : x.start_time
 
-stoptime(x::Job) = isexited(x) ? unix2datetime(x.timer.stop) : nothing
+stoptime(x::Job) = isexited(x) ? x.stop_time : nothing
 
-getresult(x::Job) = isexited(x) ? Some(fetch(x.ref.ref)) : nothing
+getresult(x::Job) = isexited(x) ? Some(fetch(x.ref)) : nothing
 
 description(x::Job) = x.desc
 
 function elapsed(x::Job)
-    start = unix2datetime(x.timer.start)
     if ispending(x)
         return
     elseif isrunning(x)
-        return unix2datetime(time()) - start
+        return now() - x.start_time
     else  # Exited
-        return unix2datetime(x.timer.stop) - start
+        return x.stop_time - x.start_time
     end
 end
 
-outmsg(x::AtomicJob) = isrunning(x) ? nothing : x.log.out
-outmsg(::EmptyJob) = ""
 
 errmsg(x::AtomicJob) = isrunning(x) ? nothing : x.log.err
 errmsg(::EmptyJob) = ""
+outmsg(x::AtomicJob) = isrunning(x) ? nothing : x.outmsg
 
 # function fromfile(cfgfile)
 #     config = load(cfgfile)
@@ -177,7 +175,7 @@ errmsg(::EmptyJob) = ""
 #     end
 # end
 
-Base.wait(x::Job) = wait(x.ref.ref)
+Base.wait(x::Job) = wait(x.ref)
 
 Base.show(io::IO, ::EmptyJob) = print(io, " empty job")
 # function Base.show(io::IO, job::AtomicJob)
