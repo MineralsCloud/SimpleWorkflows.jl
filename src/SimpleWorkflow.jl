@@ -33,12 +33,6 @@ struct Failed <: Exited end
 struct Interrupted <: Exited end
 
 abstract type Job end
-struct EmptyJob <: Job
-    desc::String
-    ref::JobRef
-    timer::Stopwatch
-    EmptyJob(desc = "No description here.") = new(desc, JobRef(), Stopwatch())
-end
 struct AtomicJob{T} <: Job
     def::T
     desc::String
@@ -47,14 +41,6 @@ struct AtomicJob{T} <: Job
     log::Logger
     AtomicJob(def::T, desc = "No description here.") where {T} =
         new{T}(def, desc, JobRef(), Stopwatch(), Logger("", ""))
-end
-struct DistributedJob{T<:Job} <: Job
-    def::Vector{T}
-    desc::String
-    ref::JobRef
-    timer::Stopwatch
-    DistributedJob(def::Vector{T}, desc = "No description here.") where {T} =
-        new{T}(def, desc, JobRef(), Stopwatch())
 end
 
 function run!(x::AtomicJob{<:Base.AbstractCmd})
