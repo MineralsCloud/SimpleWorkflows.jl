@@ -33,14 +33,33 @@ struct Failed <: Exited end
 struct Interrupted <: Exited end
 
 abstract type Job end
-struct AtomicJob{T} <: Job
+# Reference: https://github.com/cihga39871/JobSchedulers.jl/blob/aca52de/src/jobs.jl#L35-L69
+mutable struct AtomicJob{T} <: Job
     def::T
     desc::String
-    ref::JobRef
-    timer::Stopwatch
-    log::Logger
-    AtomicJob(def::T, desc = "No description here.") where {T} =
-        new{T}(def, desc, JobRef(), Stopwatch(), Logger("", ""))
+    user::String
+    created_time::DateTime
+    start_time::DateTime
+    stop_time::DateTime
+    max_time::Period
+    status::JobStatus
+    ref::Future
+    AtomicJob(
+        def::T;
+        desc = "No description here.",
+        user = "",
+        max_time = Day(1),
+    ) where {T} = new{T}(
+        def,
+        desc,
+        user,
+        now(),
+        DateTime(0),
+        DateTime(0),
+        max_time,
+        Pending(),
+        Future(),
+    )
 end
 
 function run!(x::AtomicJob{<:Base.AbstractCmd})
