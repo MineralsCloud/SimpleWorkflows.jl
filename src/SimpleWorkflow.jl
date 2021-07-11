@@ -68,14 +68,16 @@ function run!(x::AtomicJob{<:Base.AbstractCmd})
         x.status = Running()
         x.start_time = now()
         ref = try
-            capture() do
+            captured = capture() do
                 run(x.def)
             end
+            captured.value
         catch e
             @error "could not spawn process `$(x.def)`! Come across `$e`!"
             e
         finally
             x.stop_time = now()
+            x.outmsg = captured.output
         end
         if ref isa Exception  # Include all cases?
             if ref isa InterruptException
@@ -95,14 +97,16 @@ function run!(x::AtomicJob{<:Function})
         x.status = Running()
         x.start_time = now()
         ref = try
-            capture() do
+            captured = capture() do
                 x.def()
             end
+            captured.value
         catch e
             @error "could not spawn process `$(x.def)`! Come across `$e`!"
             e
         finally
             x.stop_time = now()
+            x.outmsg = captured.output
         end
         if ref isa Exception  # Include all cases?
             if ref isa InterruptException
