@@ -42,6 +42,7 @@ mutable struct AtomicJob{T} <: Job
     stop_time::DateTime
     max_time::Period
     status::JobStatus
+    outmsg::String
     ref::Future
     AtomicJob(
         def::T;
@@ -57,6 +58,7 @@ mutable struct AtomicJob{T} <: Job
         DateTime(0),
         max_time,
         Pending(),
+        "",
         Future(),
     )
 end
