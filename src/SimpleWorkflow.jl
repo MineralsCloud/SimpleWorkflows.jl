@@ -63,30 +63,27 @@ mutable struct AtomicJob{T} <: Job
 end
 
 function run!(x::AtomicJob{<:Base.AbstractCmd})
-    out, err = Pipe(), Pipe()
-    x.ref.ref = @spawn begin
-        x.ref.status = Running()
-        x.timer.start = time()
+    x.ref = @spawn begin
+        x.status = Running()
+        x.start_time = now()
         ref = try
-            run(pipeline(x.def, stdin = devnull, stdout = out, stderr = err))
+            capture() do
+                run(x.def)
+            end
         catch e
             @error "could not spawn process `$(x.def)`! Come across `$e`!"
             e
         finally
-            x.timer.stop = time()
-            close(out.in)
-            close(err.in)
+            x.stop_time = now()
         end
         if ref isa Exception  # Include all cases?
             if ref isa InterruptException
-                x.ref.status = Interrupted()
+                x.status = Interrupted()
             else
-                x.ref.status = Failed()
+                x.status = Failed()
             end
-            x.log.err = String(read(err))
         else
-            x.ref.status = Succeeded()
-            x.log.out = String(read(out))
+            x.status = Succeeded()
         end
         ref
     end
