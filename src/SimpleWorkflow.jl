@@ -62,6 +62,11 @@ mutable struct AtomicJob{T} <: Job
     )
 end
 
+function runjob(cmd::Union{Base.AbstractCmd,Function}; kwargs...)
+    job = AtomicJob(cmd; kwargs...)
+    return run!(job)
+end
+
 function run!(x::AtomicJob{<:Base.AbstractCmd})
     x.ref = @spawn begin
         x.status = Running()
