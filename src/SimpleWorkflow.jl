@@ -20,7 +20,6 @@ export getstatus,
     stoptime,
     elapsed,
     outmsg,
-    errmsg,
     run!
 
 abstract type JobStatus end
@@ -154,9 +153,6 @@ function elapsed(x::Job)
     end
 end
 
-
-errmsg(x::AtomicJob) = isrunning(x) ? nothing : x.log.err
-errmsg(::EmptyJob) = ""
 outmsg(x::AtomicJob) = isrunning(x) ? nothing : x.outmsg
 
 # function fromfile(cfgfile)
@@ -177,7 +173,6 @@ outmsg(x::AtomicJob) = isrunning(x) ? nothing : x.outmsg
 
 Base.wait(x::Job) = wait(x.ref)
 
-Base.show(io::IO, ::EmptyJob) = print(io, " empty job")
 # function Base.show(io::IO, job::AtomicJob)
 #     printstyled(io, " ", job.def; bold = true)
 #     if !ispending(job)
