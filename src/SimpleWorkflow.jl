@@ -1,8 +1,7 @@
 module SimpleWorkflow
 
 using AbInitioSoftwareBase: load
-using ColorTypes: RGB
-using Dates: DateTime, Period, Day, unix2datetime, format, now
+using Dates: DateTime, Period, Day, now
 using Distributed: Future, @spawn
 using IOCapture: capture
 using Serialization: serialize, deserialize
