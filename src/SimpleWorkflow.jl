@@ -2,8 +2,9 @@ module SimpleWorkflow
 
 using AbInitioSoftwareBase: load
 using ColorTypes: RGB
-using Dates: unix2datetime, format
+using Dates: DateTime, Period, Day, unix2datetime, format, now
 using Distributed: Future, @spawn
+using IOCapture: capture
 using Serialization: serialize, deserialize
 
 export AtomicJob
@@ -30,23 +31,6 @@ abstract type Exited <: JobStatus end
 struct Succeeded <: Exited end
 struct Failed <: Exited end
 struct Interrupted <: Exited end
-
-mutable struct Stopwatch
-    start::Float64
-    stop::Float64
-    Stopwatch() = new()
-end
-
-mutable struct Logger
-    out::String
-    err::String
-end
-
-mutable struct JobRef
-    status::JobStatus
-    ref::Future
-    JobRef() = new(Pending())
-end
 
 abstract type Job end
 struct EmptyJob <: Job
