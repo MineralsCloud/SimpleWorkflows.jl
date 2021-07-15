@@ -172,10 +172,6 @@ starttime(x::Job) = ispending(x) ? nothing : x.start_time
 
 stoptime(x::Job) = isexited(x) ? x.stop_time : nothing
 
-getresult(x::Job) = isexited(x) ? Some(fetch(x.ref)) : nothing
-
-description(x::Job) = x.desc
-
 function elapsed(x::Job)
     if ispending(x)
         return
@@ -185,6 +181,10 @@ function elapsed(x::Job)
         return x.stop_time - x.start_time
     end
 end
+
+getresult(x::Job) = isexited(x) ? Some(fetch(x.ref)) : nothing
+
+description(x::Job) = x.desc
 
 outmsg(x::AtomicJob) = isrunning(x) ? nothing : x.outmsg
 
