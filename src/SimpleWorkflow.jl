@@ -5,6 +5,7 @@ using Dates: DateTime, Period, Day, now
 using Distributed: Future, @spawn
 using IOCapture: capture
 using Serialization: serialize, deserialize
+using UUIDs: UUID, uuid1
 
 export AtomicJob
 export getstatus,
@@ -32,6 +33,7 @@ struct Interrupted <: Exited end
 abstract type Job end
 # Reference: https://github.com/cihga39871/JobSchedulers.jl/blob/aca52de/src/jobs.jl#L35-L69
 mutable struct AtomicJob{T} <: Job
+    id::UUID
     def::T
     desc::String
     user::String
@@ -48,6 +50,7 @@ mutable struct AtomicJob{T} <: Job
         user = "",
         max_time = Day(1),
     ) where {T} = new{T}(
+        uuid1(),
         def,
         desc,
         user,
