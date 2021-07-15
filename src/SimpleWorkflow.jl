@@ -21,7 +21,7 @@ export getstatus,
     stoptime,
     elapsed,
     outmsg,
-    runjob,
+    run!,
     queue
 
 abstract type JobStatus end
@@ -84,62 +84,56 @@ isnew(job::AtomicJob) =
     job.status == Pending() &&
     job.ref === nothing
 
-function runjob(cmd::Union{Base.AbstractCmd,Function}; kwargs...)
-    job = AtomicJob(cmd; kwargs...)
-    return runjob(job)
-end
-function runjob(x::AtomicJob)
-    if isnew(x)
-        x.ref = @spawn begin
-            x.status = Running()
-            x.start_time = now()
-            push!(
-                JOB_REGISTRY,
-                (x.id, x.def, x.created_time, x.start_time, nothing, nothing, x.status, x),
-            )
-            ref = try
-                captured = capture() do
-                    _call(x)
-                end
-                captured.value
-            catch e
-                @error "could not spawn process `$(x.def)`! Come across `$e`!"
-                e
-            finally
-                x.stop_time = now()
-                row = filter(row -> row.id == x.id, JOB_REGISTRY)
-                row.stop_time = x.stop_time
-                row.duration = x.stop_time - x.start_time
-                x.outmsg = captured.output
+function run!(x::AtomicJob)
+    x.ref = @spawn begin
+        x.status = Running()
+        x.start_time = now()
+        push!(
+            JOB_REGISTRY,
+            (x.id, x.def, x.created_time, x.start_time, nothing, nothing, x.status, x),
+        )
+        ref = try
+            captured = capture() do
+                _call(x.def)
             end
-            if ref isa Exception  # Include all cases?
-                if ref isa InterruptException
-                    x.status = Interrupted()
-                else
-                    x.status = Failed()
-                end
-            else
-                x.status = Succeeded()
-            end
+            captured.value
+        catch e
+            @error "could not spawn process `$(x.def)`! Come across `$e`!"
+            e
+        finally
+            x.stop_time = now()
             row = filter(row -> row.id == x.id, JOB_REGISTRY)
-            row.status = x.status
-            ref
+            row.stop_time = x.stop_time
+            row.duration = x.stop_time - x.start_time
+            x.outmsg = captured.output
         end
-        return x
-    else  # This job has been run already!
-        return runjob(AtomicJob(x))
+        if ref isa Exception  # Include all cases?
+            if ref isa InterruptException
+                x.status = Interrupted()
+            else
+                x.status = Failed()
+            end
+        else
+            x.status = Succeeded()
+        end
+        row = filter(row -> row.id == x.id, JOB_REGISTRY)
+        row.status = x.status
+        ref
     end
+    return x
 end
 
-_call(x::AtomicJob{<:Base.AbstractCmd}) = run(x.def)
-_call(x::AtomicJob) = x.def()
+_call(cmd::Base.AbstractCmd) = run(cmd)
+_call(f) = f()
 
 function queue(; all = true)
+    for row in eachrow(JOB_REGISTRY)
+        job = row.job
+        row.stop_time = stoptime(job)
+        row.duration = elapsed(job)
+        row.status = getstatus(job)
+    end
     if all
-        for row in eachrow(JOB_REGISTRY)
-            row.stop_time = stoptime(row.job)
-            row.duration = elapsed(row.job)
-        end
         return JOB_REGISTRY
     else
     end

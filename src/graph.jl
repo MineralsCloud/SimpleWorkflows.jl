@@ -109,7 +109,7 @@ const ∥ = parallel
 
 eachjob(w::Workflow) = (w.nodes[i] for i in vertices(w.graph))
 
-function runjob(w::Workflow, saveas = tempname(; cleanup = false))
+function run!(w::Workflow, saveas = tempname(; cleanup = false))
     if isfile(saveas)
         try
             open(saveas, "r") do io
@@ -138,7 +138,7 @@ function runjob(w::Workflow, saveas = tempname(; cleanup = false))
                     end
                 end
             end
-            runjob(n[i])  # Finally, run the job
+            run!(n[i])  # Finally, run the job
             open(saveas, "w") do io
                 serialize(io, w)
             end
