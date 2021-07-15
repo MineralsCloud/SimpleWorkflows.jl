@@ -5,6 +5,7 @@ using Dates: DateTime, Period, Day, now
 using Distributed: Future, @spawn
 using IOCapture: capture
 using Serialization: serialize, deserialize
+using UUIDs: UUID, uuid1
 
 export AtomicJob
 export getstatus,
@@ -19,7 +20,7 @@ export getstatus,
     stoptime,
     elapsed,
     outmsg,
-    run!
+    runjob
 
 abstract type JobStatus end
 struct Pending <: JobStatus end
@@ -32,6 +33,7 @@ struct Interrupted <: Exited end
 abstract type Job end
 # Reference: https://github.com/cihga39871/JobSchedulers.jl/blob/aca52de/src/jobs.jl#L35-L69
 mutable struct AtomicJob{T} <: Job
+    id::UUID
     def::T
     desc::String
     user::String
@@ -48,6 +50,7 @@ mutable struct AtomicJob{T} <: Job
         user = "",
         max_time = Day(1),
     ) where {T} = new{T}(
+        uuid1(),
         def,
         desc,
         user,
@@ -60,69 +63,83 @@ mutable struct AtomicJob{T} <: Job
         Future(),
     )
 end
+AtomicJob(job::AtomicJob) =
+    AtomicJob(job.def; desc = job.desc, user = job.user, max_time = job.max_time)
+
+isnew(job::AtomicJob) =
+    job.start_time == job.stop_time == DateTime(0) &&
+    job.status == Pending() &&
+    job.ref == Future()
 
 function runjob(cmd::Union{Base.AbstractCmd,Function}; kwargs...)
     job = AtomicJob(cmd; kwargs...)
-    return run!(job)
+    return runjob(job)
 end
-
-function run!(x::AtomicJob{<:Base.AbstractCmd})
-    x.ref = @spawn begin
-        x.status = Running()
-        x.start_time = now()
-        ref = try
-            captured = capture() do
-                run(x.def)
+function runjob(x::AtomicJob{<:Base.AbstractCmd})
+    if isnew(x)
+        x.ref = @spawn begin
+            x.status = Running()
+            x.start_time = now()
+            ref = try
+                captured = capture() do
+                    run(x.def)
+                end
+                captured.value
+            catch e
+                @error "could not spawn process `$(x.def)`! Come across `$e`!"
+                e
+            finally
+                x.stop_time = now()
+                x.outmsg = captured.output
             end
-            captured.value
-        catch e
-            @error "could not spawn process `$(x.def)`! Come across `$e`!"
-            e
-        finally
-            x.stop_time = now()
-            x.outmsg = captured.output
-        end
-        if ref isa Exception  # Include all cases?
-            if ref isa InterruptException
-                x.status = Interrupted()
+            if ref isa Exception  # Include all cases?
+                if ref isa InterruptException
+                    x.status = Interrupted()
+                else
+                    x.status = Failed()
+                end
             else
-                x.status = Failed()
+                x.status = Succeeded()
             end
-        else
-            x.status = Succeeded()
+            ref
         end
-        ref
+        return x
+    else  # This job has been run already!
+        return runjob(AtomicJob(x))
     end
-    return x
 end
-function run!(x::AtomicJob{<:Function})
-    x.ref = @spawn begin
-        x.status = Running()
-        x.start_time = now()
-        ref = try
-            captured = capture() do
-                x.def()
+function runjob(x::AtomicJob{<:Function})
+    if isnew(x)
+        x.ref = @spawn begin
+            x.status = Running()
+            x.start_time = now()
+            ref = try
+                captured = capture() do
+                    x.def()
+                end
+                captured.value
+            catch e
+                @error "could not spawn process `$(x.def)`! Come across `$e`!"
+                e
+            finally
+                x.stop_time = now()
+                x.outmsg = captured.output
             end
-            captured.value
-        catch e
-            @error "could not spawn process `$(x.def)`! Come across `$e`!"
-            e
-        finally
-            x.stop_time = now()
-            x.outmsg = captured.output
-        end
-        if ref isa Exception  # Include all cases?
-            if ref isa InterruptException
-                x.status = Interrupted()
+            if ref isa Exception  # Include all cases?
+                if ref isa InterruptException
+                    x.status = Interrupted()
+                else
+                    x.status = Failed()
+                end
             else
-                x.status = Failed()
+                x.status = Succeeded()
             end
-        else
-            x.status = Succeeded()
+            ref
         end
-        ref
+        return x
+    else  # This job has been run already!
+        return runjob(AtomicJob(x))
     end
-    return x
 end
 
 getstatus(x::Job) = x.status
