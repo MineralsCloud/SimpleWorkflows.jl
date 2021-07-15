@@ -88,7 +88,7 @@ function runjob(cmd::Union{Base.AbstractCmd,Function}; kwargs...)
     job = AtomicJob(cmd; kwargs...)
     return runjob(job)
 end
-function runjob(x::AtomicJob{<:Base.AbstractCmd})
+function runjob(x::AtomicJob)
     if isnew(x)
         x.ref = @spawn begin
             x.status = Running()
@@ -99,7 +99,7 @@ function runjob(x::AtomicJob{<:Base.AbstractCmd})
             )
             ref = try
                 captured = capture() do
-                    run(x.def)
+                    _call(x)
                 end
                 captured.value
             catch e
@@ -130,39 +130,9 @@ function runjob(x::AtomicJob{<:Base.AbstractCmd})
         return runjob(AtomicJob(x))
     end
 end
-function runjob(x::AtomicJob{<:Function})
-    if isnew(x)
-        x.ref = @spawn begin
-            x.status = Running()
-            x.start_time = now()
-            ref = try
-                captured = capture() do
-                    x.def()
-                end
-                captured.value
-            catch e
-                @error "could not spawn process `$(x.def)`! Come across `$e`!"
-                e
-            finally
-                x.stop_time = now()
-                x.outmsg = captured.output
-            end
-            if ref isa Exception  # Include all cases?
-                if ref isa InterruptException
-                    x.status = Interrupted()
-                else
-                    x.status = Failed()
-                end
-            else
-                x.status = Succeeded()
-            end
-            ref
-        end
-        return x
-    else  # This job has been run already!
-        return runjob(AtomicJob(x))
-    end
-end
+
+_call(x::AtomicJob{<:Base.AbstractCmd}) = run(x.def)
+_call(x::AtomicJob) = x.def()
 
 function queue(; all = true)
     if all
