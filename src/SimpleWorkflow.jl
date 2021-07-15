@@ -93,6 +93,10 @@ function runjob(x::AtomicJob{<:Base.AbstractCmd})
         x.ref = @spawn begin
             x.status = Running()
             x.start_time = now()
+            push!(
+                JOB_REGISTRY,
+                (x.id, x.def, x.created_time, x.start_time, nothing, nothing, x.status, x),
+            )
             ref = try
                 captured = capture() do
                     run(x.def)
@@ -103,6 +107,9 @@ function runjob(x::AtomicJob{<:Base.AbstractCmd})
                 e
             finally
                 x.stop_time = now()
+                row = filter(row -> row.id == x.id, JOB_REGISTRY)
+                row.stop_time = x.stop_time
+                row.duration = x.stop_time - x.start_time
                 x.outmsg = captured.output
             end
             if ref isa Exception  # Include all cases?
@@ -114,6 +121,8 @@ function runjob(x::AtomicJob{<:Base.AbstractCmd})
             else
                 x.status = Succeeded()
             end
+            row = filter(row -> row.id == x.id, JOB_REGISTRY)
+            row.status = x.status
             ref
         end
         return x
