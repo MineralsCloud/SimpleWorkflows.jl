@@ -66,16 +66,15 @@ end
 AtomicJob(job::AtomicJob) =
     AtomicJob(job.def; desc = job.desc, user = job.user, max_time = job.max_time)
 
-function runjob(cmd::Union{Base.AbstractCmd,Function}; kwargs...)
-    job = AtomicJob(cmd; kwargs...)
-    return runjob(job)
-end
-
 isnew(job::AtomicJob) =
     job.start_time == job.stop_time == DateTime(0) &&
     job.status == Pending() &&
     job.ref == Future()
 
+function runjob(cmd::Union{Base.AbstractCmd,Function}; kwargs...)
+    job = AtomicJob(cmd; kwargs...)
+    return runjob(job)
+end
 function runjob(x::AtomicJob{<:Base.AbstractCmd})
     if isnew(x)
         x.ref = @spawn begin
