@@ -77,62 +77,70 @@ isnew(job::AtomicJob) =
     job.ref == Future()
 
 function run!(x::AtomicJob{<:Base.AbstractCmd})
-    x.ref = @spawn begin
-        x.status = Running()
-        x.start_time = now()
-        ref = try
-            captured = capture() do
-                run(x.def)
+    if isnew(x)
+        x.ref = @spawn begin
+            x.status = Running()
+            x.start_time = now()
+            ref = try
+                captured = capture() do
+                    run(x.def)
+                end
+                captured.value
+            catch e
+                @error "could not spawn process `$(x.def)`! Come across `$e`!"
+                e
+            finally
+                x.stop_time = now()
+                x.outmsg = captured.output
             end
-            captured.value
-        catch e
-            @error "could not spawn process `$(x.def)`! Come across `$e`!"
-            e
-        finally
-            x.stop_time = now()
-            x.outmsg = captured.output
-        end
-        if ref isa Exception  # Include all cases?
-            if ref isa InterruptException
-                x.status = Interrupted()
+            if ref isa Exception  # Include all cases?
+                if ref isa InterruptException
+                    x.status = Interrupted()
+                else
+                    x.status = Failed()
+                end
             else
-                x.status = Failed()
+                x.status = Succeeded()
             end
-        else
-            x.status = Succeeded()
+            ref
         end
-        ref
+        return x
+    else  # This job has been run already!
+        return run!(AtomicJob(x))
     end
-    return x
 end
 function run!(x::AtomicJob{<:Function})
-    x.ref = @spawn begin
-        x.status = Running()
-        x.start_time = now()
-        ref = try
-            captured = capture() do
-                x.def()
+    if isnew(x)
+        x.ref = @spawn begin
+            x.status = Running()
+            x.start_time = now()
+            ref = try
+                captured = capture() do
+                    x.def()
+                end
+                captured.value
+            catch e
+                @error "could not spawn process `$(x.def)`! Come across `$e`!"
+                e
+            finally
+                x.stop_time = now()
+                x.outmsg = captured.output
             end
-            captured.value
-        catch e
-            @error "could not spawn process `$(x.def)`! Come across `$e`!"
-            e
-        finally
-            x.stop_time = now()
-            x.outmsg = captured.output
-        end
-        if ref isa Exception  # Include all cases?
-            if ref isa InterruptException
-                x.status = Interrupted()
+            if ref isa Exception  # Include all cases?
+                if ref isa InterruptException
+                    x.status = Interrupted()
+                else
+                    x.status = Failed()
+                end
             else
-                x.status = Failed()
+                x.status = Succeeded()
             end
-        else
-            x.status = Succeeded()
+            ref
         end
-        ref
+        return x
+    else  # This job has been run already!
+        return run!(AtomicJob(x))
     end
-    return x
 end
 
 getstatus(x::Job) = x.status
