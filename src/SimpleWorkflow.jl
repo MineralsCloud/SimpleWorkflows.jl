@@ -1,6 +1,7 @@
 module SimpleWorkflow
 
 using AbInitioSoftwareBase: load
+using DataFrames: DataFrame
 using Dates: DateTime, Period, Day, now
 using Distributed: Future, @spawn
 using IOCapture: capture
@@ -65,6 +66,17 @@ mutable struct AtomicJob{T} <: Job
 end
 AtomicJob(job::AtomicJob) =
     AtomicJob(job.def; desc = job.desc, user = job.user, max_time = job.max_time)
+
+const JOB_REGISTRY = DataFrame(
+    id = UUID[],
+    def = Any[],
+    created_time = DateTime[],
+    start_time = DateTime[],
+    stop_time = Union{DateTime,Nothing}[],
+    duration = Union{Period,Nothing}[],
+    status = JobStatus[],
+    job = Job[],
+)
 
 isnew(job::AtomicJob) =
     job.start_time == job.stop_time == DateTime(0) &&
