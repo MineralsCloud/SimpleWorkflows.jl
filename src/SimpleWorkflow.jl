@@ -99,7 +99,7 @@ function runjob(x::AtomicJob)
             )
             ref = try
                 captured = capture() do
-                    _call(x)
+                    _call(x.def)
                 end
                 captured.value
             catch e
@@ -131,8 +131,8 @@ function runjob(x::AtomicJob)
     end
 end
 
-_call(x::AtomicJob{<:Base.AbstractCmd}) = run(x.def)
-_call(x::AtomicJob) = x.def()
+_call(cmd::Base.AbstractCmd) = run(cmd)
+_call(f) = f()
 
 function queue(; all = true)
     if all
