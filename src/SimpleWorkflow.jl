@@ -21,7 +21,8 @@ export getstatus,
     stoptime,
     elapsed,
     outmsg,
-    runjob
+    runjob,
+    queue
 
 abstract type JobStatus end
 struct Pending <: JobStatus end
@@ -151,6 +152,17 @@ function runjob(x::AtomicJob{<:Function})
         return x
     else  # This job has been run already!
         return runjob(AtomicJob(x))
+    end
+end
+
+function queue(; all = true)
+    if all
+        for row in eachrow(JOB_REGISTRY)
+            row.stop_time = stoptime(row.job)
+            row.duration = elapsed(row.job)
+        end
+        return JOB_REGISTRY
+    else
     end
 end
 
