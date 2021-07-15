@@ -1,14 +1,13 @@
 module SimpleWorkflow
 
 using AbInitioSoftwareBase: load
-using ColorTypes: RGB
-using Dates: unix2datetime, format
+using Dates: DateTime, Period, Day, now
 using Distributed: Future, @spawn
+using IOCapture: capture
 using Serialization: serialize, deserialize
 
 export AtomicJob
-export color,
-    getstatus,
+export getstatus,
     getresult,
     description,
     ispending,
@@ -20,7 +19,6 @@ export color,
     stoptime,
     elapsed,
     outmsg,
-    errmsg,
     run!
 
 abstract type JobStatus end
@@ -31,138 +29,103 @@ struct Succeeded <: Exited end
 struct Failed <: Exited end
 struct Interrupted <: Exited end
 
-mutable struct Stopwatch
-    start::Float64
-    stop::Float64
-    Stopwatch() = new()
-end
-
-mutable struct Logger
-    out::String
-    err::String
-end
-
-mutable struct JobRef
-    status::JobStatus
-    ref::Future
-    JobRef() = new(Pending())
-end
-
 abstract type Job end
-struct EmptyJob <: Job
-    desc::String
-    ref::JobRef
-    timer::Stopwatch
-    EmptyJob(desc = "No description here.") = new(desc, JobRef(), Stopwatch())
-end
-struct AtomicJob{T} <: Job
+# Reference: https://github.com/cihga39871/JobSchedulers.jl/blob/aca52de/src/jobs.jl#L35-L69
+mutable struct AtomicJob{T} <: Job
     def::T
     desc::String
-    ref::JobRef
-    timer::Stopwatch
-    log::Logger
-    AtomicJob(def::T, desc = "No description here.") where {T} =
-        new{T}(def, desc, JobRef(), Stopwatch(), Logger("", ""))
+    user::String
+    created_time::DateTime
+    start_time::DateTime
+    stop_time::DateTime
+    max_time::Period
+    status::JobStatus
+    outmsg::String
+    ref::Future
+    AtomicJob(
+        def::T;
+        desc = "No description here.",
+        user = "",
+        max_time = Day(1),
+    ) where {T} = new{T}(
+        def,
+        desc,
+        user,
+        now(),
+        DateTime(0),
+        DateTime(0),
+        max_time,
+        Pending(),
+        "",
+        Future(),
+    )
 end
-struct DistributedJob{T<:Job} <: Job
-    def::Vector{T}
-    desc::String
-    ref::JobRef
-    timer::Stopwatch
-    DistributedJob(def::Vector{T}, desc = "No description here.") where {T} =
-        new{T}(def, desc, JobRef(), Stopwatch())
+
+function runjob(cmd::Union{Base.AbstractCmd,Function}; kwargs...)
+    job = AtomicJob(cmd; kwargs...)
+    return run!(job)
 end
 
 function run!(x::AtomicJob{<:Base.AbstractCmd})
-    out, err = Pipe(), Pipe()
-    x.ref.ref = @spawn begin
-        x.ref.status = Running()
-        x.timer.start = time()
+    x.ref = @spawn begin
+        x.status = Running()
+        x.start_time = now()
         ref = try
-            run(pipeline(x.def, stdin = devnull, stdout = out, stderr = err))
+            captured = capture() do
+                run(x.def)
+            end
+            captured.value
         catch e
             @error "could not spawn process `$(x.def)`! Come across `$e`!"
             e
         finally
-            x.timer.stop = time()
-            close(out.in)
-            close(err.in)
+            x.stop_time = now()
+            x.outmsg = captured.output
         end
         if ref isa Exception  # Include all cases?
             if ref isa InterruptException
-                x.ref.status = Interrupted()
+                x.status = Interrupted()
             else
-                x.ref.status = Failed()
+                x.status = Failed()
             end
-            x.log.err = String(read(err))
         else
-            x.ref.status = Succeeded()
-            x.log.out = String(read(out))
+            x.status = Succeeded()
         end
         ref
     end
     return x
 end
 function run!(x::AtomicJob{<:Function})
-    x.ref.ref = @spawn begin
-        x.ref.status = Running()
-        x.timer.start = time()
+    x.ref = @spawn begin
+        x.status = Running()
+        x.start_time = now()
         ref = try
-            x.def()
+            captured = capture() do
+                x.def()
+            end
+            captured.value
         catch e
             @error "could not spawn process `$(x.def)`! Come across `$e`!"
             e
         finally
-            x.timer.stop = time()
+            x.stop_time = now()
+            x.outmsg = captured.output
         end
         if ref isa Exception  # Include all cases?
             if ref isa InterruptException
-                x.ref.status = Interrupted()
+                x.status = Interrupted()
             else
-                x.ref.status = Failed()
+                x.status = Failed()
             end
         else
-            x.ref.status = Succeeded()
+            x.status = Succeeded()
         end
         ref
     end
     return x
 end
-function run!(x::DistributedJob)
-    x.ref.ref = @spawn begin
-        x.ref.status = Running()
-        x.timer.start = time()
-        ref = map(x.def) do job
-            @async run!(job)
-        end
-        x.timer.stop = time()
-        if all(issucceeded(job) for job in x.def)
-            x.ref.status = Succeeded()
-        elseif any(isinterrupted(job) for job in x.def)
-            x.ref.status = Interrupted()
-        else
-            x.ref.status = Failed()
-        end
-        ref
-    end
-    return x
-end
-function run!(x::EmptyJob)
-    x.ref.ref = @spawn begin
-        x.timer.start = x.timer.stop = time()
-        x.ref.status = Succeeded()
-        nothing
-    end
-    return x
-end
 
-color(::Pending) = RGB(0.0, 0.0, 1.0)  # Blue
-color(::Running) = RGB(1.0, 1.0, 0.0)  # Yellow
-color(::Succeeded) = RGB(0.0, 0.502, 0.0)  # Green
-color(::Failed) = RGB(1.0, 0.0, 0.0)  # Red
-color(::Interrupted) = RGB(1.0, 0.647, 0.0)  # Orange
-
-getstatus(x::Job) = x.ref.status
+getstatus(x::Job) = x.status
 
 ispending(x::Job) = getstatus(x) isa Pending
 
@@ -176,30 +139,25 @@ isfailed(x::Job) = getstatus(x) isa Failed
 
 isinterrupted(x::Job) = getstatus(x) isa Interrupted
 
-starttime(x::Job) = ispending(x) ? nothing : unix2datetime(x.timer.start)
+starttime(x::Job) = ispending(x) ? nothing : x.start_time
 
-stoptime(x::Job) = isexited(x) ? unix2datetime(x.timer.stop) : nothing
+stoptime(x::Job) = isexited(x) ? x.stop_time : nothing
 
-getresult(x::Job) = isexited(x) ? Some(fetch(x.ref.ref)) : nothing
+getresult(x::Job) = isexited(x) ? Some(fetch(x.ref)) : nothing
 
 description(x::Job) = x.desc
 
 function elapsed(x::Job)
-    start = unix2datetime(x.timer.start)
     if ispending(x)
         return
     elseif isrunning(x)
-        return unix2datetime(time()) - start
+        return now() - x.start_time
     else  # Exited
-        return unix2datetime(x.timer.stop) - start
+        return x.stop_time - x.start_time
     end
 end
 
-outmsg(x::AtomicJob) = isrunning(x) ? nothing : x.log.out
-outmsg(::EmptyJob) = ""
-
-errmsg(x::AtomicJob) = isrunning(x) ? nothing : x.log.err
-errmsg(::EmptyJob) = ""
+outmsg(x::AtomicJob) = isrunning(x) ? nothing : x.outmsg
 
 # function fromfile(cfgfile)
 #     config = load(cfgfile)
@@ -217,9 +175,8 @@ errmsg(::EmptyJob) = ""
 #     end
 # end
 
-Base.wait(x::Job) = wait(x.ref.ref)
+Base.wait(x::Job) = wait(x.ref)
 
-Base.show(io::IO, ::EmptyJob) = print(io, " empty job")
 # function Base.show(io::IO, job::AtomicJob)
 #     printstyled(io, " ", job.def; bold = true)
 #     if !ispending(job)
