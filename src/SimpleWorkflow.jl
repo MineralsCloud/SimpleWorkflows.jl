@@ -43,7 +43,7 @@ mutable struct AtomicJob{T} <: Job
     max_time::Period
     status::JobStatus
     outmsg::String
-    ref::Future
+    ref::Union{Future,Nothing}
     AtomicJob(
         def::T;
         desc = "No description here.",
@@ -60,7 +60,7 @@ mutable struct AtomicJob{T} <: Job
         max_time,
         Pending(),
         "",
-        Future(),
+        nothing,
     )
 end
 AtomicJob(job::AtomicJob) =
@@ -69,7 +69,7 @@ AtomicJob(job::AtomicJob) =
 isnew(job::AtomicJob) =
     job.start_time == job.stop_time == DateTime(0) &&
     job.status == Pending() &&
-    job.ref == Future()
+    job.ref === nothing
 
 function runjob(cmd::Union{Base.AbstractCmd,Function}; kwargs...)
     job = AtomicJob(cmd; kwargs...)
