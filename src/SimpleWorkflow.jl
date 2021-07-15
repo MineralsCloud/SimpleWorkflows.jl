@@ -131,11 +131,13 @@ _call(cmd::Base.AbstractCmd) = run(cmd)
 _call(f) = f()
 
 function queue(; all = true)
+    for row in eachrow(JOB_REGISTRY)
+        job = row.job
+        row.stop_time = stoptime(job)
+        row.duration = elapsed(job)
+        row.status = getstatus(job)
+    end
     if all
-        for row in eachrow(JOB_REGISTRY)
-            row.stop_time = stoptime(row.job)
-            row.duration = elapsed(row.job)
-        end
         return JOB_REGISTRY
     else
     end
