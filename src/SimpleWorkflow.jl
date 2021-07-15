@@ -84,10 +84,6 @@ isnew(job::AtomicJob) =
     job.status == Pending() &&
     job.ref === nothing
 
-function runjob(cmd::Union{Base.AbstractCmd,Function}; kwargs...)
-    job = AtomicJob(cmd; kwargs...)
-    return runjob(job)
-end
 function runjob(x::AtomicJob)
     if isnew(x)
         x.ref = @spawn begin
