@@ -1,6 +1,7 @@
 module SimpleWorkflow
 
 using AbInitioSoftwareBase: load
+using DataFrames: DataFrame
 using Dates: DateTime, Period, Day, now
 using Distributed: Future, @spawn
 using IOCapture: capture
@@ -20,7 +21,8 @@ export getstatus,
     stoptime,
     elapsed,
     outmsg,
-    runjob
+    runjob,
+    queue
 
 abstract type JobStatus end
 struct Pending <: JobStatus end
@@ -66,6 +68,17 @@ end
 AtomicJob(job::AtomicJob) =
     AtomicJob(job.def; desc = job.desc, user = job.user, max_time = job.max_time)
 
+const JOB_REGISTRY = DataFrame(
+    id = UUID[],
+    def = Any[],
+    created_time = DateTime[],
+    start_time = DateTime[],
+    stop_time = Union{DateTime,Nothing}[],
+    duration = Union{Period,Nothing}[],
+    status = JobStatus[],
+    job = Job[],
+)
+
 isnew(job::AtomicJob) =
     job.start_time == job.stop_time == DateTime(0) &&
     job.status == Pending() &&
@@ -75,14 +88,18 @@ function runjob(cmd::Union{Base.AbstractCmd,Function}; kwargs...)
     job = AtomicJob(cmd; kwargs...)
     return runjob(job)
 end
-function runjob(x::AtomicJob{<:Base.AbstractCmd})
+function runjob(x::AtomicJob)
     if isnew(x)
         x.ref = @spawn begin
             x.status = Running()
             x.start_time = now()
+            push!(
+                JOB_REGISTRY,
+                (x.id, x.def, x.created_time, x.start_time, nothing, nothing, x.status, x),
+            )
             ref = try
                 captured = capture() do
-                    run(x.def)
+                    _call(x)
                 end
                 captured.value
             catch e
@@ -90,6 +107,9 @@ function runjob(x::AtomicJob{<:Base.AbstractCmd})
                 e
             finally
                 x.stop_time = now()
+                row = filter(row -> row.id == x.id, JOB_REGISTRY)
+                row.stop_time = x.stop_time
+                row.duration = x.stop_time - x.start_time
                 x.outmsg = captured.output
             end
             if ref isa Exception  # Include all cases?
@@ -101,6 +121,8 @@ function runjob(x::AtomicJob{<:Base.AbstractCmd})
             else
                 x.status = Succeeded()
             end
+            row = filter(row -> row.id == x.id, JOB_REGISTRY)
+            row.status = x.status
             ref
         end
         return x
@@ -108,37 +130,18 @@ function runjob(x::AtomicJob{<:Base.AbstractCmd})
         return runjob(AtomicJob(x))
     end
 end
-function runjob(x::AtomicJob{<:Function})
-    if isnew(x)
-        x.ref = @spawn begin
-            x.status = Running()
-            x.start_time = now()
-            ref = try
-                captured = capture() do
-                    x.def()
-                end
-                captured.value
-            catch e
-                @error "could not spawn process `$(x.def)`! Come across `$e`!"
-                e
-            finally
-                x.stop_time = now()
-                x.outmsg = captured.output
-            end
-            if ref isa Exception  # Include all cases?
-                if ref isa InterruptException
-                    x.status = Interrupted()
-                else
-                    x.status = Failed()
-                end
-            else
-                x.status = Succeeded()
-            end
-            ref
+
+_call(x::AtomicJob{<:Base.AbstractCmd}) = run(x.def)
+_call(x::AtomicJob) = x.def()
+
+function queue(; all = true)
+    if all
+        for row in eachrow(JOB_REGISTRY)
+            row.stop_time = stoptime(row.job)
+            row.duration = elapsed(row.job)
         end
-        return x
-    else  # This job has been run already!
-        return runjob(AtomicJob(x))
+        return JOB_REGISTRY
+    else
     end
 end
 
@@ -160,10 +163,6 @@ starttime(x::Job) = ispending(x) ? nothing : x.start_time
 
 stoptime(x::Job) = isexited(x) ? x.stop_time : nothing
 
-getresult(x::Job) = isexited(x) ? Some(fetch(x.ref)) : nothing
-
-description(x::Job) = x.desc
-
 function elapsed(x::Job)
     if ispending(x)
         return
@@ -173,6 +172,10 @@ function elapsed(x::Job)
         return x.stop_time - x.start_time
     end
 end
+
+getresult(x::Job) = isexited(x) ? Some(fetch(x.ref)) : nothing
+
+description(x::Job) = x.desc
 
 outmsg(x::AtomicJob) = isrunning(x) ? nothing : x.outmsg
 
