@@ -63,6 +63,8 @@ mutable struct AtomicJob{T} <: Job
         Future(),
     )
 end
+AtomicJob(job::AtomicJob) =
+    AtomicJob(job.def; desc = job.desc, user = job.user, max_time = job.max_time)
 
 function runjob(cmd::Union{Base.AbstractCmd,Function}; kwargs...)
     job = AtomicJob(cmd; kwargs...)
