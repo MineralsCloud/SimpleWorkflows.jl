@@ -20,7 +20,7 @@ export getstatus,
     stoptime,
     elapsed,
     outmsg,
-    run!
+    runjob
 
 abstract type JobStatus end
 struct Pending <: JobStatus end
@@ -68,7 +68,7 @@ AtomicJob(job::AtomicJob) =
 
 function runjob(cmd::Union{Base.AbstractCmd,Function}; kwargs...)
     job = AtomicJob(cmd; kwargs...)
-    return run!(job)
+    return runjob(job)
 end
 
 isnew(job::AtomicJob) =
@@ -76,7 +76,7 @@ isnew(job::AtomicJob) =
     job.status == Pending() &&
     job.ref == Future()
 
-function run!(x::AtomicJob{<:Base.AbstractCmd})
+function runjob(x::AtomicJob{<:Base.AbstractCmd})
     if isnew(x)
         x.ref = @spawn begin
             x.status = Running()
@@ -106,10 +106,10 @@ function run!(x::AtomicJob{<:Base.AbstractCmd})
         end
         return x
     else  # This job has been run already!
-        return run!(AtomicJob(x))
+        return runjob(AtomicJob(x))
     end
 end
-function run!(x::AtomicJob{<:Function})
+function runjob(x::AtomicJob{<:Function})
     if isnew(x)
         x.ref = @spawn begin
             x.status = Running()
@@ -139,7 +139,7 @@ function run!(x::AtomicJob{<:Function})
         end
         return x
     else  # This job has been run already!
-        return run!(AtomicJob(x))
+        return runjob(AtomicJob(x))
     end
 end
 
