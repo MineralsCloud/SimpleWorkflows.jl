@@ -71,6 +71,11 @@ function runjob(cmd::Union{Base.AbstractCmd,Function}; kwargs...)
     return run!(job)
 end
 
+isnew(job::AtomicJob) =
+    job.start_time == job.stop_time == DateTime(0) &&
+    job.status == Pending() &&
+    job.ref == Future()
+
 function run!(x::AtomicJob{<:Base.AbstractCmd})
     x.ref = @spawn begin
         x.status = Running()
