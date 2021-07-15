@@ -6,6 +6,7 @@ version = "0.2.0"
 [deps]
 AbInitioSoftwareBase = "df5135bc-470e-46c6-b451-292e27ca5b84"
 BangBang = "198e06fe-97b7-11e9-32a5-e1d131e6ad66"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 IOCapture = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
