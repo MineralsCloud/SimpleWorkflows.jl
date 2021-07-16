@@ -69,7 +69,7 @@ AtomicJob(job::AtomicJob) =
 
 const JOB_REGISTRY = DataFrame(
     id = UUID[],
-    def = Any[],
+    def = String[],
     created_time = DateTime[],
     start_time = DateTime[],
     stop_time = Union{DateTime,Nothing}[],
@@ -89,7 +89,16 @@ function run!(x::AtomicJob)
         x.start_time = now()
         push!(
             JOB_REGISTRY,
-            (x.id, x.def, x.created_time, x.start_time, nothing, nothing, x.status, x),
+            (
+                x.id,
+                string(x.def),
+                x.created_time,
+                x.start_time,
+                nothing,
+                nothing,
+                x.status,
+                x,
+            ),
         )
         ref = try
             _call(x.def)
