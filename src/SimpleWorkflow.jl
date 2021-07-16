@@ -23,13 +23,13 @@ export getstatus,
     run!,
     queue
 
-abstract type JobStatus end
-struct Pending <: JobStatus end
-struct Running <: JobStatus end
-abstract type Exited <: JobStatus end
-struct Succeeded <: Exited end
-struct Failed <: Exited end
-struct Interrupted <: Exited end
+@enum JobStatus begin
+    PENDING
+    RUNNING
+    SUCCEEDED
+    FAILED
+    INTERRUPTED
+end
 
 abstract type Job end
 # Reference: https://github.com/cihga39871/JobSchedulers.jl/blob/aca52de/src/jobs.jl#L35-L69
@@ -59,7 +59,7 @@ mutable struct AtomicJob{T} <: Job
         DateTime(0),
         DateTime(0),
         max_time,
-        Pending(),
+        PENDING,
         "",
         nothing,
     )
@@ -80,12 +80,12 @@ const JOB_REGISTRY = DataFrame(
 
 isnew(job::AtomicJob) =
     job.start_time == job.stop_time == DateTime(0) &&
-    job.status == Pending() &&
+    job.status == PENDING &&
     job.ref === nothing
 
 function run!(x::AtomicJob)
     x.ref = @spawn begin
-        x.status = Running()
+        x.status = RUNNING
         x.start_time = now()
         push!(
             JOB_REGISTRY,
@@ -108,12 +108,12 @@ function run!(x::AtomicJob)
         end
         if ref isa Exception  # Include all cases?
             if ref isa InterruptException
-                x.status = Interrupted()
+                x.status = INTERRUPTED
             else
-                x.status = Failed()
+                x.status = FAILED
             end
         else
-            x.status = Succeeded()
+            x.status = SUCCEEDED
         end
         row = filter(row -> row.id == x.id, JOB_REGISTRY)
         row.status = x.status
@@ -133,24 +133,24 @@ function queue(; all = true)
         row.status = getstatus(job)
     end
     if all
-        return JOB_REGISTRY
+        return sort(JOB_REGISTRY, :status)
     else
     end
 end
 
 getstatus(x::Job) = x.status
 
-ispending(x::Job) = getstatus(x) isa Pending
+ispending(x::Job) = getstatus(x) === PENDING
 
-isrunning(x::Job) = getstatus(x) isa Running
+isrunning(x::Job) = getstatus(x) === RUNNING
 
-isexited(x::Job) = getstatus(x) isa Exited
+isexited(x::Job) = getstatus(x) in (SUCCEEDED, FAILED, INTERRUPTED)
 
-issucceeded(x::Job) = getstatus(x) isa Succeeded
+issucceeded(x::Job) = getstatus(x) === SUCCEEDED
 
-isfailed(x::Job) = getstatus(x) isa Failed
+isfailed(x::Job) = getstatus(x) === FAILED
 
-isinterrupted(x::Job) = getstatus(x) isa Interrupted
+isinterrupted(x::Job) = getstatus(x) === INTERRUPTED
 
 starttime(x::Job) = ispending(x) ? nothing : x.start_time
 
@@ -174,11 +174,7 @@ outmsg(x::AtomicJob) = isrunning(x) ? nothing : x.outmsg
 
 Base.wait(x::Job) = wait(x.ref)
 
-Base.show(io::IO, ::Pending) = print(io, "pending")
-Base.show(io::IO, ::Running) = print(io, "running")
-Base.show(io::IO, ::Succeeded) = print(io, "succeeded")
-Base.show(io::IO, ::Failed) = print(io, "failed")
-Base.show(io::IO, ::Interrupted) = print(io, "interrupted")
+Base.show(io::IO, x::JobStatus) = print(io, x)
 function Base.show(io::IO, job::AtomicJob)
     println(io, summary(job))
     println(io, " id: ", job.id)
