@@ -1,7 +1,7 @@
 module SimpleWorkflow
 
 using DataFrames: DataFrame
-using Dates: DateTime, Period, Day, now
+using Dates: DateTime, Period, Day, now, format
 using Distributed: Future, @spawn
 using IOCapture: capture
 using Serialization: serialize, deserialize
@@ -174,23 +174,30 @@ outmsg(x::AtomicJob) = isrunning(x) ? nothing : x.outmsg
 
 Base.wait(x::Job) = wait(x.ref)
 
-# function Base.show(io::IO, job::AtomicJob)
-#     printstyled(io, " ", job.def; bold = true)
-#     if !ispending(job)
-#         print(
-#             io,
-#             " from ",
-#             format(starttime(job), "HH:MM:SS u dd, yyyy"),
-#             isrunning(job) ? ", still running..." :
-#             ", to " * format(stoptime(job), "HH:MM:SS u dd, yyyy"),
-#             ", uses ",
-#             elapsed(job),
-#             " seconds.",
-#         )
-#     else
-#         print(" pending...")
-#     end
-# end
+Base.show(io::IO, ::Pending) = print(io, "pending")
+Base.show(io::IO, ::Running) = print(io, "running")
+Base.show(io::IO, ::Succeeded) = print(io, "succeeded")
+Base.show(io::IO, ::Failed) = print(io, "failed")
+Base.show(io::IO, ::Interrupted) = print(io, "interrupted")
+function Base.show(io::IO, job::AtomicJob)
+    println(io, summary(job))
+    println(io, " id: ", job.id)
+    print(io, " def: ")
+    printstyled(io, job.def, '\n'; bold = true)
+    println(io, " status: ", getstatus(job))
+    if !ispending(job)
+        print(
+            io,
+            " timing: from ",
+            format(starttime(job), "HH:MM:SS u dd, yyyy"),
+            isrunning(job) ? ", still running..." :
+            ", to " * format(stoptime(job), "HH:MM:SS u dd, yyyy"),
+            ", uses ",
+            elapsed(job),
+            " seconds.",
+        )
+    end
+end
 
 include("graph.jl")
 
