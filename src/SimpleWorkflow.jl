@@ -1,6 +1,5 @@
 module SimpleWorkflow
 
-using AbInitioSoftwareBase: load
 using DataFrames: DataFrame
 using Dates: DateTime, Period, Day, now
 using Distributed: Future, @spawn
@@ -172,22 +171,6 @@ getresult(x::Job) = isexited(x) ? Some(fetch(x.ref)) : nothing
 description(x::Job) = x.desc
 
 outmsg(x::AtomicJob) = isrunning(x) ? nothing : x.outmsg
-
-# function fromfile(cfgfile)
-#     config = load(cfgfile)
-#     @assert haskey(config, "actions")
-#     map(config["actions"]) do rule
-#         @assert all(haskey(rule, key) for key in ("inputs", "outputs"))
-#         if haskey(rule, "command")
-#             return AtomicJob(Script(rule["command"], mktemp()))
-#         elseif haskey(rule, "function")
-#             return AtomicJob(() -> evalfile(rule["function"]))
-#         else
-#             @error "unknown action provided! It should be either `\"command\"` or `\"function\"`!"
-#             return EmptyJob()
-#         end
-#     end
-# end
 
 Base.wait(x::Job) = wait(x.ref)
 
