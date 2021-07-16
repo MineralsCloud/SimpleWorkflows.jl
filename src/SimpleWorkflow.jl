@@ -87,45 +87,53 @@ function run!(job::AtomicJob)
     job.ref = @spawn begin
         job.status = RUNNING
         job.start_time = now()
-        push!(
-            JOB_REGISTRY,
-            (
-                job.id,
-                string(job.def),
-                job.created_time,
-                job.start_time,
-                nothing,
-                nothing,
-                job.status,
-                job,
-            ),
-        )
-        ref = try
-            captured = capture() do
-                _call(job.def)
-            end
-            job.stop_time = now()
-            job.status = SUCCEEDED
-            job.outmsg = captured.output
-            captured.value
-        catch e
-            job.stop_time = now()
-            @error "come across `$e` when running!"
-            job.status = e isa InterruptException ? INTERRUPTED : FAILED
-            if @isdefined captured  # The `captured` statement may fail
-                job.outmsg = captured.output
-            end
-            e
-        end
-        # Update JOB_REGISTRY
-        rows = filter(row -> row.id == job.id, JOB_REGISTRY)
-        rows[:, :status] .= job.status
-        rows[:, :stop_time] .= job.stop_time
-        rows[:, :duration] .= job.stop_time - job.start_time
-        # Return the result
-        ref
+        register!(job)
     end
     return job
+end
+
+function register!(job::AtomicJob)
+    push!(
+        JOB_REGISTRY,
+        (
+            job.id,
+            string(job.def),
+            job.created_time,
+            job.start_time,
+            nothing,
+            nothing,
+            job.status,
+            job,
+        ),
+    )
+    ref = _run!(job)
+    # Update JOB_REGISTRY
+    rows = filter(row -> row.id == job.id, JOB_REGISTRY)
+    rows[:, :status] .= job.status
+    rows[:, :stop_time] .= job.stop_time
+    rows[:, :duration] .= job.stop_time - job.start_time
+    # Return the result
+    return ref
+end
+
+function _run!(job::AtomicJob)
+    try
+        captured = capture() do
+            _call(job.def)
+        end
+        job.stop_time = now()
+        job.status = SUCCEEDED
+        job.outmsg = captured.output
+        return captured.value
+    catch e
+        job.stop_time = now()
+        @error "come across `$e` when running!"
+        job.status = e isa InterruptException ? INTERRUPTED : FAILED
+        if @isdefined captured  # The `captured` statement may fail
+            job.outmsg = captured.output
+        end
+        return e
+    end
 end
 
 _call(cmd::Base.AbstractCmd) = run(cmd)
