@@ -5,7 +5,6 @@ using Dates: DateTime, Period, Day, now, format
 using Distributed: Future, @spawn
 using IOCapture: capture
 using Serialization: serialize, deserialize
-using UUIDs: UUID, uuid1
 
 export AtomicJob
 export getstatus,
