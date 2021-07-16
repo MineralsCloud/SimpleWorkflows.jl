@@ -102,14 +102,15 @@ function run!(x::AtomicJob)
         )
         ref = try
             result = _call(x.def)
+            x.stop_time = now()
             x.status = SUCCEEDED
             result
         catch e
-            @error "could not spawn process `$(x.def)`! Come across `$e`!"
+            x.stop_time = now()
+            @error "come across `$e` when running!"
             x.status = e isa InterruptException ? INTERRUPTED : FAILED
             e
         end
-        x.stop_time = now()
         row = filter(row -> row.id == x.id, JOB_REGISTRY)
         row.status = x.status
         row.stop_time = x.stop_time
