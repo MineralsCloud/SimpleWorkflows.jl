@@ -99,13 +99,12 @@ function run!(x::AtomicJob)
         catch e
             @error "could not spawn process `$(x.def)`! Come across `$e`!"
             e
-        finally
-            x.stop_time = now()
-            row = filter(row -> row.id == x.id, JOB_REGISTRY)
-            row.stop_time = x.stop_time
-            row.duration = x.stop_time - x.start_time
-            x.outmsg = captured.output
         end
+        x.stop_time = now()
+        row = filter(row -> row.id == x.id, JOB_REGISTRY)
+        row.stop_time = x.stop_time
+        row.duration = x.stop_time - x.start_time
+        x.outmsg = captured.output
         if ref isa Exception  # Include all cases?
             if ref isa InterruptException
                 x.status = INTERRUPTED
