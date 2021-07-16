@@ -174,7 +174,6 @@ outmsg(x::AtomicJob) = isrunning(x) ? nothing : x.outmsg
 
 Base.wait(x::Job) = wait(x.ref)
 
-Base.show(io::IO, x::JobStatus) = print(io, x)
 function Base.show(io::IO, job::AtomicJob)
     println(io, summary(job))
     println(io, " id: ", job.id)
