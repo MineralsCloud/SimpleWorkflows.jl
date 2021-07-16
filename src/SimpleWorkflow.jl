@@ -133,7 +133,7 @@ function queue(; all = true)
         row.status = getstatus(job)
     end
     if all
-        return JOB_REGISTRY
+        return sort(JOB_REGISTRY, :status)
     else
     end
 end
