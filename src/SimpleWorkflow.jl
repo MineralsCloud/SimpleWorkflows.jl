@@ -80,8 +80,7 @@ const JOB_REGISTRY = DataFrame(
 
 isnew(job::AtomicJob) =
     job.start_time == job.stop_time == DateTime(0) &&
-    job.status == PENDING &&
-    isempty(job.outmsg) &&
+    job.status === PENDING &&
     job.ref === nothing
 
 function run!(job::AtomicJob)
