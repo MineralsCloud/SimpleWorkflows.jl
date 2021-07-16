@@ -119,10 +119,10 @@ function _register!(job::AtomicJob)
     )
     result = _run!(job)
     # Update JOB_REGISTRY
-    rows = query(job.id)
-    rows[:, :status] .= job.status
-    rows[:, :stop_time] .= job.stop_time
-    rows[:, :duration] .= job.stop_time - job.start_time
+    row = query(job.id)
+    row.status = job.status
+    row.stop_time = job.stop_time
+    row.duration = job.stop_time - job.start_time
     # Return the result
     return result
 end
