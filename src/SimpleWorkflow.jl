@@ -85,12 +85,22 @@ isnew(job::AtomicJob) =
     job.ref === nothing
 
 function run!(job::AtomicJob)
-    job.ref = @spawn begin
-        job.status = RUNNING
-        job.start_time = now()
-        _register!(job)
+    if isnew(job)
+        job.ref = @spawn begin
+            job.status = RUNNING
+            job.start_time = now()
+            _register!(job)
+        end
+        return job
+    else
+        job.id = generate_id()
+        job.start_time = DateTime(0)
+        job.stop_time = DateTime(0)
+        job.status = PENDING
+        job.outmsg = ""
+        job.ref = nothing
+        return run!(job)
     end
-    return job
 end
 
 function _register!(job::AtomicJob)
