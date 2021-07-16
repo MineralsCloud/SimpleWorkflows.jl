@@ -20,7 +20,8 @@ export getstatus,
     elapsed,
     outmsg,
     run!,
-    queue
+    queue,
+    query
 
 @enum JobStatus begin
     PENDING
@@ -142,6 +143,8 @@ function queue(; all = true)
     else
     end
 end
+
+query(id::Union{Int64,AbstractVector{Int64}}) = filter(row -> row.id == id, JOB_REGISTRY)
 
 getstatus(x::Job) = x.status
 
