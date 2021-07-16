@@ -87,12 +87,12 @@ function run!(job::AtomicJob)
     job.ref = @spawn begin
         job.status = RUNNING
         job.start_time = now()
-        register!(job)
+        _register!(job)
     end
     return job
 end
 
-function register!(job::AtomicJob)
+function _register!(job::AtomicJob)
     push!(
         JOB_REGISTRY,
         (
@@ -106,14 +106,14 @@ function register!(job::AtomicJob)
             job,
         ),
     )
-    ref = _run!(job)
+    result = _run!(job)
     # Update JOB_REGISTRY
     rows = filter(row -> row.id == job.id, JOB_REGISTRY)
     rows[:, :status] .= job.status
     rows[:, :stop_time] .= job.stop_time
     rows[:, :duration] .= job.stop_time - job.start_time
     # Return the result
-    return ref
+    return result
 end
 
 function _run!(job::AtomicJob)
