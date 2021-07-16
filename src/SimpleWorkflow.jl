@@ -108,7 +108,7 @@ function _register!(job::AtomicJob)
     )
     result = _run!(job)
     # Update JOB_REGISTRY
-    rows = filter(row -> row.id == job.id, JOB_REGISTRY)
+    rows = query(job.id)
     rows[:, :status] .= job.status
     rows[:, :stop_time] .= job.stop_time
     rows[:, :duration] .= job.stop_time - job.start_time
