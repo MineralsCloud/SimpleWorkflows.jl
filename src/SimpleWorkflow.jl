@@ -34,7 +34,7 @@ end
 abstract type Job end
 # Reference: https://github.com/cihga39871/JobSchedulers.jl/blob/aca52de/src/jobs.jl#L35-L69
 mutable struct AtomicJob{T} <: Job
-    id::UUID
+    id::Int64
     def::T
     desc::String
     user::String
@@ -51,7 +51,7 @@ mutable struct AtomicJob{T} <: Job
         user = "",
         max_time = Day(1),
     ) where {T} = new{T}(
-        uuid1(),
+        generate_id(),
         def,
         desc,
         user,
@@ -68,7 +68,7 @@ AtomicJob(job::AtomicJob) =
     AtomicJob(job.def; desc = job.desc, user = job.user, max_time = job.max_time)
 
 const JOB_REGISTRY = DataFrame(
-    id = UUID[],
+    id = Int64[],
     def = String[],
     created_time = DateTime[],
     start_time = DateTime[],
@@ -177,6 +177,13 @@ getresult(x::Job) = isexited(x) ? Some(fetch(x.ref)) : nothing
 description(x::Job) = x.desc
 
 outmsg(x::AtomicJob) = isexited(x) ? x.outmsg : nothing
+
+# From https://github.com/cihga39871/JobSchedulers.jl/blob/aca52de/src/jobs.jl#L6-L10
+function generate_id()
+    time_value = (now().instant.periods.value - 63749462400000) << 16
+    rand_value = rand(UInt16)
+    return time_value + rand_value
+end
 
 Base.wait(x::Job) = wait(x.ref)
 
