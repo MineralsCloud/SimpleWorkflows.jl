@@ -69,7 +69,7 @@ AtomicJob(job::AtomicJob) =
 
 const JOB_REGISTRY = DataFrame(
     id = UUID[],
-    def = Any[],
+    def = String[],
     created_time = DateTime[],
     start_time = DateTime[],
     stop_time = Union{DateTime,Nothing}[],
@@ -83,43 +83,49 @@ isnew(job::AtomicJob) =
     job.status == PENDING &&
     job.ref === nothing
 
-function run!(x::AtomicJob)
-    x.ref = @spawn begin
-        x.status = RUNNING
-        x.start_time = now()
+function run!(job::AtomicJob)
+    job.ref = @spawn begin
+        job.status = RUNNING
+        job.start_time = now()
         push!(
             JOB_REGISTRY,
-            (x.id, x.def, x.created_time, x.start_time, nothing, nothing, x.status, x),
+            (
+                job.id,
+                string(job.def),
+                job.created_time,
+                job.start_time,
+                nothing,
+                nothing,
+                job.status,
+                job,
+            ),
         )
         ref = try
             captured = capture() do
-                _call(x.def)
+                _call(job.def)
             end
+            job.stop_time = now()
+            job.status = SUCCEEDED
+            job.outmsg = captured.output
             captured.value
         catch e
-            @error "could not spawn process `$(x.def)`! Come across `$e`!"
-            e
-        finally
-            x.stop_time = now()
-            row = filter(row -> row.id == x.id, JOB_REGISTRY)
-            row.stop_time = x.stop_time
-            row.duration = x.stop_time - x.start_time
-            x.outmsg = captured.output
-        end
-        if ref isa Exception  # Include all cases?
-            if ref isa InterruptException
-                x.status = INTERRUPTED
-            else
-                x.status = FAILED
+            job.stop_time = now()
+            @error "come across `$e` when running!"
+            job.status = e isa InterruptException ? INTERRUPTED : FAILED
+            if @isdefined captured  # The `captured` statement may fail
+                job.outmsg = captured.output
             end
-        else
-            x.status = SUCCEEDED
+            e
         end
-        row = filter(row -> row.id == x.id, JOB_REGISTRY)
-        row.status = x.status
+        # Update JOB_REGISTRY
+        rows = filter(row -> row.id == job.id, JOB_REGISTRY)
+        rows[:, :status] .= job.status
+        rows[:, :stop_time] .= job.stop_time
+        rows[:, :duration] .= job.stop_time - job.start_time
+        # Return the result
         ref
     end
-    return x
+    return job
 end
 
 _call(cmd::Base.AbstractCmd) = run(cmd)
@@ -170,7 +176,7 @@ getresult(x::Job) = isexited(x) ? Some(fetch(x.ref)) : nothing
 
 description(x::Job) = x.desc
 
-outmsg(x::AtomicJob) = isrunning(x) ? nothing : x.outmsg
+outmsg(x::AtomicJob) = isexited(x) ? x.outmsg : nothing
 
 Base.wait(x::Job) = wait(x.ref)
 
