@@ -92,19 +92,12 @@ function run!(x::AtomicJob)
             (x.id, x.def, x.created_time, x.start_time, nothing, nothing, x.status, x),
         )
         ref = try
-            captured = capture() do
-                _call(x.def)
-            end
-            captured.value
+            _call(x.def)
         catch e
             @error "could not spawn process `$(x.def)`! Come across `$e`!"
             e
         end
         x.stop_time = now()
-        row = filter(row -> row.id == x.id, JOB_REGISTRY)
-        row.stop_time = x.stop_time
-        row.duration = x.stop_time - x.start_time
-        x.outmsg = captured.output
         if ref isa Exception  # Include all cases?
             if ref isa InterruptException
                 x.status = INTERRUPTED
@@ -116,6 +109,8 @@ function run!(x::AtomicJob)
         end
         row = filter(row -> row.id == x.id, JOB_REGISTRY)
         row.status = x.status
+        row.stop_time = x.stop_time
+        row.duration = x.stop_time - x.start_time
         ref
     end
     return x
@@ -169,7 +164,7 @@ getresult(x::Job) = isexited(x) ? Some(fetch(x.ref)) : nothing
 
 description(x::Job) = x.desc
 
-outmsg(x::AtomicJob) = isrunning(x) ? nothing : x.outmsg
+outmsg(x::AtomicJob) = isexited(x) ? x.outmsg : nothing
 
 Base.wait(x::Job) = wait(x.ref)
 
