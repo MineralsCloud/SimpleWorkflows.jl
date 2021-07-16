@@ -101,14 +101,20 @@ function run!(job::AtomicJob)
             ),
         )
         ref = try
-            result = _call(job.def)
+            captured = capture() do
+                _call(job.def)
+            end
             job.stop_time = now()
             job.status = SUCCEEDED
-            result
+            job.outmsg = captured.output
+            captured.value
         catch e
             job.stop_time = now()
             @error "come across `$e` when running!"
             job.status = e isa InterruptException ? INTERRUPTED : FAILED
+            if @isdefined captured  # The `captured` statement may fail
+                job.outmsg = captured.output
+            end
             e
         end
         # Update JOB_REGISTRY
