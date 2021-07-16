@@ -83,41 +83,43 @@ isnew(job::AtomicJob) =
     job.status == PENDING &&
     job.ref === nothing
 
-function run!(x::AtomicJob)
-    x.ref = @spawn begin
-        x.status = RUNNING
-        x.start_time = now()
+function run!(job::AtomicJob)
+    job.ref = @spawn begin
+        job.status = RUNNING
+        job.start_time = now()
         push!(
             JOB_REGISTRY,
             (
-                x.id,
-                string(x.def),
-                x.created_time,
-                x.start_time,
+                job.id,
+                string(job.def),
+                job.created_time,
+                job.start_time,
                 nothing,
                 nothing,
-                x.status,
-                x,
+                job.status,
+                job,
             ),
         )
         ref = try
-            result = _call(x.def)
-            x.stop_time = now()
-            x.status = SUCCEEDED
+            result = _call(job.def)
+            job.stop_time = now()
+            job.status = SUCCEEDED
             result
         catch e
-            x.stop_time = now()
+            job.stop_time = now()
             @error "come across `$e` when running!"
-            x.status = e isa InterruptException ? INTERRUPTED : FAILED
+            job.status = e isa InterruptException ? INTERRUPTED : FAILED
             e
         end
-        row = filter(row -> row.id == x.id, JOB_REGISTRY)
-        row.status = x.status
-        row.stop_time = x.stop_time
-        row.duration = x.stop_time - x.start_time
+        # Update JOB_REGISTRY
+        row = filter(row -> row.id == job.id, JOB_REGISTRY)
+        row.status = job.status
+        row.stop_time = job.stop_time
+        row.duration = job.stop_time - job.start_time
+        # Return the result
         ref
     end
-    return x
+    return job
 end
 
 _call(cmd::Base.AbstractCmd) = run(cmd)
