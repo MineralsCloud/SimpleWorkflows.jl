@@ -118,10 +118,10 @@ function run!(job::AtomicJob)
             e
         end
         # Update JOB_REGISTRY
-        row = filter(row -> row.id == job.id, JOB_REGISTRY)
-        row.status = job.status
-        row.stop_time = job.stop_time
-        row.duration = job.stop_time - job.start_time
+        rows = filter(row -> row.id == job.id, JOB_REGISTRY)
+        rows[:, :status] .= job.status
+        rows[:, :stop_time] .= job.stop_time
+        rows[:, :duration] .= job.stop_time - job.start_time
         # Return the result
         ref
     end
