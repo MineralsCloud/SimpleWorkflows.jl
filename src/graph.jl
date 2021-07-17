@@ -14,7 +14,7 @@ using LightGraphs:
 using BangBang: push!!, pushfirst!!, append!!
 using MetaGraphs: MetaGraph, set_prop!
 
-export Workflow, eachjob, chain, backchain, parallel, reset!, ←, →, ∥
+export Workflow, eachjob, chain, backchain, parallel, ←, →, ∥
 
 struct Workflow
     graph::DiGraph{Int}
@@ -172,10 +172,4 @@ function ⊕(g::AbstractGraph, b::AbstractGraph)
         add_edge!(a, src(e) + nv(g), dst(e) + nv(g))
     end
     return a
-end
-
-function Base.show(io::IO, wf::Workflow)
-    for node in wf.nodes
-        println(io, node)
-    end
 end
