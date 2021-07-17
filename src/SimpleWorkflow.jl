@@ -2,7 +2,7 @@ module SimpleWorkflow
 
 using DataFrames: DataFrame, nrow, sort, filter
 using Dates: DateTime, Period, Day, now, format
-using Distributed: Future, @spawn
+using Distributed: Future, interrupt, @spawn
 using IOCapture: capture
 using Serialization: serialize, deserialize
 
@@ -12,6 +12,7 @@ export getstatus,
     description,
     ispending,
     isrunning,
+    isexited,
     issucceeded,
     isfailed,
     isinterrupted,
@@ -20,6 +21,7 @@ export getstatus,
     elapsed,
     outmsg,
     run!,
+    interrupt!,
     queue,
     query
 
@@ -204,6 +206,19 @@ function generate_id()
     time_value = (now().instant.periods.value - 63749462400000) << 16
     rand_value = rand(UInt16)
     return time_value + rand_value
+end
+
+function interrupt!(job::AtomicJob)
+    if isexited(job)
+        @info "the job $(job.id) has already exited!"
+        return job
+    elseif ispending(job)
+        @info "the job $(job.id) has not started!"
+        return job
+    else
+        interrupt(job.ref.where)
+        return job
+    end
 end
 
 Base.wait(x::Job) = wait(x.ref)
