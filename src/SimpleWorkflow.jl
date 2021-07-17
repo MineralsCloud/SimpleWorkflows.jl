@@ -1,6 +1,6 @@
 module SimpleWorkflow
 
-using DataFrames: DataFrame, sort
+using DataFrames: DataFrame, nrow, sort, filter
 using Dates: DateTime, Period, Day, now, format
 using Distributed: Future, @spawn
 using IOCapture: capture
