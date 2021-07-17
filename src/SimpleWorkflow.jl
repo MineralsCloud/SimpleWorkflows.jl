@@ -1,6 +1,6 @@
 module SimpleWorkflow
 
-using DataFrames: DataFrame, sort
+using DataFrames: DataFrame, nrow, sort, filter
 using Dates: DateTime, Period, Day, now, format
 using Distributed: Future, @spawn
 using IOCapture: capture
@@ -118,7 +118,7 @@ function _register!(job::AtomicJob)
     )
     result = _run!(job)
     # Update JOB_REGISTRY
-    row = query(job.id)
+    row = first(query(job.id))  # `query` returns a `DataFrame`, not a `DataFrameRow`
     row.status = job.status
     row.stop_time = job.stop_time
     row.duration = job.stop_time - job.start_time
@@ -163,7 +163,7 @@ function queue(; all = true, sortby = :created_time)
     end
 end
 
-query(id::Union{Int64,AbstractVector{Int64}}) = filter(row -> row.id == id, JOB_REGISTRY)
+query(id::Union{Integer,AbstractVector}) = filter(row -> row.id == id, JOB_REGISTRY)
 
 getstatus(x::Job) = x.status
 
