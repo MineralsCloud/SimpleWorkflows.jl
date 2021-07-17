@@ -163,7 +163,7 @@ function queue(; all = true, sortby = :created_time)
     end
 end
 
-query(id::Union{Int64,AbstractVector{Int64}}) = filter(row -> row.id == id, JOB_REGISTRY)
+query(id::Union{Integer,AbstractVector}) = filter(row -> row.id == id, JOB_REGISTRY)
 
 getstatus(x::Job) = x.status
 
