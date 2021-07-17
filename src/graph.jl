@@ -147,20 +147,6 @@ function run!(w::Workflow, saveas = tempname(; cleanup = false))
     return w
 end
 
-function reset!(job::Job)
-    if job isa AtomicJob
-        return AtomicJob(job.def, job.desc)
-    elseif job isa EmptyJob
-        return EmptyJob(job.desc)
-    else
-        @assert false "this should not happen!"
-    end
-end
-function reset!(w::Workflow)
-    nodes = map(reset!, w.nodes)
-    return Workflow(w.graph, nodes)
-end
-
 function getstatus(w::Workflow)
     st = map(getstatus, w.nodes)
     mg = MetaGraph(w.graph)
