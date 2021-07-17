@@ -118,7 +118,7 @@ function _register!(job::AtomicJob)
     )
     result = _run!(job)
     # Update JOB_REGISTRY
-    row = query(job.id)
+    row = first(query(job.id))  # `query` returns a `DataFrame`, not a `DataFrameRow`
     row.status = job.status
     row.stop_time = job.stop_time
     row.duration = job.stop_time - job.start_time
