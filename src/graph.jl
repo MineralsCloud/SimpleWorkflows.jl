@@ -15,6 +15,7 @@ using BangBang: push!!, pushfirst!!, append!!
 using MetaGraphs: MetaGraph, set_prop!
 
 
+const DEPENDENCIES = Dict{Job,Vector{AtomicJob}}()
 
 function ⊕(g::AbstractGraph, b::AbstractGraph)
     a = copy(g)
