@@ -79,7 +79,11 @@ end
 function run!(w::Workflow)
     for job in w.nodes  # The nodes have been topologically sorted.
         if !issucceeded(job)
-            run!(job)
+            if isrunning(job)
+                wait(job)
+            else
+                run!(job)
+            end
         end
     end
     return Workflow
