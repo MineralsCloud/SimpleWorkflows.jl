@@ -2,18 +2,13 @@ using LightGraphs:
     AbstractGraph,
     DiGraph,
     add_edge!,
-    add_vertex!,
     add_vertices!,
     nv,
     is_cyclic,
-    vertices,
     edges,
-    inneighbors,
     topological_sort_by_dfs,
     src,
     dst
-using BangBang: push!!, pushfirst!!, append!!
-using MetaGraphs: MetaGraph, set_prop!
 
 
 const DEPENDENCIES = Dict{Job,Vector{AtomicJob}}()
