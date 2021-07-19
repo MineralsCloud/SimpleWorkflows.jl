@@ -75,3 +75,16 @@ function ⊕(g::AbstractGraph, b::AbstractGraph)
     end
     return a
 end
+
+function run!(w::Workflow)
+    for job in w.nodes  # The nodes have been topologically sorted.
+        if !issucceeded(job)
+            if isrunning(job)
+                wait(job)
+            else
+                run!(job)
+            end
+        end
+    end
+    return Workflow
+end
