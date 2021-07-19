@@ -10,6 +10,7 @@ using LightGraphs:
     src,
     dst
 
+export Workflow, dependencies, →
 
 const DEPENDENCIES = Dict{Job,Vector{AtomicJob}}()
 
