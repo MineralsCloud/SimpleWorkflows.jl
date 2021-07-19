@@ -51,7 +51,8 @@ dependencies(job::Job) = get(DEPENDENCIES, job, AtomicJob[])
 
 function →(a::Job, b::Job)
     if a == b
-        throw(ArgumentError("a job cannot have itself as a dependency!"))
+        @warn "a job cannot have itself as a dependency! We will create a new job for you!"
+        return →(a, AtomicJob(a))
     else
         if haskey(DEPENDENCIES, b)
             push!(DEPENDENCIES[b], a)
