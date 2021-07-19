@@ -9,6 +9,7 @@ using LightGraphs:
     vertices,
     edges,
     inneighbors,
+    topological_sort_by_dfs,
     src,
     dst
 using BangBang: push!!, pushfirst!!, append!!
@@ -16,6 +17,39 @@ using MetaGraphs: MetaGraph, set_prop!
 
 
 const DEPENDENCIES = Dict{Job,Vector{AtomicJob}}()
+
+struct Workflow
+    graph::DiGraph{Int}
+    nodes::Vector{AtomicJob}
+    function Workflow(graph, nodes)
+        @assert !is_cyclic(graph) "`graph` must be an acyclic graph!"
+        if nv(graph) != length(nodes)
+            throw(DimensionMismatch("`graph`'s size is different from `nodes`!"))
+        end
+        return new(graph, nodes)
+    end
+end
+function Workflow(jobs::Job...)
+    graph = DiGraph(length(jobs))
+    dict = Dict(zip(jobs, 1:length(jobs)))
+    for (i, job) in enumerate(jobs)
+        for dependency in dependencies(job)
+            j = dict[dependency]
+            add_edge!(graph, j, i)
+        end
+    end
+    order = topological_sort_by_dfs(graph)
+    new = collect(jobs[order])
+    graph = DiGraph(length(jobs))
+    dict = Dict(zip(jobs, 1:length(jobs)))
+    for (i, job) in enumerate(jobs)
+        for dependency in dependencies(job)
+            j = dict[dependency]
+            add_edge!(graph, j, i)
+        end
+    end
+    return Workflow(graph, new)
+end
 
 dependencies(job::Job) = get(DEPENDENCIES, job, AtomicJob[])
 
