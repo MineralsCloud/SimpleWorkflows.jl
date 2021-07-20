@@ -97,3 +97,17 @@ function reset!(w::Workflow)
     end
     return w
 end
+
+function Base.show(io::IO, w::Workflow)
+    if get(io, :compact, false) || get(io, :typeinfo, nothing) == typeof(w)
+        Base.show_default(IOContext(io, :limit => true), w)  # From https://github.com/mauro3/Parameters.jl/blob/ecbf8df/src/Parameters.jl#L556
+    else
+        println(io, summary(w))
+        println(io, " ", w.graph)
+        println(io, "jobs:")
+        for (i, job) in enumerate(w.nodes)
+            println(io, " ", i, "] ", "id: ", job.id)
+            println(io, "    def: ", job.def)
+        end
+    end
+end
