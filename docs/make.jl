@@ -1,16 +1,16 @@
-using SimpleWorkflow
+using SimpleWorkflows
 using Documenter
 
-DocMeta.setdocmeta!(SimpleWorkflow, :DocTestSetup, :(using SimpleWorkflow); recursive=true)
+DocMeta.setdocmeta!(SimpleWorkflows, :DocTestSetup, :(using SimpleWorkflows); recursive=true)
 
 makedocs(;
-    modules=[SimpleWorkflow],
+    modules=[SimpleWorkflows],
     authors="Qi Zhang <singularitti@outlook.com>",
-    repo="https://github.com/MineralsCloud/SimpleWorkflow.jl/blob/{commit}{path}#{line}",
-    sitename="SimpleWorkflow.jl",
+    repo="https://github.com/MineralsCloud/SimpleWorkflows.jl/blob/{commit}{path}#{line}",
+    sitename="SimpleWorkflows.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://MineralsCloud.github.io/SimpleWorkflow.jl",
+        canonical="https://MineralsCloud.github.io/SimpleWorkflows.jl",
         assets=String[],
     ),
     pages=[
@@ -19,5 +19,5 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com/MineralsCloud/SimpleWorkflow.jl",
+    repo="github.com/MineralsCloud/SimpleWorkflows.jl",
 )

@@ -1,14 +1,14 @@
 ```@meta
-CurrentModule = SimpleWorkflow
+CurrentModule = SimpleWorkflows
 ```
 
-# SimpleWorkflow
+# SimpleWorkflows
 
-Documentation for [SimpleWorkflow](https://github.com/MineralsCloud/SimpleWorkflow.jl).
+Documentation for [SimpleWorkflows](https://github.com/MineralsCloud/SimpleWorkflows.jl).
 
 ```@index
 ```
 
 ```@autodocs
-Modules = [SimpleWorkflow]
+Modules = [SimpleWorkflows]
 ```
