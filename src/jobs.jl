@@ -20,6 +20,7 @@ export getstatus,
     outmsg,
     run!,
     interrupt!,
+    reset!,
     queue,
     query
 
@@ -217,6 +218,15 @@ function interrupt!(job::AtomicJob)
         interrupt(job.ref.where)
         return job
     end
+end
+
+function reset!(job::AtomicJob)
+    job.start_time = DateTime(0)
+    job.stop_time = DateTime(0)
+    job.status = PENDING
+    job.outmsg = ""
+    job.ref = nothing
+    return job
 end
 
 Base.wait(x::Job) = wait(x.ref)
