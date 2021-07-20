@@ -73,15 +73,6 @@ end
 →(x::AndJobs, y::Job) = x.b → y
 →(x::Job, y::AndJobs) = x → y.a
 
-function ⊕(g::AbstractGraph, b::AbstractGraph)
-    a = copy(g)
-    add_vertices!(a, nv(b))
-    for e in edges(b)
-        add_edge!(a, src(e) + nv(g), dst(e) + nv(g))
-    end
-    return a
-end
-
 function run!(w::Workflow)
     for job in w.nodes  # The nodes have been topologically sorted.
         if !issucceeded(job)
