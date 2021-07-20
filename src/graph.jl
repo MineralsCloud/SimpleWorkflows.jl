@@ -22,6 +22,7 @@ struct Workflow
         if nv(graph) != length(nodes)
             throw(DimensionMismatch("`graph`'s size is different from `nodes`!"))
         end
+        @assert unique(nodes) == nodes "at least two jobs are identical!"
         return new(graph, nodes)
     end
 end
