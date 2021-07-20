@@ -1,4 +1,4 @@
-using SimpleWorkflow
+using SimpleWorkflows
 using Test
 
 @testset "SimpleWorkflow.jl" begin

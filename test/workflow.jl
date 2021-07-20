@@ -1,4 +1,4 @@
-using SimpleWorkflow
+using SimpleWorkflows
 
 j = AtomicJob(`ls`)
 k = AtomicJob(() -> sleep(5))

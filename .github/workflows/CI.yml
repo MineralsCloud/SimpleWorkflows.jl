@@ -62,9 +62,9 @@ jobs:
       - run: |
           julia --project=docs -e '
             using Documenter: DocMeta, doctest
-            using SimpleWorkflow
-            DocMeta.setdocmeta!(SimpleWorkflow, :DocTestSetup, :(using SimpleWorkflow); recursive=true)
-            doctest(SimpleWorkflow)'
+            using SimpleWorkflows
+            DocMeta.setdocmeta!(SimpleWorkflows, :DocTestSetup, :(using SimpleWorkflows); recursive=true)
+            doctest(SimpleWorkflows)'
       - run: julia --project=docs docs/make.jl
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
