@@ -68,11 +68,8 @@ function →(a::Job, b::Job)
         return AndJobs(a, b)
     end
 end
-function →(a::Job, b::Job, c::Job, xs::Job...)  # See https://github.com/JuliaLang/julia/blob/be54a6c/base/operators.jl#L540
-    foreach(zip((a, b, xs[1:end-1]...), (b, c, xs...))) do x, y
-        x → y
-    end
-end
+→(x::AndJobs, y::Job) = x.b → y
+→(x::Job, y::AndJobs) = x → y.a
 
 function ⊕(g::AbstractGraph, b::AbstractGraph)
     a = copy(g)
