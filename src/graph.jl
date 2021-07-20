@@ -65,7 +65,7 @@ function →(a::Job, b::Job)
         else
             push!(DEPENDENCIES, b => [a])  # Initialization
         end
-        return
+        return AndJobs(a, b)
     end
 end
 function →(a::Job, b::Job, c::Job, xs::Job...)  # See https://github.com/JuliaLang/julia/blob/be54a6c/base/operators.jl#L540
