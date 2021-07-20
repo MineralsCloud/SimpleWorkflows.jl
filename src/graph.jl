@@ -22,6 +22,7 @@ struct Workflow
         if nv(graph) != length(nodes)
             throw(DimensionMismatch("`graph`'s size is different from `nodes`!"))
         end
+        @assert unique(nodes) == nodes "at least two jobs are identical!"
         return new(graph, nodes)
     end
 end
@@ -49,23 +50,28 @@ end
 
 dependencies(job::Job) = get(DEPENDENCIES, job, AtomicJob[])
 
+# See https://discourse.julialang.org/t/how-to-define-an-infix-operator-that-can-act-on-multiple-arguments-at-once-like/64954/4
+struct AndJobs
+    a::Job
+    b::Job
+end
+
 function →(a::Job, b::Job)
     if a == b
         throw(ArgumentError("a job cannot have itself as a dependency!"))
     else
         if haskey(DEPENDENCIES, b)
-            push!(DEPENDENCIES[b], a)
+            if a ∉ DEPENDENCIES[b]  # Duplicate running will push the same job multiple times
+                push!(DEPENDENCIES[b], a)
+            end
         else
             push!(DEPENDENCIES, b => [a])  # Initialization
         end
-        return
+        return AndJobs(a, b)
     end
 end
-function →(a::Job, b::Job, c::Job, xs::Job...)  # See https://github.com/JuliaLang/julia/blob/be54a6c/base/operators.jl#L540
-    foreach(zip((a, b, xs[1:end-1]...), (b, c, xs...))) do x, y
-        x → y
-    end
-end
+→(x::AndJobs, y::Job) = x.b → y
+→(x::Job, y::AndJobs) = x → y.a
 
 function ⊕(g::AbstractGraph, b::AbstractGraph)
     a = copy(g)
