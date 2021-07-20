@@ -57,8 +57,7 @@ end
 
 function →(a::Job, b::Job)
     if a == b
-        @warn "a job cannot have itself as a dependency! We will create a new job for you!"
-        return →(a, AtomicJob(a))
+        throw(ArgumentError("a job cannot have itself as a dependency!"))
     else
         if haskey(DEPENDENCIES, b)
             push!(DEPENDENCIES[b], a)
