@@ -86,6 +86,11 @@ function run!(w::Workflow)
     return Workflow
 end
 
+function reset!()
+    empty!(DEPENDENCIES)
+    empty!(JOB_REGISTRY)
+    return
+end
 function reset!(w::Workflow)
     for node in w.nodes
         reset!(node)
