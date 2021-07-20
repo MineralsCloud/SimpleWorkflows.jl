@@ -85,3 +85,10 @@ function run!(w::Workflow)
     end
     return Workflow
 end
+
+function reset!(w::Workflow)
+    for node in w.nodes
+        reset!(node)
+    end
+    return w
+end
