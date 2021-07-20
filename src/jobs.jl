@@ -232,25 +232,21 @@ end
 Base.wait(x::Job) = wait(x.ref)
 
 function Base.show(io::IO, job::AtomicJob)
-    if get(io, :compact, false) || get(io, :typeinfo, nothing) == typeof(job)
-        Base.show_default(IOContext(io, :limit => true), job)  # From https://github.com/mauro3/Parameters.jl/blob/ecbf8df/src/Parameters.jl#L556
-    else
-        println(io, summary(job))
-        println(io, " id: ", job.id)
-        print(io, " def: ")
-        printstyled(io, job.def, '\n'; bold = true)
-        println(io, " status: ", getstatus(job))
-        if !ispending(job)
-            print(
-                io,
-                " timing: from ",
-                format(starttime(job), "HH:MM:SS u dd, yyyy"),
-                isrunning(job) ? ", still running..." :
-                ", to " * format(stoptime(job), "HH:MM:SS u dd, yyyy"),
-                ", uses ",
-                elapsed(job),
-                " seconds.",
-            )
-        end
+    println(io, summary(job))
+    println(io, " id: ", job.id)
+    print(io, " def: ")
+    printstyled(io, job.def, '\n'; bold = true)
+    println(io, " status: ", getstatus(job))
+    if !ispending(job)
+        print(
+            io,
+            " timing: from ",
+            format(starttime(job), "HH:MM:SS u dd, yyyy"),
+            isrunning(job) ? ", still running..." :
+            ", to " * format(stoptime(job), "HH:MM:SS u dd, yyyy"),
+            ", uses ",
+            elapsed(job),
+            " seconds.",
+        )
     end
 end
