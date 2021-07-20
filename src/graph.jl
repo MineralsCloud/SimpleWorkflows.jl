@@ -61,7 +61,9 @@ function →(a::Job, b::Job)
         throw(ArgumentError("a job cannot have itself as a dependency!"))
     else
         if haskey(DEPENDENCIES, b)
-            push!(DEPENDENCIES[b], a)
+            if a ∉ DEPENDENCIES[b]  # Duplicate running will push the same job multiple times
+                push!(DEPENDENCIES[b], a)
+            end
         else
             push!(DEPENDENCIES, b => [a])  # Initialization
         end
