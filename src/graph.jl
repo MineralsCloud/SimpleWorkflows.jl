@@ -10,7 +10,7 @@ using LightGraphs:
     src,
     dst
 
-export Workflow, dependencies, →, ⋲, ⋺, ⋄
+export Workflow, dependencies, ▷, ⋲, ⋺, ⋄
 
 const DEPENDENCIES = Dict{Job,Vector{AtomicJob}}()
 
@@ -50,7 +50,7 @@ end
 
 dependencies(job::Job) = get(DEPENDENCIES, job, AtomicJob[])
 
-function →(a::Job, b::Job)
+function ▷(a::Job, b::Job)
     if a == b
         throw(ArgumentError("a job cannot have itself as a dependency!"))
     else
@@ -70,7 +70,7 @@ function ⋲(x::Job, ys::Job...)
         throw(ArgumentError("a job cannot have itself as a dependency!"))
     else
         for y in ys
-            x → y
+            x ▷ y
         end
     end
 end
@@ -79,7 +79,7 @@ function ⋺(xs::Job...)
     @assert length(xs) >= 2
     y = last(xs)
     for x in xs[1:end-1]
-        x → y
+        x ▷ y
     end
 end
 
