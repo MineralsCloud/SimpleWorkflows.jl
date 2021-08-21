@@ -11,7 +11,7 @@ using LightGraphs:
     src,
     dst
 
-export Workflow, dependencies, →, ⋲, ⋺, ⋄
+export Workflow, dependencies, →
 
 const DEPENDENCIES = Dict{Job,Vector{AtomicJob}}()
 
@@ -75,29 +75,29 @@ end
 →(x::AndJobs, y::Job) = x.b → y
 →(x::Job, y::AndJobs) = x → y.a
 
-function ⋲(x::Job, ys::Job...)
-    if x in ys
-        throw(ArgumentError("a job cannot have itself as a dependency!"))
-    else
-        for y in ys
-            x → y
-        end
-    end
-end
+# function ⋲(x::Job, ys::Job...)
+#     if x in ys
+#         throw(ArgumentError("a job cannot have itself as a dependency!"))
+#     else
+#         for y in ys
+#             x → y
+#         end
+#     end
+# end
 
-function ⋺(xs::Job...)
-    @assert length(xs) >= 2
-    y = last(xs)
-    for x in xs[1:end-1]
-        x → y
-    end
-end
+# function ⋺(xs::Job...)
+#     @assert length(xs) >= 2
+#     y = last(xs)
+#     for x in xs[1:end-1]
+#         x → y
+#     end
+# end
 
-function ⋄(xs::Job...)
-    @assert length(xs) >= 3
-    ⋲(first(xs), xs[2:end-1]...)
-    ⋺(xs[2:end]...)
-end
+# function ⋄(xs::Job...)
+#     @assert length(xs) >= 3
+#     ⋲(first(xs), xs[2:end-1]...)
+#     ⋺(xs[2:end]...)
+# end
 
 function run!(w::Workflow)
     for job in w.nodes  # The nodes have been topologically sorted.
