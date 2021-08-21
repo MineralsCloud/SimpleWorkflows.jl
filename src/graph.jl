@@ -5,6 +5,7 @@ using LightGraphs:
     add_vertices!,
     nv,
     is_cyclic,
+    is_connected,
     edges,
     topological_sort_by_dfs,
     src,
@@ -19,6 +20,7 @@ struct Workflow
     nodes::Vector{AtomicJob}
     function Workflow(graph, nodes)
         @assert !is_cyclic(graph) "`graph` must be an acyclic graph!"
+        @assert is_connected(graph) "`graph` is not connected! some nodes are not used!"
         if nv(graph) != length(nodes)
             throw(DimensionMismatch("`graph`'s size is different from `nodes`!"))
         end
