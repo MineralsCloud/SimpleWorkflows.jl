@@ -50,12 +50,6 @@ end
 
 dependencies(job::Job) = get(DEPENDENCIES, job, AtomicJob[])
 
-# See https://discourse.julialang.org/t/how-to-define-an-infix-operator-that-can-act-on-multiple-arguments-at-once-like/64954/4
-struct AndJobs
-    a::Job
-    b::Job
-end
-
 function →(a::Job, b::Job)
     if a == b
         throw(ArgumentError("a job cannot have itself as a dependency!"))
@@ -67,11 +61,9 @@ function →(a::Job, b::Job)
         else
             push!(DEPENDENCIES, b => [a])  # Initialization
         end
-        return AndJobs(a, b)
+        return b
     end
 end
-→(x::AndJobs, y::Job) = x.b → y
-→(x::Job, y::AndJobs) = x → y.a
 
 function ⋲(x::Job, ys::Job...)
     if x in ys
