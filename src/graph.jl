@@ -5,12 +5,13 @@ using LightGraphs:
     add_vertices!,
     nv,
     is_cyclic,
+    is_connected,
     edges,
     topological_sort_by_dfs,
     src,
     dst
 
-export Workflow, dependencies, ▷, ⋲, ⋺, ⋄
+export Workflow, dependencies, ▷
 
 const DEPENDENCIES = Dict{Job,Vector{AtomicJob}}()
 
@@ -19,6 +20,7 @@ struct Workflow
     nodes::Vector{AtomicJob}
     function Workflow(graph, nodes)
         @assert !is_cyclic(graph) "`graph` must be an acyclic graph!"
+        @assert is_connected(graph) "`graph` is not connected! some nodes are not used!"
         if nv(graph) != length(nodes)
             throw(DimensionMismatch("`graph`'s size is different from `nodes`!"))
         end
@@ -79,6 +81,7 @@ end
 #     @assert length(xs) >= 2
 #     y = last(xs)
 #     for x in xs[1:end-1]
+#         x → y
 #         x ▷ y
 #     end
 # end
