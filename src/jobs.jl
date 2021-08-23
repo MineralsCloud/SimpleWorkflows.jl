@@ -20,7 +20,7 @@ export getstatus,
     outmsg,
     run!,
     interrupt!,
-    reset!,
+    initialize!,
     queue,
     query
 
@@ -79,13 +79,13 @@ const JOB_REGISTRY = DataFrame(
     job = Job[],
 )
 
-isnew(job::AtomicJob) =
+isinitialized(job::AtomicJob) =
     job.start_time == job.stop_time == DateTime(0) &&
     job.status === PENDING &&
     job.ref === nothing
 
 function run!(job::AtomicJob)
-    if isnew(job)
+    if isinitialized(job)
         job.ref = @spawn begin
             job.status = RUNNING
             job.start_time = now()
@@ -93,12 +93,7 @@ function run!(job::AtomicJob)
         end
         return job
     else
-        job.id = generate_id()
-        job.start_time = DateTime(0)
-        job.stop_time = DateTime(0)
-        job.status = PENDING
-        job.outmsg = ""
-        job.ref = nothing
+        job = initialize!(job)
         return run!(job)
     end
 end
@@ -220,7 +215,7 @@ function interrupt!(job::AtomicJob)
     end
 end
 
-function reset!(job::AtomicJob)
+function initialize!(job::AtomicJob)
     job.start_time = DateTime(0)
     job.stop_time = DateTime(0)
     job.status = PENDING
