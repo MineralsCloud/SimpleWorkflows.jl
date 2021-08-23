@@ -93,12 +93,7 @@ function run!(job::AtomicJob)
         end
         return job
     else
-        job.id = generate_id()
-        job.start_time = DateTime(0)
-        job.stop_time = DateTime(0)
-        job.status = PENDING
-        job.outmsg = ""
-        job.ref = nothing
+        job = initialize!(job)
         return run!(job)
     end
 end
