@@ -91,11 +91,12 @@ function ⋄(xs::Job...)
     ⋺(xs[2:end]...)
 end
 
-function run!(w::Workflow)
+function run!(w::Workflow; interval = 3)
     for job in w.nodes  # The nodes have been topologically sorted.
         if !issucceeded(job)
             if isrunning(job)
                 wait(job)
+                sleep(interval)
             else
                 run!(job)
             end
