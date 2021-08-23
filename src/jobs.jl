@@ -20,7 +20,7 @@ export getstatus,
     outmsg,
     run!,
     interrupt!,
-    reset!,
+    initialize!,
     queue,
     query
 
@@ -220,7 +220,7 @@ function interrupt!(job::AtomicJob)
     end
 end
 
-function reset!(job::AtomicJob)
+function initialize!(job::AtomicJob)
     job.start_time = DateTime(0)
     job.stop_time = DateTime(0)
     job.status = PENDING

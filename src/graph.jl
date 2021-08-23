@@ -105,14 +105,14 @@ function run!(w::Workflow; interval = 3)
     return Workflow
 end
 
-function reset!()
+function initialize!()
     empty!(DEPENDENCIES)
     empty!(JOB_REGISTRY)
     return
 end
-function reset!(w::Workflow)
+function initialize!(w::Workflow)
     for node in w.nodes
-        reset!(node)
+        initialize!(node)
     end
     return w
 end
