@@ -22,7 +22,8 @@ export getstatus,
     interrupt!,
     initialize!,
     queue,
-    query
+    query,
+    ntimes
 
 @enum JobStatus begin
     PENDING
@@ -163,6 +164,9 @@ query(id::Integer; sortby = :created_time) =
     sort(filter(row -> row.id == id, JOB_REGISTRY), sortby)
 query(ids::AbstractVector{<:Integer}; sortby = :created_time) =
     map(id -> query(id; sortby = sortby), ids)
+
+ntimes(id::Integer) = size(query(id), 1)
+ntimes(job::Job) = ntimes(job.id)
 
 getstatus(x::Job) = x.status
 
