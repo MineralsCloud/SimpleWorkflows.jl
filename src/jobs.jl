@@ -79,13 +79,13 @@ const JOB_REGISTRY = DataFrame(
     job = Job[],
 )
 
-isnew(job::AtomicJob) =
+isinitialized(job::AtomicJob) =
     job.start_time == job.stop_time == DateTime(0) &&
     job.status === PENDING &&
     job.ref === nothing
 
 function run!(job::AtomicJob)
-    if isnew(job)
+    if isinitialized(job)
         job.ref = @spawn begin
             job.status = RUNNING
             job.start_time = now()
