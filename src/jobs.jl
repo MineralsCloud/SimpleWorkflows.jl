@@ -146,7 +146,8 @@ end
 _call(cmd::Base.AbstractCmd) = run(cmd)
 _call(f) = f()
 
-    @assert sortby in (:id, :created_time, :start_time, :stop_time, :duration, :status)
+function queue(; sortby = :created_time)
+    @assert sortby in (:created_time, :start_time, :stop_time, :duration, :status)
     for row in eachrow(JOB_REGISTRY)
         job = row.job
         row.stop_time = stoptime(job)
