@@ -22,7 +22,8 @@ export getstatus,
     interrupt!,
     initialize!,
     queue,
-    query
+    query,
+    ntimes
 
 @enum JobStatus begin
     PENDING
@@ -145,21 +146,26 @@ end
 _call(cmd::Base.AbstractCmd) = run(cmd)
 _call(f) = f()
 
-function queue(; all = true, sortby = :created_time)
-    @assert sortby in (:id, :created_time, :start_time, :stop_time, :duration, :status)
+function queue(; sortby = :created_time)
+    @assert sortby in (:created_time, :start_time, :stop_time, :duration, :status)
     for row in eachrow(JOB_REGISTRY)
         job = row.job
-        row.stop_time = stoptime(job)
-        row.duration = elapsed(job)
-        row.status = getstatus(job)
+        if job.start_time == row.start_time
+            row.stop_time = stoptime(job)
+            row.duration = elapsed(job)
+            row.status = getstatus(job)
+        end
     end
-    if all
-        return sort(JOB_REGISTRY, sortby)
-    else
-    end
+    return sort(JOB_REGISTRY, [:id, sortby])
 end
 
-query(id::Union{Integer,AbstractVector}) = filter(row -> row.id == id, JOB_REGISTRY)
+query(id::Integer; sortby = :created_time) =
+    sort(filter(row -> row.id == id, JOB_REGISTRY), sortby)
+query(ids::AbstractVector{<:Integer}; sortby = :created_time) =
+    map(id -> query(id; sortby = sortby), ids)
+
+ntimes(id::Integer) = size(query(id), 1)
+ntimes(job::Job) = ntimes(job.id)
 
 getstatus(x::Job) = x.status
 
