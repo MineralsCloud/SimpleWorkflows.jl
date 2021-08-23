@@ -150,10 +150,11 @@ function queue(; sortby = :created_time)
     @assert sortby in (:created_time, :start_time, :stop_time, :duration, :status)
     for row in eachrow(JOB_REGISTRY)
         job = row.job
-        row.stop_time = stoptime(job)
-        row.duration = elapsed(job)
-        row.status = getstatus(job)
-    end
+        if job.start_time == row.start_time
+            row.stop_time = stoptime(job)
+            row.duration = elapsed(job)
+            row.status = getstatus(job)
+        end
     end
     return sort(JOB_REGISTRY, [:id, sortby])
 end
