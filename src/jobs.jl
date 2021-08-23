@@ -216,7 +216,6 @@ function interrupt!(job::AtomicJob)
 end
 
 function initialize!(job::AtomicJob)
-    job.id = generate_id()
     job.start_time = DateTime(0)
     job.stop_time = DateTime(0)
     job.status = PENDING
