@@ -138,7 +138,7 @@ end
 query(id::Integer) = filter(row -> row.id == id, queue())
 query(ids::AbstractVector{<:Integer}) = map(id -> query(id), ids)
 
-isexecuted(job::Job) = job.id in JOB_REGISTRY.id
+isexecuted(job::Job) = job in JOB_REGISTRY
 
 ntimes(id::Integer) = size(query(id), 1)
 ntimes(job::Job) = ntimes(job.id)
