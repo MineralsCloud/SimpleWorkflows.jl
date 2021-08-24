@@ -144,8 +144,8 @@ query(ids::AbstractVector{<:Integer}) = map(id -> query(id), ids)
 
 isexecuted(job::Job) = job in JOB_REGISTRY
 
-ntimes(id::Integer) = size(query(id), 1)
-ntimes(job::Job) = ntimes(job.id)
+ntimes(id::Integer) = ntimes(first(filter(x -> x.id == id, JOB_REGISTRY)))
+ntimes(job::Job) = Int(job.count)
 
 getstatus(x::Job) = x.status
 
