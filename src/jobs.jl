@@ -23,6 +23,7 @@ export getstatus,
     initialize!,
     queue,
     query,
+    isexecuted,
     ntimes
 
 @enum JobStatus begin
@@ -69,16 +70,7 @@ end
 AtomicJob(job::AtomicJob) =
     AtomicJob(job.def; desc = job.desc, user = job.user, max_time = job.max_time)
 
-const JOB_REGISTRY = DataFrame(
-    id = Int64[],
-    def = String[],
-    created_time = DateTime[],
-    start_time = DateTime[],
-    stop_time = Union{DateTime,Nothing}[],
-    duration = Union{Period,Nothing}[],
-    status = JobStatus[],
-    job = Job[],
-)
+const JOB_REGISTRY = Job[]
 
 isinitialized(job::AtomicJob) =
     job.start_time == job.stop_time == DateTime(0) &&
@@ -100,27 +92,10 @@ function run!(job::AtomicJob)
 end
 
 function _register!(job::AtomicJob)
-    push!(
-        JOB_REGISTRY,
-        (
-            job.id,
-            string(job.def),
-            job.created_time,
-            job.start_time,
-            nothing,
-            nothing,
-            job.status,
-            job,
-        ),
-    )
-    result = _run!(job)
-    # Update JOB_REGISTRY
-    row = first(query(job.id))  # `query` returns a `DataFrame`, not a `DataFrameRow`
-    row.status = job.status
-    row.stop_time = job.stop_time
-    row.duration = job.stop_time - job.start_time
-    # Return the result
-    return result
+    if !isexecuted(job)
+        push!(JOB_REGISTRY, job)
+    end
+    return _run!(job)
 end
 
 function _run!(job::AtomicJob)
@@ -148,21 +123,22 @@ _call(f) = f()
 
 function queue(; sortby = :created_time)
     @assert sortby in (:created_time, :start_time, :stop_time, :duration, :status)
-    for row in eachrow(JOB_REGISTRY)
-        job = row.job
-        if job.start_time == row.start_time
-            row.stop_time = stoptime(job)
-            row.duration = elapsed(job)
-            row.status = getstatus(job)
-        end
-    end
-    return sort(JOB_REGISTRY, [:id, sortby])
+    df = DataFrame(
+        id = [job.id for job in JOB_REGISTRY],
+        def = [string(job.def) for job in JOB_REGISTRY],
+        created_time = [job.created_time for job in JOB_REGISTRY],
+        start_time = map(starttime, JOB_REGISTRY),
+        stop_time = map(stoptime, JOB_REGISTRY),
+        duration = map(elapsed, JOB_REGISTRY),
+        status = map(getstatus, JOB_REGISTRY),
+    )
+    return sort(df, [:id, sortby])
 end
 
-query(id::Integer; sortby = :created_time) =
-    sort(filter(row -> row.id == id, JOB_REGISTRY), sortby)
-query(ids::AbstractVector{<:Integer}; sortby = :created_time) =
-    map(id -> query(id; sortby = sortby), ids)
+query(id::Integer) = filter(row -> row.id == id, queue())
+query(ids::AbstractVector{<:Integer}) = map(id -> query(id), ids)
+
+isexecuted(job::Job) = job in JOB_REGISTRY
 
 ntimes(id::Integer) = size(query(id), 1)
 ntimes(job::Job) = ntimes(job.id)
