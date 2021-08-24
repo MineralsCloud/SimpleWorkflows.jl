@@ -48,6 +48,7 @@ mutable struct AtomicJob{T} <: Job
     status::JobStatus
     outmsg::String
     ref::Union{Future,Nothing}
+    count::UInt64
     AtomicJob(
         def::T;
         desc = "No description here.",
@@ -65,6 +66,7 @@ mutable struct AtomicJob{T} <: Job
         PENDING,
         "",
         nothing,
+        0,
     )
 end
 AtomicJob(job::AtomicJob) =
@@ -115,6 +117,8 @@ function _run!(job::AtomicJob)
             job.outmsg = captured.output
         end
         return e
+    finally
+        job.count += 1
     end
 end
 
@@ -140,8 +144,8 @@ query(ids::AbstractVector{<:Integer}) = map(id -> query(id), ids)
 
 isexecuted(job::Job) = job in JOB_REGISTRY
 
-ntimes(id::Integer) = size(query(id), 1)
-ntimes(job::Job) = ntimes(job.id)
+ntimes(id::Integer) = ntimes(first(filter(x -> x.id == id, JOB_REGISTRY)))
+ntimes(job::Job) = Int(job.count)
 
 getstatus(x::Job) = x.status
 
