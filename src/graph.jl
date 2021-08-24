@@ -11,7 +11,7 @@ using LightGraphs:
     src,
     dst
 
-export Workflow, dependencies, ▷, ⋲, ⋺, ⋄
+export Workflow, dependencies, chain, lfork, rfork, diamond, ▷, ⋲, ⋺, ⋄
 
 const DEPENDENCIES = Dict{Job,Vector{AtomicJob}}()
 
@@ -52,7 +52,7 @@ end
 
 dependencies(job::Job) = get(DEPENDENCIES, job, AtomicJob[])
 
-function ▷(a::Job, b::Job)
+function chain(a::Job, b::Job)
     if a == b
         throw(ArgumentError("a job cannot have itself as a dependency!"))
     else
@@ -66,8 +66,15 @@ function ▷(a::Job, b::Job)
         return b
     end
 end
+function chain(xs::AbstractVector{<:Job}, ys::AbstractVector{<:Job})
+    for (x, y) in zip(xs, ys)
+        x ▷ y
+    end
+    return ys
+end
+const ▷ = chain
 
-function ⋲(x::Job, ys::Job...)
+function lfork(x::Job, ys::AbstractVector{<:Job})
     if x in ys
         throw(ArgumentError("a job cannot have itself as a dependency!"))
     else
@@ -75,21 +82,24 @@ function ⋲(x::Job, ys::Job...)
             x ▷ y
         end
     end
+    return ys
 end
+const ⋲ = lfork
 
-function ⋺(xs::Job...)
-    @assert length(xs) >= 2
-    y = last(xs)
-    for x in xs[1:end-1]
-        x ▷ y
+function rfork(xs::AbstractVector{<:Job}, y::Job)
+    if y in xs
+        throw(ArgumentError("a job cannot have itself as a dependency!"))
+    else
+        for x in xs
+            x ▷ y
+        end
     end
+    return y
 end
+const ⋺ = rfork
 
-function ⋄(xs::Job...)
-    @assert length(xs) >= 3
-    ⋲(first(xs), xs[2:end-1]...)
-    ⋺(xs[2:end]...)
-end
+diamond(x::Job, ys::AbstractVector{<:Job}, z::Job) = (x ⋲ ys) ⋺ z
+const ⋄ = diamond
 
 function run!(w::Workflow; interval = 3)
     for job in w.nodes  # The nodes have been topologically sorted.
