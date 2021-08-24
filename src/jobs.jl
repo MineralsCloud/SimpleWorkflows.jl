@@ -84,7 +84,10 @@ function run!(job::AtomicJob)
         job.ref = @spawn begin
             job.status = RUNNING
             job.start_time = now()
-            _register!(job)
+            if !isexecuted(job)
+                push!(JOB_REGISTRY, job)
+            end
+            _run!(job)
         end
         return job
     else
@@ -92,14 +95,6 @@ function run!(job::AtomicJob)
         return run!(job)
     end
 end
-
-function _register!(job::AtomicJob)
-    if !isexecuted(job)
-        push!(JOB_REGISTRY, job)
-    end
-    return _run!(job)
-end
-
 function _run!(job::AtomicJob)
     try
         captured = capture() do
