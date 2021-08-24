@@ -31,6 +31,7 @@ export getstatus,
     SUCCEEDED
     FAILED
     INTERRUPTED
+    UNKNOWN
 end
 
 abstract type Job end
