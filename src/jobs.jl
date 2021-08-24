@@ -132,7 +132,7 @@ function queue(; sortby = :created_time)
         created_time = [job.created_time for job in JOB_REGISTRY],
         start_time = map(starttime, JOB_REGISTRY),
         stop_time = map(stoptime, JOB_REGISTRY),
-        duration = map(elapsed, JOB_REGISTRY),
+        elapsed = map(elapsed, JOB_REGISTRY),
         status = map(getstatus, JOB_REGISTRY),
         times = map(ntimes, JOB_REGISTRY),
     )
