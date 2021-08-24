@@ -135,7 +135,7 @@ function queue(; sortby = :created_time)
     return sort(df, [:id, sortby])
 end
 
-query(id::Integer) = filter(row -> row.id == id, JOB_REGISTRY)
+query(id::Integer) = filter(row -> row.id == id, queue())
 query(ids::AbstractVector{<:Integer}) = map(id -> query(id), ids)
 
 isexecuted(job::Job) = job.id in JOB_REGISTRY.id
