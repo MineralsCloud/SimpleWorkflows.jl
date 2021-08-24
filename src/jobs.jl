@@ -163,10 +163,8 @@ function queue(; sortby = :created_time)
     return sort(JOB_REGISTRY, [:id, sortby])
 end
 
-query(id::Integer; sortby = :created_time) =
-    sort(filter(row -> row.id == id, JOB_REGISTRY), sortby)
-query(ids::AbstractVector{<:Integer}; sortby = :created_time) =
-    map(id -> query(id; sortby = sortby), ids)
+query(id::Integer) = filter(row -> row.id == id, JOB_REGISTRY)
+query(ids::AbstractVector{<:Integer}) = map(id -> query(id), ids)
 
 isexecuted(job::Job) = job.id in JOB_REGISTRY.id
 
