@@ -155,6 +155,8 @@ function queue(; sortby = :created_time)
             row.stop_time = stoptime(job)
             row.duration = elapsed(job)
             row.status = getstatus(job)
+        else
+            row.status = UNKNOWN
         end
     end
     return sort(JOB_REGISTRY, [:id, sortby])
