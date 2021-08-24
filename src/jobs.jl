@@ -14,6 +14,7 @@ export getstatus,
     issucceeded,
     isfailed,
     isinterrupted,
+    createdtime,
     starttime,
     stoptime,
     elapsed,
@@ -163,6 +164,8 @@ issucceeded(x::Job) = getstatus(x) === SUCCEEDED
 isfailed(x::Job) = getstatus(x) === FAILED
 
 isinterrupted(x::Job) = getstatus(x) === INTERRUPTED
+
+createdtime(x::Job) = x.created_time
 
 starttime(x::Job) = ispending(x) ? nothing : x.start_time
 
