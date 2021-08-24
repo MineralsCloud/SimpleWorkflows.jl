@@ -83,13 +83,12 @@ function lfork(x::Job, ys::AbstractVector{<:Job})
 end
 const ⋲ = lfork
 
-function ⋺(xs::Job...)
-    @assert length(xs) >= 2
-    y = last(xs)
-    for x in xs[1:end-1]
+function rfork(xs::AbstractVector{<:Job}, y::Job)
+    for x in xs
         x ▷ y
     end
 end
+const ⋺ = rfork
 
 function ⋄(xs::Job...)
     @assert length(xs) >= 3
