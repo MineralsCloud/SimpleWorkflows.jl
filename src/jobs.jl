@@ -117,6 +117,8 @@ function _run!(job::AtomicJob)
             job.outmsg = captured.output
         end
         return e
+    finally
+        job.count += 1
     end
 end
 
