@@ -84,9 +84,14 @@ end
 const ⋲ = lfork
 
 function rfork(xs::AbstractVector{<:Job}, y::Job)
-    for x in xs
-        x ▷ y
+    if y in xs
+        throw(ArgumentError("a job cannot have itself as a dependency!"))
+    else
+        for x in xs
+            x ▷ y
+        end
     end
+    return y
 end
 const ⋺ = rfork
 
