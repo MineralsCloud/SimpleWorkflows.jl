@@ -97,9 +97,7 @@ function rfork(xs::AbstractVector{<:Job}, y::Job)
 end
 const ⋺ = rfork
 
-function diamond(x::Job, ys::AbstractVector{<:Job}, z::Job)
-    x ⋲ ys ⋺ z
-end
+diamond(x::Job, ys::AbstractVector{<:Job}, z::Job) = (x ⋲ ys) ⋺ z
 const ⋄ = diamond
 
 function run!(w::Workflow; interval = 3)
