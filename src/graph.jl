@@ -96,11 +96,10 @@ function rfork(xs::AbstractVector{<:Job}, y::Job)
 end
 const ⋺ = rfork
 
-function ⋄(xs::Job...)
-    @assert length(xs) >= 3
-    ⋲(first(xs), xs[2:end-1]...)
-    ⋺(xs[2:end]...)
+function diamond(x::Job, ys::AbstractVector{<:Job}, z::Job)
+    x ⋲ ys ⋺ z
 end
+const ⋄ = diamond
 
 function run!(w::Workflow; interval = 3)
     for job in w.nodes  # The nodes have been topologically sorted.
