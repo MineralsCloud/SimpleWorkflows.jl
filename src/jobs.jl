@@ -1,4 +1,4 @@
-using DataFrames: DataFrame, nrow, sort, filter
+using DataFrames: DataFrame, sort, filter
 using Dates: DateTime, Period, Day, now, format
 using Distributed: Future, interrupt, @spawn
 using IOCapture: capture
