@@ -92,27 +92,10 @@ function run!(job::AtomicJob)
 end
 
 function _register!(job::AtomicJob)
-    push!(
-        JOB_REGISTRY,
-        (
-            job.id,
-            string(job.def),
-            job.created_time,
-            job.start_time,
-            nothing,
-            nothing,
-            job.status,
-            job,
-        ),
-    )
-    result = _run!(job)
-    # Update JOB_REGISTRY
-    row = first(query(job.id))  # `query` returns a `DataFrame`, not a `DataFrameRow`
-    row.status = job.status
-    row.stop_time = job.stop_time
-    row.duration = job.stop_time - job.start_time
-    # Return the result
-    return result
+    if !isexecuted(job)
+        push!(JOB_REGISTRY, job)
+    end
+    return _run!(job)
 end
 
 function _run!(job::AtomicJob)
