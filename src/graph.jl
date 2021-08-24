@@ -52,7 +52,7 @@ end
 
 dependencies(job::Job) = get(DEPENDENCIES, job, AtomicJob[])
 
-function ▷(a::Job, b::Job)
+function chain(a::Job, b::Job)
     if a == b
         throw(ArgumentError("a job cannot have itself as a dependency!"))
     else
@@ -66,11 +66,12 @@ function ▷(a::Job, b::Job)
         return b
     end
 end
-function ▷(xs::AbstractVector{<:Job}, ys::AbstractVector{<:Job})
+function chain(xs::AbstractVector{<:Job}, ys::AbstractVector{<:Job})
     for (x, y) in zip(xs, ys)
         x ▷ y
     end
 end
+const ▷ = chain
 
 function lfork(x::Job, ys::AbstractVector{<:Job})
     if x in ys
