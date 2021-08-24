@@ -72,7 +72,7 @@ function ▷(xs::AbstractVector{<:Job}, ys::AbstractVector{<:Job})
     end
 end
 
-function ⋲(x::Job, ys::Job...)
+function lfork(x::Job, ys::AbstractVector{<:Job})
     if x in ys
         throw(ArgumentError("a job cannot have itself as a dependency!"))
     else
@@ -81,6 +81,7 @@ function ⋲(x::Job, ys::Job...)
         end
     end
 end
+const ⋲ = lfork
 
 function ⋺(xs::Job...)
     @assert length(xs) >= 2
