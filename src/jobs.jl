@@ -126,15 +126,18 @@ _call(cmd::Base.AbstractCmd) = run(cmd)
 _call(f) = f()
 
 function queue(; sortby = :created_time)
-    @assert sortby in (:created_time, :start_time, :stop_time, :duration, :status, :times)
+    @assert sortby in
+            (:created_time, :user, :start_time, :stop_time, :elapsed, :status, :times)
     df = DataFrame(
         id = [job.id for job in JOB_REGISTRY],
+        user = [job.user for job in JOB_REGISTRY],
         created_time = [job.created_time for job in JOB_REGISTRY],
         start_time = map(starttime, JOB_REGISTRY),
         stop_time = map(stoptime, JOB_REGISTRY),
         elapsed = map(elapsed, JOB_REGISTRY),
         status = map(getstatus, JOB_REGISTRY),
         times = map(ntimes, JOB_REGISTRY),
+        desc = map(description, JOB_REGISTRY),
     )
     return sort(df, [:id, sortby])
 end
