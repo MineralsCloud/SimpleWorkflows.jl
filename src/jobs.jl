@@ -126,7 +126,7 @@ _call(cmd::Base.AbstractCmd) = run(cmd)
 _call(f) = f()
 
 function queue(; sortby = :created_time)
-    @assert sortby in (:created_time, :start_time, :stop_time, :duration, :status)
+    @assert sortby in (:created_time, :start_time, :stop_time, :duration, :status, :times)
     df = DataFrame(
         id = [job.id for job in JOB_REGISTRY],
         created_time = [job.created_time for job in JOB_REGISTRY],
