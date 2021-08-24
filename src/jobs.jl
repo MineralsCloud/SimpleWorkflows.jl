@@ -48,6 +48,7 @@ mutable struct AtomicJob{T} <: Job
     status::JobStatus
     outmsg::String
     ref::Union{Future,Nothing}
+    count::UInt64
     AtomicJob(
         def::T;
         desc = "No description here.",
@@ -65,6 +66,7 @@ mutable struct AtomicJob{T} <: Job
         PENDING,
         "",
         nothing,
+        0,
     )
 end
 AtomicJob(job::AtomicJob) =
