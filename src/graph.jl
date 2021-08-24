@@ -11,7 +11,7 @@ using LightGraphs:
     src,
     dst
 
-export Workflow, dependencies, ▷, ⋲, ⋺, ⋄
+export Workflow, dependencies, chain, lfork, rfork, diamond, ▷, ⋲, ⋺, ⋄
 
 const DEPENDENCIES = Dict{Job,Vector{AtomicJob}}()
 
