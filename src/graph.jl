@@ -66,6 +66,11 @@ function ▷(a::Job, b::Job)
         return b
     end
 end
+function ▷(xs::AbstractVector{<:Job}, ys::AbstractVector{<:Job})
+    for (x, y) in zip(xs, ys)
+        x ▷ y
+    end
+end
 
 function ⋲(x::Job, ys::Job...)
     if x in ys
