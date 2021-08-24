@@ -14,6 +14,7 @@ export getstatus,
     issucceeded,
     isfailed,
     isinterrupted,
+    createdtime,
     starttime,
     stoptime,
     elapsed,
@@ -121,15 +122,18 @@ _call(cmd::Base.AbstractCmd) = run(cmd)
 _call(f) = f()
 
 function queue(; sortby = :created_time)
-    @assert sortby in (:created_time, :start_time, :stop_time, :duration, :status, :times)
+    @assert sortby in
+            (:created_time, :user, :start_time, :stop_time, :elapsed, :status, :times)
     df = DataFrame(
         id = [job.id for job in JOB_REGISTRY],
-        created_time = [job.created_time for job in JOB_REGISTRY],
+        user = [job.user for job in JOB_REGISTRY],
+        created_time = map(createdtime, JOB_REGISTRY),
         start_time = map(starttime, JOB_REGISTRY),
         stop_time = map(stoptime, JOB_REGISTRY),
-        duration = map(elapsed, JOB_REGISTRY),
+        elapsed = map(elapsed, JOB_REGISTRY),
         status = map(getstatus, JOB_REGISTRY),
         times = map(ntimes, JOB_REGISTRY),
+        desc = map(description, JOB_REGISTRY),
     )
     return sort(df, [:id, sortby])
 end
@@ -155,6 +159,8 @@ issucceeded(x::Job) = getstatus(x) === SUCCEEDED
 isfailed(x::Job) = getstatus(x) === FAILED
 
 isinterrupted(x::Job) = getstatus(x) === INTERRUPTED
+
+createdtime(x::Job) = x.created_time
 
 starttime(x::Job) = ispending(x) ? nothing : x.start_time
 
