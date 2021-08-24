@@ -70,6 +70,7 @@ function chain(xs::AbstractVector{<:Job}, ys::AbstractVector{<:Job})
     for (x, y) in zip(xs, ys)
         x ▷ y
     end
+    return ys
 end
 const ▷ = chain
 
