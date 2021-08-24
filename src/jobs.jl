@@ -70,16 +70,7 @@ end
 AtomicJob(job::AtomicJob) =
     AtomicJob(job.def; desc = job.desc, user = job.user, max_time = job.max_time)
 
-const JOB_REGISTRY = DataFrame(
-    id = Int64[],
-    def = String[],
-    created_time = DateTime[],
-    start_time = DateTime[],
-    stop_time = Union{DateTime,Nothing}[],
-    duration = Union{Period,Nothing}[],
-    status = JobStatus[],
-    job = Job[],
-)
+const JOB_REGISTRY = Job[]
 
 isinitialized(job::AtomicJob) =
     job.start_time == job.stop_time == DateTime(0) &&
