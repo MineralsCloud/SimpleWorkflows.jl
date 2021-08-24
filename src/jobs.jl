@@ -23,6 +23,7 @@ export getstatus,
     initialize!,
     queue,
     query,
+    isexecuted,
     ntimes
 
 @enum JobStatus begin
@@ -166,6 +167,8 @@ query(id::Integer; sortby = :created_time) =
     sort(filter(row -> row.id == id, JOB_REGISTRY), sortby)
 query(ids::AbstractVector{<:Integer}; sortby = :created_time) =
     map(id -> query(id; sortby = sortby), ids)
+
+isexecuted(job::Job) = job.id in JOB_REGISTRY.id
 
 ntimes(id::Integer) = size(query(id), 1)
 ntimes(job::Job) = ntimes(job.id)
