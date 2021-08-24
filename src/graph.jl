@@ -80,6 +80,7 @@ function lfork(x::Job, ys::AbstractVector{<:Job})
             x ▷ y
         end
     end
+    return ys
 end
 const ⋲ = lfork
 
