@@ -123,15 +123,16 @@ _call(f) = f()
 
 function queue(; sortby = :created_time)
     @assert sortby in (:created_time, :start_time, :stop_time, :duration, :status)
-    for row in eachrow(JOB_REGISTRY)
-        job = row.job
-        if job.start_time == row.start_time
-            row.stop_time = stoptime(job)
-            row.duration = elapsed(job)
-            row.status = getstatus(job)
-        end
-    end
-    return sort(JOB_REGISTRY, [:id, sortby])
+    df = DataFrame(
+        id = [job.id for job in JOB_REGISTRY],
+        def = [string(job.def) for job in JOB_REGISTRY],
+        created_time = [job.created_time for job in JOB_REGISTRY],
+        start_time = map(starttime, JOB_REGISTRY),
+        stop_time = map(stoptime, JOB_REGISTRY),
+        duration = map(elapsed, JOB_REGISTRY),
+        status = map(getstatus, JOB_REGISTRY),
+    )
+    return sort(df, [:id, sortby])
 end
 
 query(id::Integer) = filter(row -> row.id == id, JOB_REGISTRY)
