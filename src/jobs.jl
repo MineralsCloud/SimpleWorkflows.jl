@@ -48,7 +48,7 @@ mutable struct AtomicJob{T} <: Job
     max_time::Period
     status::JobStatus
     outmsg::String
-    ref::Union{Future,Nothing}
+    ref::Union{Task,Nothing}
     count::UInt64
     AtomicJob(
         def::T;
@@ -82,7 +82,7 @@ isinitialized(job::AtomicJob) =
 
 function run!(job::AtomicJob)
     if isinitialized(job)
-        job.ref = @spawn begin
+        job.ref = @async begin
             job.status = RUNNING
             job.start_time = now()
             if !isexecuted(job)
@@ -197,7 +197,7 @@ function interrupt!(job::AtomicJob)
         @info "the job $(job.id) has not started!"
         return job
     else
-        interrupt(job.ref.where)
+        schedule(job.ref, InterruptException(); error = true)
         return job
     end
 end
