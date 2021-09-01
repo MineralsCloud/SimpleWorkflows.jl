@@ -102,13 +102,15 @@ diamond(x::Job, ys::AbstractVector{<:Job}, z::Job) = (x ⋲ ys) ⋺ z
 const ⋄ = diamond
 
 function run!(w::Workflow; interval = 3)
-    for job in w.nodes  # The nodes have been topologically sorted.
-        if !issucceeded(job)
+    @sync for job in w.nodes  # The nodes have been topologically sorted.
+        @async if !issucceeded(job)
             if isrunning(job)
                 wait(job)
                 sleep(interval)
             else
                 run!(job)
+                wait(job)
+                sleep(interval)
             end
         end
     end
