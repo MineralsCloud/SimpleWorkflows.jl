@@ -109,6 +109,8 @@ function run!(w::Workflow; interval = 3)
                 sleep(interval)
             else
                 run!(job)
+                wait(job)
+                sleep(interval)
             end
         end
     end
