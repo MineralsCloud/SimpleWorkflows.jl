@@ -129,7 +129,7 @@ function run!(w::Workflow; sleep_job = 3, attempts = 5, sleep_attempt = 3)
                 end
             end
         end
-        return Workflow
+        return w
     end
 end
 
