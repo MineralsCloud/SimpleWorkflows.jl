@@ -105,7 +105,7 @@ function run!(w::Workflow; sleep_job = 3, attempts = 5, sleep_attempt = 3)
     @assert isinteger(attempts) && attempts >= 1
     if attempts > 1
         w = run!(w; sleep_job = sleep_job, attempts = 1)
-        if any(!issucceeded, w.nodes)
+        if any(!issucceeded(job) for job in w.nodes)
             sleep(sleep_attempt)
             return run!(
                 w;
@@ -123,7 +123,7 @@ function run!(w::Workflow; sleep_job = 3, attempts = 5, sleep_attempt = 3)
                     wait(job)
                     sleep(sleep_job)
                 else
-                    run!(job)
+                    run!(job; attempts = 1)
                     wait(job)
                     sleep(sleep_job)
                 end
