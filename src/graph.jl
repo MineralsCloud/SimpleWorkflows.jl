@@ -117,8 +117,8 @@ function run!(w::Workflow; sleep_job = 3, attempts = 5, sleep_attempt = 3)
             return w
         end
     else  # attempts == 1
-        @sync for job in w.nodes  # The nodes have been topologically sorted.
-            @async if !issucceeded(job)
+        for job in w.nodes  # The nodes have been topologically sorted.
+            if !issucceeded(job)
                 if isrunning(job)
                     wait(job)
                     sleep(sleep_job)
