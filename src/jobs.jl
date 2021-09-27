@@ -104,7 +104,7 @@ end
 function _run!(job::AtomicJob)
     try
         captured = capture() do
-            _call(job.def)
+            job.def()
         end
         job.stop_time = now()
         job.status = SUCCEEDED
@@ -122,9 +122,6 @@ function _run!(job::AtomicJob)
         job.count += 1
     end
 end
-
-_call(cmd::Base.AbstractCmd) = run(cmd)
-_call(f) = f()
 
 function queue(; sortby = :created_time)
     @assert sortby in
