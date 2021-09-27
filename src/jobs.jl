@@ -1,5 +1,6 @@
 using DataFrames: DataFrame, sort, filter
 using Dates: DateTime, Period, Day, now, format
+using LegibleLambdas: @λ
 using IOCapture: capture
 using Serialization: serialize, deserialize
 
@@ -64,6 +65,7 @@ mutable struct AtomicJob <: Job
         0,
     )
 end
+AtomicJob(cmd::Base.AbstractCmd; kwargs...) = AtomicJob(@λ(() -> run(cmd)); kwargs...)
 AtomicJob(job::AtomicJob) =
     AtomicJob(job.def; desc = job.desc, user = job.user, max_time = job.max_time)
 
