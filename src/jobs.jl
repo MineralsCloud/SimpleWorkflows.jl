@@ -222,21 +222,20 @@ function Base.show(io::IO, job::AtomicJob)
         Base.show_default(IOContext(io, :limit => true), job)  # From https://github.com/mauro3/Parameters.jl/blob/ecbf8df/src/Parameters.jl#L556
     else
         println(io, summary(job))
-        println(io, " id: ", job.id)
-        print(io, " def: ")
-        printstyled(io, job.def, '\n'; bold = true)
-        println(io, " status: ", getstatus(job))
+        println(io, ' ', "id: ", job.id)
+        print(io, ' ', "def: ")
+        show(io, job.def)
+        print(io, '\n', ' ', "status: ")
+        printstyled(io, getstatus(job); bold = true)
         if !ispending(job)
-            print(
-                io,
-                " timing: from ",
-                format(starttime(job), "HH:MM:SS u dd, yyyy"),
-                isrunning(job) ? ", still running..." :
-                ", to " * format(stoptime(job), "HH:MM:SS u dd, yyyy"),
-                ", uses ",
-                elapsed(job),
-                " seconds.",
-            )
+            println(io, '\n', ' ', "from: ", format(starttime(job), "dd-u-YYYY HH:MM:SS.s"))
+            print(io, ' ', "to: ")
+            if isrunning(job)
+                print(io, "still running...")
+            else
+                println(io, format(stoptime(job), "dd-u-YYYY HH:MM:SS.s"))
+                print(io, ' ', "uses: ", elapsed(job))
+            end
         end
     end
 end
