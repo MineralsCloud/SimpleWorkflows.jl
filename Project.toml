@@ -12,7 +12,7 @@ LightGraphs = "093fc24a-ae57-5d10-9952-331d41423f4d"
 Serialization = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
 
 [compat]
-DataFrames = "1"
+DataFrames = "0.13, 0.14, 0.15, 0.16, 0.17, 0.18, 0.19, 0.20, 0.21, 0.22, 1"
 IOCapture = "0.2"
 LegibleLambdas = "0.1, 0.2, 0.3"
 LightGraphs = "1"
