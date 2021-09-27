@@ -153,8 +153,28 @@ function Base.show(io::IO, w::Workflow)
         println(io, " ", w.graph)
         println(io, "jobs:")
         for (i, job) in enumerate(w.nodes)
-            println(io, " ", i, "] ", "id: ", job.id)
-            println(io, "    def: ", job.def)
+            println(io, " (", i, ") ", "id: ", job.id)
+            print(io, ' '^5, "def: ")
+            show(io, job.def)
+            print(io, '\n', ' '^5, "status: ")
+            printstyled(io, getstatus(job); bold = true)
+            if !ispending(job)
+                println(
+                    io,
+                    '\n',
+                    ' '^5,
+                    "from: ",
+                    format(starttime(job), "dd-u-YYYY HH:MM:SS.s"),
+                )
+                print(io, ' '^5, "to: ")
+                if isrunning(job)
+                    print(io, "still running...")
+                else
+                    println(io, format(stoptime(job), "dd-u-YYYY HH:MM:SS.s"))
+                    print(io, ' '^5, "uses: ", elapsed(job))
+                end
+            end
+            println(io)
         end
     end
 end
