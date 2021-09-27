@@ -1,25 +1,25 @@
 name = "SimpleWorkflows"
 uuid = "6a97d125-85da-4b66-b300-4bba10360563"
 authors = ["Qi Zhang <singularitti@outlook.com>"]
-version = "0.8.2-DEV"
+version = "0.9.1-DEV"
 
 [deps]
-DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
-IOCapture = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
+Serialization = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
 LegibleLambdas = "f1f30506-32fe-5131-bd72-7c197988f9e5"
 LightGraphs = "093fc24a-ae57-5d10-9952-331d41423f4d"
-Serialization = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
-
-[compat]
-DataFrames = "0.13, 0.14, 0.15, 0.16, 0.17, 0.18, 0.19, 0.20, 0.21, 0.22, 1"
-IOCapture = "0.2"
-LegibleLambdas = "0.1, 0.2, 0.3"
-LightGraphs = "1"
-julia = "1"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+IOCapture = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[compat]
+julia = "1"
+LegibleLambdas = "0.1, 0.2, 0.3"
+LightGraphs = "1"
+DataFrames = "0.13, 0.14, 0.15, 0.16, 0.17, 0.18, 0.19, 0.20, 0.21, 0.22, 1"
+IOCapture = "0.2"
 
 [targets]
 test = ["Test"]
