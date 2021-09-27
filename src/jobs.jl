@@ -36,9 +36,9 @@ end
 
 abstract type Job end
 # Reference: https://github.com/cihga39871/JobSchedulers.jl/blob/aca52de/src/jobs.jl#L35-L69
-mutable struct AtomicJob{T} <: Job
+mutable struct AtomicJob <: Job
     id::Int64
-    def::T
+    def::Function
     desc::String
     user::String
     created_time::DateTime
@@ -49,12 +49,7 @@ mutable struct AtomicJob{T} <: Job
     outmsg::String
     ref::Union{Task,Nothing}
     count::UInt64
-    AtomicJob(
-        def::T;
-        desc = "No description here.",
-        user = "",
-        max_time = Day(1),
-    ) where {T} = new{T}(
+    AtomicJob(def; desc = "No description here.", user = "", max_time = Day(1)) = new(
         generate_id(),
         def,
         desc,
