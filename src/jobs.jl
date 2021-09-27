@@ -1,5 +1,6 @@
 using DataFrames: DataFrame, sort, filter
 using Dates: DateTime, Period, Day, now, format
+using LegibleLambdas: @λ
 using IOCapture: capture
 using Serialization: serialize, deserialize
 
@@ -36,9 +37,9 @@ end
 
 abstract type Job end
 # Reference: https://github.com/cihga39871/JobSchedulers.jl/blob/aca52de/src/jobs.jl#L35-L69
-mutable struct AtomicJob{T} <: Job
+mutable struct AtomicJob <: Job
     id::Int64
-    def::T
+    def::Function
     desc::String
     user::String
     created_time::DateTime
@@ -49,12 +50,7 @@ mutable struct AtomicJob{T} <: Job
     outmsg::String
     ref::Union{Task,Nothing}
     count::UInt64
-    AtomicJob(
-        def::T;
-        desc = "No description here.",
-        user = "",
-        max_time = Day(1),
-    ) where {T} = new{T}(
+    AtomicJob(def; desc = "No description here.", user = "", max_time = Day(1)) = new(
         generate_id(),
         def,
         desc,
@@ -69,6 +65,7 @@ mutable struct AtomicJob{T} <: Job
         0,
     )
 end
+AtomicJob(cmd::Base.AbstractCmd; kwargs...) = AtomicJob(@λ(() -> run(cmd)); kwargs...)
 AtomicJob(job::AtomicJob) =
     AtomicJob(job.def; desc = job.desc, user = job.user, max_time = job.max_time)
 
@@ -109,7 +106,7 @@ end
 function _run!(job::AtomicJob)
     try
         captured = capture() do
-            _call(job.def)
+            job.def()
         end
         job.stop_time = now()
         job.status = SUCCEEDED
@@ -127,9 +124,6 @@ function _run!(job::AtomicJob)
         job.count += 1
     end
 end
-
-_call(cmd::Base.AbstractCmd) = run(cmd)
-_call(f) = f()
 
 function queue(; sortby = :created_time)
     @assert sortby in
