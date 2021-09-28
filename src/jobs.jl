@@ -50,7 +50,7 @@ mutable struct AtomicJob <: Job
     outmsg::String
     ref::Union{Task,Nothing}
     count::UInt64
-    AtomicJob(def; desc = "No description here.", user = "", max_time = Day(1)) = new(
+    AtomicJob(def; desc = "", user = "", max_time = Day(1)) = new(
         generate_id(),
         def,
         desc,
