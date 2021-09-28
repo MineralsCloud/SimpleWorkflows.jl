@@ -50,7 +50,7 @@ mutable struct AtomicJob <: Job
     outmsg::String
     ref::Union{Task,Nothing}
     count::UInt64
-    AtomicJob(def; desc = "No description here.", user = "", max_time = Day(1)) = new(
+    AtomicJob(def; desc = "", user = "", max_time = Day(1)) = new(
         generate_id(),
         def,
         desc,
@@ -223,6 +223,11 @@ function Base.show(io::IO, job::AtomicJob)
     else
         println(io, summary(job))
         println(io, ' ', "id: ", job.id)
+        if !isempty(job.desc)
+            print(io, ' ', "description: ")
+            show(io, job.desc)
+            println(io)
+        end
         print(io, ' ', "def: ")
         show(io, job.def)
         print(io, '\n', ' ', "status: ")
