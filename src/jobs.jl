@@ -223,6 +223,11 @@ function Base.show(io::IO, job::AtomicJob)
     else
         println(io, summary(job))
         println(io, ' ', "id: ", job.id)
+        if !isempty(job.desc)
+            print(io, ' ', "description: ")
+            show(io, job.desc)
+            println(io)
+        end
         print(io, ' ', "def: ")
         show(io, job.def)
         print(io, '\n', ' ', "status: ")
