@@ -1,7 +1,6 @@
 using DataFrames: DataFrame, sort, filter
 using Dates: DateTime, Period, Day, now, format
 using LegibleLambdas: @λ
-using IOCapture: capture
 using Serialization: serialize, deserialize
 
 export AtomicJob
@@ -105,20 +104,14 @@ function run!(job::AtomicJob; attempts = 5, sleep_attempt = 3)
 end
 function _run!(job::AtomicJob)
     try
-        captured = capture() do
-            job.def()
-        end
+        result = job.def()
         job.stop_time = now()
         job.status = SUCCEEDED
-        job.outmsg = captured.output
-        return captured.value
+        return result
     catch e
         job.stop_time = now()
         @error "come across `$e` when running!"
         job.status = e isa InterruptException ? INTERRUPTED : FAILED
-        if @isdefined captured  # The `captured` statement may fail
-            job.outmsg = captured.output
-        end
         return e
     finally
         job.count += 1
