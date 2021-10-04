@@ -17,15 +17,15 @@ const DEPENDENCIES = Dict{Job,Vector{AtomicJob}}()
 
 struct Workflow
     graph::DiGraph{Int}
-    nodes::Vector{AtomicJob}
-    function Workflow(graph, nodes)
+    jobs::Vector{AtomicJob}
+    function Workflow(graph, jobs)
         @assert !is_cyclic(graph) "`graph` must be an acyclic graph!"
-        @assert is_connected(graph) "`graph` is not connected! some nodes are not used!"
-        if nv(graph) != length(nodes)
-            throw(DimensionMismatch("`graph`'s size is different from `nodes`!"))
+        @assert is_connected(graph) "`graph` is not connected!"
+        if nv(graph) != length(jobs)
+            throw(DimensionMismatch("`graph`'s size is different from `jobs`!"))
         end
-        @assert unique(nodes) == nodes "at least two jobs are identical!"
-        return new(graph, nodes)
+        @assert unique(jobs) == jobs "at least two jobs are identical!"
+        return new(graph, jobs)
     end
 end
 function Workflow(jobs::Job...)
@@ -105,15 +105,15 @@ function run!(w::Workflow; nap_job = 3, attempts = 5, nap = 3)
     @assert isinteger(attempts) && attempts >= 1
     for _ in 1:attempts
         inner_run!(w; nap_job = nap_job)
-        if any(!issucceeded(job) for job in w.nodes)
+        if any(!issucceeded(job) for job in w.jobs)
             inner_run!(w; nap_job = nap_job)
-            all(issucceeded(job) for job in w.nodes) ? break : sleep(nap)
+            all(issucceeded(job) for job in w.jobs) ? break : sleep(nap)
         end
     end
     return w
 end
 function inner_run!(w::Workflow; nap_job)
-    for job in w.nodes  # The nodes have been topologically sorted.
+    for job in w.jobs  # The nodes have been topologically sorted.
         if !issucceeded(job)
             if isrunning(job)
                 wait(job)
@@ -134,7 +134,7 @@ function initialize!()
     return
 end
 function initialize!(w::Workflow)
-    for node in w.nodes
+    for node in w.jobs
         initialize!(node)
     end
     return w
@@ -147,7 +147,7 @@ function Base.show(io::IO, w::Workflow)
         println(io, summary(w))
         println(io, " ", w.graph)
         println(io, "jobs:")
-        for (i, job) in enumerate(w.nodes)
+        for (i, job) in enumerate(w.jobs)
             println(io, " (", i, ") ", "id: ", job.id)
             if !isempty(job.desc)
                 print(io, ' '^5, "description: ")
