@@ -78,27 +78,35 @@ isinitialized(job::AtomicJob) =
 function run!(job::AtomicJob; attempts = 5, sleep_attempt = 3)
     @assert isinteger(attempts) && attempts >= 1
     if attempts > 1
-        job = run!(job; attempts = 1)
-        if !issucceeded(job)
-            sleep(sleep_attempt)
-            return run!(job; attempts = attempts - 1, sleep_attempt = sleep_attempt)
-        else
+        if issucceeded(job)
             return job
+        else
+            job = run!(job; attempts = 1)
+            if !issucceeded(job)
+                sleep(sleep_attempt)
+                return run!(job; attempts = attempts - 1, sleep_attempt = sleep_attempt)
+            else
+                return job
+            end
         end
     else  # attempts == 1
-        if isinitialized(job)
-            job.ref = @async begin
-                job.status = RUNNING
-                job.start_time = now()
-                if !isexecuted(job)
-                    push!(JOB_REGISTRY, job)
-                end
-                _run!(job)
-            end
+        if issucceeded(job)
             return job
         else
-            job = initialize!(job)
-            return run!(job; attempts = 1)
+            if isinitialized(job)
+                job.ref = @async begin
+                    job.status = RUNNING
+                    job.start_time = now()
+                    if !isexecuted(job)
+                        push!(JOB_REGISTRY, job)
+                    end
+                    _run!(job)
+                end
+                return job
+            else
+                job = initialize!(job)
+                return run!(job; attempts = 1)
+            end
         end
     end
 end
