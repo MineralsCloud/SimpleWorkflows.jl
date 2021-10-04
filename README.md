@@ -10,3 +10,21 @@
 [![coverage report](https://gitlab.com/singularitti/SimpleWorkflows.jl/badges/master/coverage.svg)](https://gitlab.com/singularitti/SimpleWorkflows.jl/-/jobs)
 [![Coverage](https://codecov.io/gh/MineralsCloud/SimpleWorkflows.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/MineralsCloud/SimpleWorkflows.jl)
 [![Open in Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/organization/repository)
+
+Build workflows from atomic jobs. Run and monitor them.
+
+This package aims to be a combination of
+[`JobSchedulers.jl`](https://github.com/cihga39871/JobSchedulers.jl) and
+[`Dispatcher.jl`](https://github.com/invenia/Dispatcher.jl) (unmaintained).
+
+Please cite [this package as](https://arxiv.org/abs/2109.11724):
+```bibtex
+@misc{zhang2021textttexpress,
+      title={$\texttt{express}$: extensible, high-level workflows for swifter $\textit{ab initio}$ materials modeling},
+      author={Qi Zhang and Chaoxuan Gu and Jingyi Zhuang and Renata M. Wentzcovitch},
+      year={2021},
+      eprint={2109.11724},
+      archivePrefix={arXiv},
+      primaryClass={physics.comp-ph}
+}
+```
