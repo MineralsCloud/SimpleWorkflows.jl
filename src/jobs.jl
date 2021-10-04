@@ -94,8 +94,8 @@ function inner_run!(job::AtomicJob)
                 push!(JOB_REGISTRY, job)
             end
             core_run!(job)
-            return job
         end
+        return job
     else
         job = initialize!(job)
         return inner_run!(job)
