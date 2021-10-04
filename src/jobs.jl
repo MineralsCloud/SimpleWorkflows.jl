@@ -2,6 +2,7 @@ using DataFrames: DataFrame, sort, filter
 using Dates: DateTime, Period, Day, now, format
 using LegibleLambdas: @λ
 using Serialization: serialize, deserialize
+using TryCatch: @try
 
 export AtomicJob
 export getstatus,
@@ -102,17 +103,19 @@ function inner_run!(job::AtomicJob)
     end
 end
 function core_run!(job::AtomicJob)
-    try
-        result = job.def()
-        job.stop_time = now()
-        job.status = SUCCEEDED
-        return result
-    catch e
+    # See https://github.com/JuliaLang/julia/issues/21130#issuecomment-288423284
+    @try begin
+        global result = job.def()
+    @catch e
         job.stop_time = now()
         @error "come across `$e` when running!"
         job.status = e isa InterruptException ? INTERRUPTED : FAILED
         return e
-    finally
+    @else
+        job.stop_time = now()
+        job.status = SUCCEEDED
+        return result
+    @finally
         job.count += 1
     end
 end
