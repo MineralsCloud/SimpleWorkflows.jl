@@ -75,12 +75,12 @@ isinitialized(job::AtomicJob) =
     job.status === PENDING &&
     job.ref === nothing
 
-function run!(job::AtomicJob; attempts = 1, sleep_attempt = 3)
+function run!(job::AtomicJob; attempts = 1, nap = 3)
     @assert isinteger(attempts) && attempts >= 1
     for _ in 1:attempts
         if !issucceeded(job)
             inner_run!(job)
-            issucceeded(job) ? break : sleep(sleep_attempt)
+            issucceeded(job) ? break : sleep(nap)
         end
     end
     return job

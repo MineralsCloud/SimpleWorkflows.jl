@@ -101,27 +101,27 @@ const ⋺ = rfork
 diamond(x::Job, ys::AbstractVector{<:Job}, z::Job) = (x ⋲ ys) ⋺ z
 const ⋄ = diamond
 
-function run!(w::Workflow; sleep_job = 3, attempts = 5, sleep_attempt = 3)
+function run!(w::Workflow; nap_job = 3, attempts = 5, nap = 3)
     @assert isinteger(attempts) && attempts >= 1
     for _ in 1:attempts
-        inner_run!(w; sleep_job = sleep_job)
+        inner_run!(w; nap_job = nap_job)
         if any(!issucceeded(job) for job in w.nodes)
-            inner_run!(w; sleep_job = sleep_job)
-            all(issucceeded(job) for job in w.nodes) ? break : sleep(sleep_attempt)
+            inner_run!(w; nap_job = nap_job)
+            all(issucceeded(job) for job in w.nodes) ? break : sleep(nap)
         end
     end
     return w
 end
-function inner_run!(w::Workflow; sleep_job)
+function inner_run!(w::Workflow; nap_job)
     for job in w.nodes  # The nodes have been topologically sorted.
         if !issucceeded(job)
             if isrunning(job)
                 wait(job)
-                sleep(sleep_job)
+                sleep(nap_job)
             else
                 run!(job; attempts = 1)
                 wait(job)
-                sleep(sleep_job)
+                sleep(nap_job)
             end
         end
     end
