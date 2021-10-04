@@ -80,11 +80,8 @@ function run!(job::AtomicJob; attempts = 1, sleep_attempt = 3)
     for _ in 1:attempts
         if !issucceeded(job)
             inner_run!(job)
-            if issucceeded(job)
-                break
-            end
+            issucceeded(job) ? break : sleep(sleep_attempt)
         end
-        sleep(sleep_attempt)
     end
     return job
 end
