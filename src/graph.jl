@@ -103,34 +103,29 @@ const ⋄ = diamond
 
 function run!(w::Workflow; sleep_job = 3, attempts = 5, sleep_attempt = 3)
     @assert isinteger(attempts) && attempts >= 1
-    if attempts > 1
-        w = run!(w; sleep_job = sleep_job, attempts = 1)
+    for _ in 1:attempts
+        inner_run!(w; sleep_job = sleep_job)
         if any(!issucceeded(job) for job in w.nodes)
-            sleep(sleep_attempt)
-            return run!(
-                w;
-                sleep_job = sleep_job,
-                attempts = attempts - 1,
-                sleep_attempt = sleep_attempt,
-            )
-        else
-            return w
+            inner_run!(w; sleep_job = sleep_job)
+            all(issucceeded(job) for job in w.nodes) ? break : sleep(sleep_attempt)
         end
-    else  # attempts == 1
-        for job in w.nodes  # The nodes have been topologically sorted.
-            if !issucceeded(job)
-                if isrunning(job)
-                    wait(job)
-                    sleep(sleep_job)
-                else
-                    run!(job; attempts = 1)
-                    wait(job)
-                    sleep(sleep_job)
-                end
+    end
+    return w
+end
+function inner_run!(w::Workflow; sleep_job)
+    for job in w.nodes  # The nodes have been topologically sorted.
+        if !issucceeded(job)
+            if isrunning(job)
+                wait(job)
+                sleep(sleep_job)
+            else
+                run!(job; attempts = 1)
+                wait(job)
+                sleep(sleep_job)
             end
         end
-        return w
     end
+    return w
 end
 
 function initialize!()
