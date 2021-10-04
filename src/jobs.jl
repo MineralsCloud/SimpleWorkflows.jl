@@ -79,7 +79,7 @@ function run!(job::AtomicJob; attempts = 5, sleep_attempt = 3)
     @assert isinteger(attempts) && attempts >= 1
     for _ in 1:attempts
         if !issucceeded(job)
-            _iter_run!(job)
+            inner_run!(job)
             if issucceeded(job)
                 break
             end
@@ -88,7 +88,7 @@ function run!(job::AtomicJob; attempts = 5, sleep_attempt = 3)
     end
     return job
 end
-function _iter_run!(job::AtomicJob)
+function inner_run!(job::AtomicJob)
     if isinitialized(job)
         job.ref = @async begin
             job.status = RUNNING
@@ -96,15 +96,15 @@ function _iter_run!(job::AtomicJob)
             if !isexecuted(job)
                 push!(JOB_REGISTRY, job)
             end
-            _run!(job)
+            core_run!(job)
             return job
         end
     else
         job = initialize!(job)
-        return _iter_run!(job)
+        return inner_run!(job)
     end
 end
-function _run!(job::AtomicJob)
+function core_run!(job::AtomicJob)
     try
         result = job.def()
         job.stop_time = now()
