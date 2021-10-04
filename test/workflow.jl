@@ -10,5 +10,5 @@ j ▷ l ▷ k ▷ n ▷ m
 j ▷ k
 k ▷ m
 w = Workflow(l, k, j, m, n)
-@test w.nodes == Workflow(k, j, l, n, m).nodes == Workflow(k, l, m, n, j).nodes
+@test w.jobs == Workflow(k, j, l, n, m).jobs == Workflow(k, l, m, n, j).jobs
 run!(w)
