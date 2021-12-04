@@ -16,6 +16,7 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
 julia = "1"
+Graphs = "1.4"
 LegibleLambdas = "0.1, 0.2, 0.3"
 TryCatch = "0.1"
 DataFrames = "0.13, 0.14, 0.15, 0.16, 0.17, 0.18, 0.19, 0.20, 0.21, 0.22, 1"
