@@ -1,4 +1,4 @@
-using LightGraphs:
+using Graphs:
     AbstractGraph,
     DiGraph,
     add_edge!,
