@@ -1,7 +1,6 @@
 using DataFrames: DataFrame, sort, filter
 using Dates: DateTime, Period, Day, now, format
 using LegibleLambdas: @λ
-using Serialization: serialize, deserialize
 using TryCatch: @try
 
 export AtomicJob

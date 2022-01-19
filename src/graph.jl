@@ -10,6 +10,7 @@ using Graphs:
     topological_sort_by_dfs,
     src,
     dst
+using Serialization: serialize, deserialize
 
 export Workflow, dependencies, chain, lfork, rfork, diamond, ▷, ⋲, ⋺, ⋄
 
@@ -101,28 +102,36 @@ const ⋺ = rfork
 diamond(x::Job, ys::AbstractVector{<:Job}, z::Job) = (x ⋲ ys) ⋺ z
 const ⋄ = diamond
 
-function run!(w::Workflow; nap_job = 3, attempts = 5, nap = 3)
+function run!(w::Workflow; nap_job = 3, attempts = 5, nap = 3, saveas = "status.jls")
+    if isfile(saveas)
+        saved = open(saveas, "r") do io
+            deserialize(io)
+        end
+        if saved isa Workflow && saved.graph == w.graph
+            w = saved
+        end
+    end
     @assert isinteger(attempts) && attempts >= 1
     for _ in 1:attempts
-        inner_run!(w; nap_job = nap_job)
+        inner_run!(w; nap_job = nap_job, saveas = saveas)
         if any(!issucceeded(job) for job in w.jobs)
-            inner_run!(w; nap_job = nap_job)
+            inner_run!(w; nap_job = nap_job, saveas = saveas)
             all(issucceeded(job) for job in w.jobs) ? break : sleep(nap)
         end
     end
     return w
 end
-function inner_run!(w::Workflow; nap_job)
+function inner_run!(w::Workflow; nap_job, saveas)
     for job in w.jobs  # The nodes have been topologically sorted.
         if !issucceeded(job)
-            if isrunning(job)
-                wait(job)
-                sleep(nap_job)
-            else
+            if !isrunning(job)  # Run the job if it is not already running
                 run!(job; attempts = 1)
-                wait(job)
-                sleep(nap_job)
             end
+            wait(job)
+            open(saveas, "w") do io
+                serialize(io, w)
+            end
+            sleep(nap_job)
         end
     end
     return w
