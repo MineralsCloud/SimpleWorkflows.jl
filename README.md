@@ -16,6 +16,7 @@ This package aims to be a combination of
 [`Dispatcher.jl`](https://github.com/invenia/Dispatcher.jl) (unmaintained).
 
 Please cite [this package as](https://arxiv.org/abs/2109.11724):
+
 ```bibtex
 @misc{zhang2021textttexpress,
       title={$\texttt{express}$: extensible, high-level workflows for swifter $\textit{ab initio}$ materials modeling},
