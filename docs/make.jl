@@ -5,7 +5,7 @@ DocMeta.setdocmeta!(SimpleWorkflows, :DocTestSetup, :(using SimpleWorkflows); re
 
 makedocs(;
     modules=[SimpleWorkflows],
-    authors="Qi Zhang <singularitti@outlook.com>",
+    authors="Reno <singularitti@outlook.com>",
     repo="https://github.com/MineralsCloud/SimpleWorkflows.jl/blob/{commit}{path}#{line}",
     sitename="SimpleWorkflows.jl",
     format=Documenter.HTML(;
