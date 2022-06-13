@@ -25,6 +25,7 @@ export getstatus,
     query,
     isexecuted,
     ntimes
+export @job
 
 @enum JobStatus begin
     PENDING
@@ -67,6 +68,18 @@ end
 AtomicJob(cmd::Base.AbstractCmd; kwargs...) = AtomicJob(@λ(() -> run(cmd)); kwargs...)
 AtomicJob(job::AtomicJob) =
     AtomicJob(job.def; desc = job.desc, user = job.user, max_time = job.max_time)
+
+# Ideas from `@test`, see https://github.com/JuliaLang/julia/blob/6bd952c/stdlib/Test/src/Test.jl#L331-L341
+macro job(ex, kwargs...)
+    ex isa Expr && ex.head === :call || error("`@job` can only take a function call!")
+    ex = :(AtomicJob(@λ(() -> $(esc(ex)))))
+    for kwarg in kwargs
+        kwarg isa Expr && kwarg.head === :(=) || error("argument $kwarg is invalid!")
+        kwarg.head = :kw
+        push!(ex.args, kwarg)
+    end
+    return ex
+end
 
 const JOB_REGISTRY = Job[]
 
