@@ -12,7 +12,7 @@ using Graphs:
     dst
 using Serialization: serialize, deserialize
 
-export Workflow, dependencies, chain, lfork, rfork, diamond, ▷, ⋲, ⋺, ⋄
+export Workflow, chain, lfork, rfork, diamond, ▷, ⋲, ⋺, ⋄
 
 const DEPENDENCIES = Dict{Job,Vector{AtomicJob}}()
 
@@ -45,49 +45,37 @@ function Workflow(nodes::Node...)
     return Workflow(nodes, graph)
 end
 
-dependencies(job::Job) = get(DEPENDENCIES, job, AtomicJob[])
-
-function chain(a::Job, b::Job)
-    if a == b
-        throw(ArgumentError("a job cannot have itself as a dependency!"))
+function chain(x::Job, y::Job)
+    if x == y
+        throw(ArgumentError("a job cannot be followed by itself!"))
     else
-        if haskey(DEPENDENCIES, b)
-            if a ∉ DEPENDENCIES[b]  # Duplicate running will push the same job multiple times
-                push!(DEPENDENCIES[b], a)
-            end
-        else
-            push!(DEPENDENCIES, b => [a])  # Initialization
-        end
+        a, b = Node(x), Node(y)
+        push!(a.outgoing, b)
         return b
     end
 end
 function chain(xs::AbstractVector{<:Job}, ys::AbstractVector{<:Job})
+    if size(xs) != size(ys)
+        throw(DimensionMismatch("`xs` and `ys` must have the same size!"))
+    end
     for (x, y) in zip(xs, ys)
-        x ▷ y
+        chain(x, y)
     end
     return ys
 end
 const ▷ = chain
 
 function lfork(x::Job, ys::AbstractVector{<:Job})
-    if x in ys
-        throw(ArgumentError("a job cannot have itself as a dependency!"))
-    else
-        for y in ys
-            x ▷ y
-        end
+    for y in ys
+        chain(x, y)
     end
     return ys
 end
 const ⋲ = lfork
 
 function rfork(xs::AbstractVector{<:Job}, y::Job)
-    if y in xs
-        throw(ArgumentError("a job cannot have itself as a dependency!"))
-    else
-        for x in xs
-            x ▷ y
-        end
+    for x in xs
+        x ▷ y
     end
     return y
 end
