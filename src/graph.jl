@@ -22,10 +22,8 @@ struct Workflow
     function Workflow(graph, jobs)
         @assert !is_cyclic(graph) "`graph` must be an acyclic graph!"
         @assert is_connected(graph) "`graph` is not connected!"
-        if nv(graph) != length(jobs)
-            throw(DimensionMismatch("`graph`'s size is different from `jobs`!"))
-        end
-        @assert unique(jobs) == jobs "at least two jobs are identical!"
+        @assert nv(graph) == length(jobs) "`graph`'s size is different from `jobs`!"
+        @assert length(jobs) == length(unique(jobs)) "at least two jobs are identical!"
         return new(graph, jobs)
     end
 end
