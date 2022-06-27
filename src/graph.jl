@@ -21,6 +21,7 @@ struct Node
     incoming::Vector{Node}
     outgoing::Vector{Node}
 end
+Node(job) = Node(job, Node[], Node[])
 
 struct Workflow
     nodes::Vector{Node}
@@ -34,26 +35,14 @@ struct Workflow
         return new(nodes, graph)
     end
 end
-function Workflow(jobs::Job...)
-    graph = DiGraph(length(jobs))
-    dict = Dict(zip(jobs, 1:length(jobs)))
-    for (i, job) in enumerate(jobs)
-        for dependency in dependencies(job)
-            j = dict[dependency]
-            add_edge!(graph, j, i)
+function Workflow(nodes::Node...)
+    graph = DiGraph(length(nodes))
+    for (i, node) in enumerate(nodes)
+        for j in node.outgoing
+            add_edge!(graph, i, j)
         end
     end
-    order = topological_sort_by_dfs(graph)
-    new = collect(jobs[order])
-    graph = DiGraph(length(jobs))
-    dict = Dict(zip(jobs, 1:length(jobs)))
-    for (i, job) in enumerate(jobs)
-        for dependency in dependencies(job)
-            j = dict[dependency]
-            add_edge!(graph, j, i)
-        end
-    end
-    return Workflow(new, graph)
+    return Workflow(nodes, graph)
 end
 
 dependencies(job::Job) = get(DEPENDENCIES, job, AtomicJob[])
