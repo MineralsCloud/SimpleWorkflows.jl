@@ -16,15 +16,22 @@ export Workflow, dependencies, chain, lfork, rfork, diamond, ▷, ⋲, ⋺, ⋄
 
 const DEPENDENCIES = Dict{Job,Vector{AtomicJob}}()
 
+struct Node
+    job::AtomicJob
+    incoming::Vector{Node}
+    outgoing::Vector{Node}
+end
+
 struct Workflow
+    nodes::Vector{Node}
     graph::DiGraph{Int}
-    jobs::Vector{AtomicJob}
-    function Workflow(graph, jobs)
-        @assert !is_cyclic(graph) "`graph` must be an acyclic graph!"
-        @assert is_connected(graph) "`graph` is not connected!"
-        @assert nv(graph) == length(jobs) "`graph`'s size is different from `jobs`!"
+    function Workflow(nodes, graph)
+        @assert !is_cyclic(graph) "`graph` must be acyclic"
+        @assert is_connected(graph) "`graph` must be connected!"
+        @assert nv(graph) == length(nodes) "`graph` has different size from `nodes`!"
+        jobs = (node.job for node in nodes)
         @assert length(jobs) == length(unique(jobs)) "at least two jobs are identical!"
-        return new(graph, jobs)
+        return new(nodes, graph)
     end
 end
 function Workflow(jobs::Job...)
@@ -46,7 +53,7 @@ function Workflow(jobs::Job...)
             add_edge!(graph, j, i)
         end
     end
-    return Workflow(graph, new)
+    return Workflow(new, graph)
 end
 
 dependencies(job::Job) = get(DEPENDENCIES, job, AtomicJob[])
@@ -120,7 +127,7 @@ function run!(w::Workflow; nap_job = 3, attempts = 5, nap = 3, saveas = "status.
     return w
 end
 function inner_run!(w::Workflow; nap_job, saveas)
-    for job in w.jobs  # The nodes have been topologically sorted.
+    for job in w.nodes  # The nodes have been topologically sorted.
         if !issucceeded(job)
             if !isrunning(job)  # Run the job if it is not already running
                 run!(job; attempts = 1)
@@ -141,7 +148,7 @@ function initialize!()
     return
 end
 function initialize!(w::Workflow)
-    for node in w.jobs
+    for node in w.nodes
         initialize!(node)
     end
     return w
@@ -154,7 +161,7 @@ function Base.show(io::IO, w::Workflow)
         println(io, summary(w))
         println(io, " ", w.graph)
         println(io, "jobs:")
-        for (i, job) in enumerate(w.jobs)
+        for (i, job) in enumerate(w.nodes)
             println(io, " (", i, ") ", "id: ", job.id)
             if !isempty(job.desc)
                 print(io, ' '^5, "description: ")
