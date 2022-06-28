@@ -3,7 +3,7 @@ using Dates: DateTime, Period, Day, now, format
 using LegibleLambdas: @λ
 using TryCatch: @try
 
-export AtomicJob
+export Job
 export getstatus,
     getresult,
     description,
@@ -35,9 +35,8 @@ export @job
     INTERRUPTED
 end
 
-abstract type Job end
 # Reference: https://github.com/cihga39871/JobSchedulers.jl/blob/aca52de/src/jobs.jl#L35-L69
-mutable struct AtomicJob <: Job
+mutable struct Job
     id::Int64
     def::Function
     desc::String
@@ -50,7 +49,7 @@ mutable struct AtomicJob <: Job
     outmsg::String
     ref::Union{Task,Nothing}
     count::UInt64
-    AtomicJob(def; desc = "", user = "", max_time = Day(1)) = new(
+    Job(def; desc = "", user = "", max_time = Day(1)) = new(
         generate_id(),
         def,
         desc,
@@ -65,14 +64,13 @@ mutable struct AtomicJob <: Job
         0,
     )
 end
-AtomicJob(cmd::Base.AbstractCmd; kwargs...) = AtomicJob(@λ(() -> run(cmd)); kwargs...)
-AtomicJob(job::AtomicJob) =
-    AtomicJob(job.def; desc = job.desc, user = job.user, max_time = job.max_time)
+Job(cmd::Base.AbstractCmd; kwargs...) = Job(@λ(() -> run(cmd)); kwargs...)
+Job(job::Job) = Job(job.def; desc = job.desc, user = job.user, max_time = job.max_time)
 
 # Ideas from `@test`, see https://github.com/JuliaLang/julia/blob/6bd952c/stdlib/Test/src/Test.jl#L331-L341
 macro job(ex, kwargs...)
     ex isa Expr && ex.head === :call || error("`@job` can only take a function call!")
-    ex = :(AtomicJob(@λ(() -> $(esc(ex)))))
+    ex = :(Job(@λ(() -> $(esc(ex)))))
     for kwarg in kwargs
         kwarg isa Expr && kwarg.head === :(=) || error("argument $kwarg is invalid!")
         kwarg.head = :kw
@@ -83,12 +81,12 @@ end
 
 const JOB_REGISTRY = Job[]
 
-isinitialized(job::AtomicJob) =
+isinitialized(job::Job) =
     job.start_time == job.stop_time == DateTime(0) &&
     job.status === PENDING &&
     job.ref === nothing
 
-function run!(job::AtomicJob; attempts = 1, nap = 3)
+function run!(job::Job; attempts = 1, nap = 3)
     @assert isinteger(attempts) && attempts >= 1
     for _ in 1:attempts
         if !issucceeded(job)
@@ -98,7 +96,7 @@ function run!(job::AtomicJob; attempts = 1, nap = 3)
     end
     return job
 end
-function inner_run!(job::AtomicJob)
+function inner_run!(job::Job)
     if isinitialized(job)
         job.ref = @async begin
             job.status = RUNNING
@@ -114,7 +112,7 @@ function inner_run!(job::AtomicJob)
         return inner_run!(job)
     end
 end
-function core_run!(job::AtomicJob)
+function core_run!(job::Job)
     # See https://github.com/JuliaLang/julia/issues/21130#issuecomment-288423284
     @try begin
         global result = job.def()
@@ -191,7 +189,7 @@ getresult(x::Job) = isexited(x) ? Some(fetch(x.ref)) : nothing
 
 description(x::Job) = x.desc
 
-outmsg(x::AtomicJob) = isexited(x) ? x.outmsg : nothing
+outmsg(x::Job) = isexited(x) ? x.outmsg : nothing
 
 # From https://github.com/cihga39871/JobSchedulers.jl/blob/aca52de/src/jobs.jl#L6-L10
 function generate_id()
@@ -200,7 +198,7 @@ function generate_id()
     return time_value + rand_value
 end
 
-function interrupt!(job::AtomicJob)
+function interrupt!(job::Job)
     if isexited(job)
         @info "the job $(job.id) has already exited!"
         return job
@@ -213,7 +211,7 @@ function interrupt!(job::AtomicJob)
     end
 end
 
-function initialize!(job::AtomicJob)
+function initialize!(job::Job)
     job.start_time = DateTime(0)
     job.stop_time = DateTime(0)
     job.status = PENDING
@@ -224,7 +222,7 @@ end
 
 Base.wait(x::Job) = wait(x.ref)
 
-function Base.show(io::IO, job::AtomicJob)
+function Base.show(io::IO, job::Job)
     if get(io, :compact, false) || get(io, :typeinfo, nothing) == typeof(job)
         Base.show_default(IOContext(io, :limit => true), job)  # From https://github.com/mauro3/Parameters.jl/blob/ecbf8df/src/Parameters.jl#L556
     else

@@ -14,10 +14,10 @@ using Serialization: serialize, deserialize
 
 export Workflow, chain, lfork, rfork, diamond, ▷, ⋲, ⋺, ⋄
 
-const DEPENDENCIES = Dict{Job,Vector{AtomicJob}}()
+const DEPENDENCIES = Dict{Job,Vector{Job}}()
 
 struct Node
-    job::AtomicJob
+    job::Job
     incoming::Vector{Node}
     outgoing::Vector{Node}
 end
