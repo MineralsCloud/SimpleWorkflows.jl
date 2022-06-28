@@ -49,7 +49,9 @@ mutable struct Job
     outmsg::String
     ref::Union{Task,Nothing}
     count::UInt64
-    Job(def; desc = "", user = "", max_time = Day(1)) = new(
+    parents::Vector{Job}
+    children::Vector{Job}
+    Job(def; desc = "", user = "", max_time = Day(1), parents = [], children = []) = new(
         generate_id(),
         def,
         desc,
@@ -62,6 +64,8 @@ mutable struct Job
         "",
         nothing,
         0,
+        parents,
+        children,
     )
 end
 Job(cmd::Base.AbstractCmd; kwargs...) = Job(@λ(() -> run(cmd)); kwargs...)
