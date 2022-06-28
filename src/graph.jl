@@ -12,7 +12,7 @@ using Graphs:
     dst
 using Serialization: serialize, deserialize
 
-export Workflow, chain, lfork, rfork, diamond, ▷, ⋲, ⋺, ⋄
+export Workflow, chain, fork, converge, diamond, ▷, ⋲, ⋺, ⋄
 
 const DEPENDENCIES = Dict{Job,Vector{Job}}()
 
@@ -65,23 +65,23 @@ function chain(xs::AbstractVector{<:Job}, ys::AbstractVector{<:Job})
 end
 const ▷ = chain
 
-function lfork(x::Job, ys::AbstractVector{<:Job})
+function fork(x::Job, ys::AbstractVector{<:Job})
     for y in ys
         chain(x, y)
     end
     return ys
 end
-const ⋲ = lfork
+const ⋲ = fork
 
-function rfork(xs::AbstractVector{<:Job}, y::Job)
+function converge(xs::AbstractVector{<:Job}, y::Job)
     for x in xs
-        x ▷ y
+        chain(x, y)
     end
     return y
 end
-const ⋺ = rfork
+const ⋺ = converge
 
-diamond(x::Job, ys::AbstractVector{<:Job}, z::Job) = (x ⋲ ys) ⋺ z
+diamond(x::Job, ys::AbstractVector{<:Job}, z::Job) = converge(fork(x, ys), z)
 const ⋄ = diamond
 
 function run!(w::Workflow; nap_job = 3, attempts = 5, nap = 3, saveas = "status.jls")
