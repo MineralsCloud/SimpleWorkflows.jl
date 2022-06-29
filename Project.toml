@@ -17,8 +17,7 @@ TryCatch = "0.1"
 julia = "1"
 
 [extras]
-LegibleLambdas = "f1f30506-32fe-5131-bd72-7c197988f9e5"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "LegibleLambdas"]
+test = ["Test"]

@@ -86,11 +86,6 @@ end
 
 const JOB_REGISTRY = Job[]
 
-isinitialized(job::Job) =
-    job.start_time == job.stop_time == DateTime(0) &&
-    job.status === PENDING &&
-    job.ref === nothing
-
 function run!(job::Job; attempts = 1, nap = 3)
     @assert isinteger(attempts) && attempts >= 1
     for _ in 1:attempts
@@ -102,7 +97,7 @@ function run!(job::Job; attempts = 1, nap = 3)
     return job
 end
 function inner_run!(job::Job)
-    if !ispending(job)
+    if ispending(job)
         job.ref = @async begin
             job.status = RUNNING
             job.start_time = now()
