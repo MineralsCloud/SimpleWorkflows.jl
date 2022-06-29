@@ -97,7 +97,7 @@ function run!(job::Job; attempts = 1, nap = 3)
     return job
 end
 function inner_run!(job::Job)
-    if !ispending(job)
+    if ispending(job)
         job.ref = @async begin
             job.status = RUNNING
             job.start_time = now()
