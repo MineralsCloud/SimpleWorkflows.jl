@@ -6,9 +6,16 @@ CurrentModule = SimpleWorkflows
 
 Documentation for [SimpleWorkflows](https://github.com/MineralsCloud/SimpleWorkflows.jl).
 
-```@index
+## Manual Outline
+
+```@contents
+Pages = [
+    "installation.md",
+]
+Depth = 3
 ```
 
-```@autodocs
-Modules = [SimpleWorkflows]
+### Index
+
+```@index
 ```
