@@ -11,7 +11,7 @@
 
 Build workflows from atomic jobs. Run and monitor them.
 
-This package aims to be a combination of
+This package take inspiration from
 [`JobSchedulers.jl`](https://github.com/cihga39871/JobSchedulers.jl) and
 [`Dispatcher.jl`](https://github.com/invenia/Dispatcher.jl) (unmaintained).
 
