@@ -68,8 +68,14 @@ mutable struct Job
         children,
     )
 end
-Job(cmd::Base.AbstractCmd; kwargs...) = Job(@λ(() -> run(cmd)); kwargs...)
-Job(job::Job) = Job(job.def; desc = job.desc, user = job.user, max_time = job.max_time)
+Job(job::Job) = Job(
+    job.def;
+    desc = job.desc,
+    user = job.user,
+    max_time = job.max_time,
+    parents = job.parents,
+    children = job.children,
+)
 
 # Ideas from `@test`, see https://github.com/JuliaLang/julia/blob/6bd952c/stdlib/Test/src/Test.jl#L331-L341
 macro job(ex, kwargs...)
