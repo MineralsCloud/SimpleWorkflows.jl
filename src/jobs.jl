@@ -17,7 +17,6 @@ export getstatus,
     starttime,
     stoptime,
     elapsed,
-    outmsg,
     run!,
     interrupt!,
     queue,
@@ -45,7 +44,6 @@ mutable struct Job
     stop_time::DateTime
     max_time::Period
     status::JobStatus
-    outmsg::String
     ref::Union{Task,Nothing}
     count::UInt64
     parents::Vector{Job}
@@ -60,7 +58,6 @@ mutable struct Job
         DateTime(0),
         max_time,
         PENDING,
-        "",
         nothing,
         0,
         parents,
@@ -197,8 +194,6 @@ end
 getresult(x::Job) = isexited(x) ? Some(fetch(x.ref)) : nothing
 
 description(x::Job) = x.desc
-
-outmsg(x::Job) = isexited(x) ? x.outmsg : nothing
 
 # From https://github.com/cihga39871/JobSchedulers.jl/blob/aca52de/src/jobs.jl#L6-L10
 function generate_id()
