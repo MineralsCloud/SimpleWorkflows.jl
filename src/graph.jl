@@ -15,8 +15,6 @@ using Serialization: serialize, deserialize
 
 export Workflow, chain, fork, converge, diamond, ▷, ⋲, ⋺, ⋄
 
-const DEPENDENCIES = Dict{Job,Vector{Job}}()
-
 struct Workflow
     jobs::Vector{Job}
     graph::DiGraph{Int}
@@ -131,15 +129,8 @@ function inner_run!(w::Workflow; nap_job, saveas)
 end
 
 function initialize!()
-    empty!(DEPENDENCIES)
     empty!(JOB_REGISTRY)
     return
-end
-function initialize!(w::Workflow)
-    for node in w.jobs
-        initialize!(node)
-    end
-    return w
 end
 
 function Base.show(io::IO, w::Workflow)

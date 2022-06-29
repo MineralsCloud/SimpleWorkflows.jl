@@ -20,7 +20,6 @@ export getstatus,
     outmsg,
     run!,
     interrupt!,
-    initialize!,
     queue,
     query,
     isexecuted,
@@ -68,8 +67,14 @@ mutable struct Job
         children,
     )
 end
-Job(cmd::Base.AbstractCmd; kwargs...) = Job(@λ(() -> run(cmd)); kwargs...)
-Job(job::Job) = Job(job.def; desc = job.desc, user = job.user, max_time = job.max_time)
+Job(job::Job) = Job(
+    job.def;
+    desc = job.desc,
+    user = job.user,
+    max_time = job.max_time,
+    parents = job.parents,
+    children = job.children,
+)
 
 # Ideas from `@test`, see https://github.com/JuliaLang/julia/blob/6bd952c/stdlib/Test/src/Test.jl#L331-L341
 macro job(ex, kwargs...)
@@ -101,7 +106,7 @@ function run!(job::Job; attempts = 1, nap = 3)
     return job
 end
 function inner_run!(job::Job)
-    if isinitialized(job)
+    if !ispending(job)
         job.ref = @async begin
             job.status = RUNNING
             job.start_time = now()
@@ -112,7 +117,7 @@ function inner_run!(job::Job)
         end
         return job
     else
-        job = initialize!(job)
+        job.status = PENDING
         return inner_run!(job)
     end
 end
@@ -213,15 +218,6 @@ function interrupt!(job::Job)
         schedule(job.ref, InterruptException(); error = true)
         return job
     end
-end
-
-function initialize!(job::Job)
-    job.start_time = DateTime(0)
-    job.stop_time = DateTime(0)
-    job.status = PENDING
-    job.outmsg = ""
-    job.ref = nothing
-    return job
 end
 
 Base.wait(x::Job) = wait(x.ref)
