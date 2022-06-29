@@ -132,12 +132,6 @@ function initialize!()
     empty!(JOB_REGISTRY)
     return
 end
-function initialize!(w::Workflow)
-    for node in w.jobs
-        initialize!(node)
-    end
-    return w
-end
 
 function Base.show(io::IO, w::Workflow)
     if get(io, :compact, false) || get(io, :typeinfo, nothing) == typeof(w)
