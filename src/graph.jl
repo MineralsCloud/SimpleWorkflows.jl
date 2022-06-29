@@ -7,6 +7,7 @@ using Graphs:
     is_cyclic,
     is_connected,
     edges,
+    has_edge,
     topological_sort_by_dfs,
     src,
     dst
@@ -26,6 +27,33 @@ struct Workflow
         @assert length(jobs) == length(unique(jobs)) "at least two jobs are identical!"
         return new(jobs, graph)
     end
+end
+function Workflow(jobs::Job...)
+    all_possible_jobs = collect(jobs)
+    for job in all_possible_jobs
+        neighbors = vcat(job.parents, job.children)
+        for neighbor in neighbors
+            if neighbor ∉ all_possible_jobs
+                push!(all_possible_jobs, neighbor)  # This will alter `to_visit` dynamically
+            end
+        end
+    end
+    n = length(all_possible_jobs)
+    graph = DiGraph(n)
+    dict = IdDict(zip(all_possible_jobs, 1:n))
+    for (i, job) in enumerate(all_possible_jobs)
+        for parent in job.parents
+            if !has_edge(graph, dict[parent], i)
+                add_edge!(graph, dict[parent], i)
+            end
+        end
+        for child in job.children
+            if !has_edge(graph, i, dict[child])
+                add_edge!(graph, i, dict[child])
+            end
+        end
+    end
+    return Workflow(all_possible_jobs, graph)
 end
 
 function chain(x::Job, y::Job)
