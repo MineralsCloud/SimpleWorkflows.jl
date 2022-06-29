@@ -1,6 +1,6 @@
 module SimpleWorkflows
 
 include("jobs.jl")
-include("graph.jl")
+include("workflow.jl")
 
 end
