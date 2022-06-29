@@ -16,42 +16,25 @@ export Workflow, chain, fork, converge, diamond, ▷, ⋲, ⋺, ⋄
 
 const DEPENDENCIES = Dict{Job,Vector{Job}}()
 
-struct Node
-    job::Job
-    incoming::Vector{Node}
-    outgoing::Vector{Node}
-end
-Node(job) = Node(job, Node[], Node[])
-
 struct Workflow
-    nodes::Vector{Node}
+    jobs::Vector{Job}
     graph::DiGraph{Int}
-    function Workflow(nodes, graph)
+    function Workflow(jobs, graph)
         @assert !is_cyclic(graph) "`graph` must be acyclic"
         @assert is_connected(graph) "`graph` must be connected!"
-        @assert nv(graph) == length(nodes) "`graph` has different size from `nodes`!"
-        jobs = (node.job for node in nodes)
+        @assert nv(graph) == length(jobs) "`graph` has different size from `jobs`!"
         @assert length(jobs) == length(unique(jobs)) "at least two jobs are identical!"
-        return new(nodes, graph)
+        return new(jobs, graph)
     end
-end
-function Workflow(nodes::Node...)
-    graph = DiGraph(length(nodes))
-    for (i, node) in enumerate(nodes)
-        for j in node.outgoing
-            add_edge!(graph, i, j)
-        end
-    end
-    return Workflow(nodes, graph)
 end
 
 function chain(x::Job, y::Job)
     if x == y
         throw(ArgumentError("a job cannot be followed by itself!"))
     else
-        a, b = Node(x), Node(y)
-        push!(a.outgoing, b)
-        return b
+        push!(x.children, y)
+        push!(y.parents, x)
+        return y
     end
 end
 function chain(xs::AbstractVector{<:Job}, ys::AbstractVector{<:Job})
@@ -104,7 +87,7 @@ function run!(w::Workflow; nap_job = 3, attempts = 5, nap = 3, saveas = "status.
     return w
 end
 function inner_run!(w::Workflow; nap_job, saveas)
-    for job in w.nodes  # The nodes have been topologically sorted.
+    for job in w.jobs  # The nodes have been topologically sorted.
         if !issucceeded(job)
             if !isrunning(job)  # Run the job if it is not already running
                 run!(job; attempts = 1)
@@ -125,7 +108,7 @@ function initialize!()
     return
 end
 function initialize!(w::Workflow)
-    for node in w.nodes
+    for node in w.jobs
         initialize!(node)
     end
     return w
@@ -138,7 +121,7 @@ function Base.show(io::IO, w::Workflow)
         println(io, summary(w))
         println(io, " ", w.graph)
         println(io, "jobs:")
-        for (i, job) in enumerate(w.nodes)
+        for (i, job) in enumerate(w.jobs)
             println(io, " (", i, ") ", "id: ", job.id)
             if !isempty(job.desc)
                 print(io, ' '^5, "description: ")
