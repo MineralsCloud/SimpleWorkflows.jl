@@ -132,6 +132,7 @@ function __run!(jobs, graph; nap_job, saveas)  # This will modify `wf`
         @sync for job in jobs[queue]
             @async run!(job; attempts = 1, nap = nap_job)
         end
+        wait.(jobs[queue])
         rem_vertices!(graph, queue; keep_order = true)
         deleteat!(jobs, queue)
         return __run!(jobs, graph; nap_job = nap_job, saveas = saveas)
