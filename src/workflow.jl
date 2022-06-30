@@ -128,9 +128,6 @@ function __run!(jobs, graph; nap_job, saveas)  # This will modify `wf`
         @sync for job in jobs[queue]
             @async begin
                 run!(job; attempts = 1)
-                open(saveas, "w") do io
-                    serialize(io, wf)
-                end
                 sleep(nap_job)
             end
         end
