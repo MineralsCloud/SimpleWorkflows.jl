@@ -117,10 +117,10 @@ end
 function __run!(jobs, graph; nap_job, saveas)  # This will modify `wf`
     if isempty(jobs) && iszero(nv(graph))  # Stopping criterion
         return
-    elseif (isempty(jobs) && !iszero(nv(graph))) || (!isempty(jobs) && iszero(nv(graph)))
+    elseif isempty(jobs) && !iszero(nv(graph)) || !isempty(jobs) && iszero(nv(graph))
         throw(
             ArgumentError(
-                "either `jobs` is empty but `graph` is not or `graph` is empty but `jobs` is not!",
+                "either `jobs` is empty but `graph` is not, or `graph` is empty but `jobs` is not!",
             ),
         )
     else
