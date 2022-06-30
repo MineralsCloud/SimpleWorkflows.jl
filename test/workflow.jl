@@ -1,17 +1,20 @@
 using SimpleWorkflows
 
-j = @job (println("Start job `j`!"); run(`ls`)) user = "me" desc = "j"
-k = @job (println("Start job `k`!"); sleep(5)) desc = "k"
+i = @job (println("Start job `i`!"); sleep(5)) user = "me" desc = "i"
+j = @job (println("Start job `j`!"); sleep(3); exp(2)) user = "me" desc = "j"
+k = @job (println("Start job `k`!"); sleep(6)) desc = "k"
 l = @job (println("Start job `l`!"); run(`sleep 3`)) desc = "l" user = "me"
-m = @job (println("Start job `m`!"); sin(1)) desc = "m"
+m = @job (println("Start job `m`!"); sleep(3); sin(1)) desc = "m"
 n = @job (println("Start job `n`!"); run(`pwd` & `ls`)) user = "me" desc = "n"
-j ▷ k ▷ n ▷ m
+i ▷ l
+j ▷ k ▷ m ▷ n
 j ▷ l
-k ▷ m
+k ▷ n
 w = Workflow(k)
 # @test w.jobs == Workflow(k, j, l, n, m).jobs == Workflow(k, l, m, n, j).jobs
-run!(w; nap_job = 1, nap = 0, attempts = 1)
-@test something(getresult(j)) isa Base.Process
+run!(w; nap_job = 0, attempts = 1)
+@test something(getresult(i)) === nothing
+@test something(getresult(j)) == 7.38905609893065
 @test something(getresult(k)) === nothing
 @test something(getresult(l)) isa Base.Process
 @test something(getresult(m)) == 0.8414709848078965
