@@ -103,11 +103,12 @@ function run!(wf::Workflow; nap_job = 3, attempts = 5, nap = 1, saveas = "status
     for _ in 1:attempts
         if any(!issucceeded(job) for job in wf.jobs)
             _run!(wf; nap_job = nap_job, saveas = saveas)
-            if all(issucceeded(job) for job in wf.jobs)
-                break  # Stop immediately
-            else
-                sleep(nap)
-            end
+        end
+        if all(issucceeded(job) for job in wf.jobs)
+            break  # Stop immediately
+        end
+        if !iszero(nap)  # Still unsuccessful
+            sleep(nap)  # `if-else` is faster than `sleep(0)`
         end
     end
     return wf

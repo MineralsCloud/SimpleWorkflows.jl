@@ -91,10 +91,12 @@ function run!(job::Job; attempts = 1, nap = 0)
     for _ in 1:attempts
         if !issucceeded(job)
             _run!(job)
-            sleep(nap)
-            if issucceeded(job)
-                break
-            end
+        end
+        if issucceeded(job)
+            break  # Stop immediately
+        end
+        if !iszero(nap)  # Still unsuccessful
+            sleep(nap)  # `if-else` is faster than `sleep(0)`
         end
     end
     return job
