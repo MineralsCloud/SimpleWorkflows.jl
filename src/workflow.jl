@@ -90,24 +90,27 @@ const ⋺ = converge
 diamond(x::Job, ys::AbstractVector{<:Job}, z::Job) = converge(fork(x, ys), z)
 const ⋄ = diamond
 
-function run!(w::Workflow; nap_job = 3, attempts = 5, nap = 3, saveas = "status.jls")
+function run!(wf::Workflow; nap_job = 3, attempts = 5, nap = 1, saveas = "status.jls")
     @assert isinteger(attempts) && attempts >= 1
     if isfile(saveas)
         saved = open(saveas, "r") do io
             deserialize(io)
         end
-        if saved isa Workflow && saved.graph == w.graph
-            w = saved
+        if saved isa Workflow && saved.graph == wf.graph
+            wf = saved
         end
     end
     for _ in 1:attempts
-        _run!(w; nap_job = nap_job, saveas = saveas)
-        if any(!issucceeded(job) for job in w.jobs)
-            _run!(w; nap_job = nap_job, saveas = saveas)
-            all(issucceeded(job) for job in w.jobs) ? break : sleep(nap)
+        if any(!issucceeded(job) for job in wf.jobs)
+            _run!(wf; nap_job = nap_job, saveas = saveas)
+            if all(issucceeded(job) for job in wf.jobs)
+                break  # Stop immediately
+            else
+                sleep(nap)
+            end
         end
     end
-    return w
+    return wf
 end
 function _run!(wf::Workflow; nap_job, saveas)
     jobs, graph = copy(wf.jobs), copy(wf.graph)  # This separation is necessary, or else we call this every iteration of `core_run!`
