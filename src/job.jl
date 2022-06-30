@@ -199,14 +199,12 @@ end
 function interrupt!(job::Job)
     if isexited(job)
         @info "the job $(job.id) has already exited!"
-        return job
     elseif ispending(job)
         @info "the job $(job.id) has not started!"
-        return job
     else
         schedule(job.ref, InterruptException(); error = true)
-        return job
     end
+    return job
 end
 
 Base.wait(x::Job) = wait(x.ref)
