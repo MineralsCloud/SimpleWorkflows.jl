@@ -109,20 +109,37 @@ function run!(w::Workflow; nap_job = 3, attempts = 5, nap = 3, saveas = "status.
     end
     return w
 end
-function inner_run!(w::Workflow; nap_job, saveas)
-    for job in w.jobs  # The nodes have been topologically sorted.
-        if !issucceeded(job)
-            if !isrunning(job)  # Run the job if it is not already running
+function inner_run!(wf::Workflow; nap_job, saveas)
+    jobs, graph = wf.jobs, wf.graph  # This separation is necessary, or else we call this every iteration of `core_run!`
+    core_run!(wf, jobs, graph; nap_job, saveas)
+    return wf
+end
+function core_run!(wf, jobs, graph; nap_job, saveas)  # This will modify `wf`
+    if isempty(jobs) && iszero(nv(graph))
+        return
+    elseif (isempty(jobs) && !iszero(nv(graph))) || (!isempty(jobs) && iszero(nv(graph)))
+        throw(
+            ArgumentError(
+                "either `jobs` is empty but `graph` is not or `graph` is empty but `jobs` is not!",
+            ),
+        )
+    else
+        queue = findall(iszero, indegree(graph))
+        @sync for job in jobs[queue]
+            @async begin
                 run!(job; attempts = 1)
+                open(saveas, "w") do io
+                    serialize(io, wf)
+                end
+                sleep(nap_job)
             end
-            wait(job)
-            open(saveas, "w") do io
-                serialize(io, w)
-            end
-            sleep(nap_job)
         end
+        rem_vertices!(graph, queue; keep_order = true)
+        for i in queue
+            popat!(jobs, i)
+        end
+        return core_run!(wf, jobs, graph; nap_job, saveas)
     end
-    return w
 end
 
 function initialize!()
