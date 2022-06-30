@@ -110,7 +110,7 @@ function run!(w::Workflow; nap_job = 3, attempts = 5, nap = 3, saveas = "status.
     return w
 end
 function _run!(wf::Workflow; nap_job, saveas)
-    jobs, graph = wf.jobs, wf.graph  # This separation is necessary, or else we call this every iteration of `core_run!`
+    jobs, graph = copy(wf.jobs), copy(wf.graph)  # This separation is necessary, or else we call this every iteration of `core_run!`
     __run!(jobs, graph; nap_job, saveas)
     return wf
 end
