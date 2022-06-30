@@ -74,7 +74,6 @@ Job(job::Job) = Job(
 
 # Ideas from `@test`, see https://github.com/JuliaLang/julia/blob/6bd952c/stdlib/Test/src/Test.jl#L331-L341
 macro job(ex, kwargs...)
-    ex isa Expr && ex.head === :call || error("`@job` can only take a function call!")
     ex = :(Job(() -> $(esc(ex))))
     for kwarg in kwargs
         kwarg isa Expr && kwarg.head === :(=) || error("argument $kwarg is invalid!")
