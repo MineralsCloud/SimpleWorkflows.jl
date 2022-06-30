@@ -74,7 +74,6 @@ Job(job::Job) = Job(
 
 # Ideas from `@test`, see https://github.com/JuliaLang/julia/blob/6bd952c/stdlib/Test/src/Test.jl#L331-L341
 macro job(ex, kwargs...)
-    ex isa Expr && ex.head === :call || error("`@job` can only take a function call!")
     ex = :(Job(() -> $(esc(ex))))
     for kwarg in kwargs
         kwarg isa Expr && kwarg.head === :(=) || error("argument $kwarg is invalid!")
@@ -86,17 +85,22 @@ end
 
 const JOB_REGISTRY = Job[]
 
-function run!(job::Job; attempts = 1, nap = 3)
+function run!(job::Job; attempts = 1, nap = 1)
     @assert isinteger(attempts) && attempts >= 1
     for _ in 1:attempts
         if !issucceeded(job)
-            inner_run!(job)
-            issucceeded(job) ? break : sleep(nap)
+            _run!(job)
+        end
+        if issucceeded(job)
+            break  # Stop immediately
+        end
+        if !iszero(nap)  # Still unsuccessful
+            sleep(nap)  # `if-else` is faster than `sleep(0)`
         end
     end
     return job
 end
-function inner_run!(job::Job)
+function _run!(job::Job)
     if ispending(job)
         job.ref = @async begin
             job.status = RUNNING
@@ -104,15 +108,15 @@ function inner_run!(job::Job)
             if !isexecuted(job)
                 push!(JOB_REGISTRY, job)
             end
-            core_run!(job)
+            __run!(job)
         end
         return job
     else
         job.status = PENDING
-        return inner_run!(job)
+        return _run!(job)
     end
 end
-function core_run!(job::Job)
+function __run!(job::Job)
     # See https://github.com/JuliaLang/julia/issues/21130#issuecomment-288423284
     @try begin
         global result = job.def()
@@ -199,14 +203,12 @@ end
 function interrupt!(job::Job)
     if isexited(job)
         @info "the job $(job.id) has already exited!"
-        return job
     elseif ispending(job)
         @info "the job $(job.id) has not started!"
-        return job
     else
         schedule(job.ref, InterruptException(); error = true)
-        return job
     end
+    return job
 end
 
 Base.wait(x::Job) = wait(x.ref)

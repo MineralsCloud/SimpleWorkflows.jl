@@ -1,16 +1,13 @@
 using Graphs:
-    AbstractGraph,
     DiGraph,
     add_edge!,
-    add_vertices!,
     nv,
     is_cyclic,
     is_connected,
-    edges,
     has_edge,
     topological_sort_by_dfs,
-    src,
-    dst
+    indegree,
+    rem_vertices!
 using Serialization: serialize, deserialize
 
 export Workflow, chain, fork, converge, diamond, ▷, ⋲, ⋺, ⋄
@@ -32,7 +29,7 @@ function Workflow(jobs::Job...)
         neighbors = vcat(job.parents, job.children)
         for neighbor in neighbors
             if neighbor ∉ all_possible_jobs
-                push!(all_possible_jobs, neighbor)  # This will alter `to_visit` dynamically
+                push!(all_possible_jobs, neighbor)  # This will alter `all_possible_jobs` dynamically
             end
         end
     end
@@ -93,39 +90,53 @@ const ⋺ = converge
 diamond(x::Job, ys::AbstractVector{<:Job}, z::Job) = converge(fork(x, ys), z)
 const ⋄ = diamond
 
-function run!(w::Workflow; nap_job = 3, attempts = 5, nap = 3, saveas = "status.jls")
+function run!(wf::Workflow; nap_job = 1, attempts = 5, nap = 1, saveas = "status.jls")
+    @assert isinteger(attempts) && attempts >= 1
     if isfile(saveas)
         saved = open(saveas, "r") do io
             deserialize(io)
         end
-        if saved isa Workflow && saved.graph == w.graph
-            w = saved
+        if saved isa Workflow && saved.graph == wf.graph
+            wf = saved
         end
     end
-    @assert isinteger(attempts) && attempts >= 1
     for _ in 1:attempts
-        inner_run!(w; nap_job = nap_job, saveas = saveas)
-        if any(!issucceeded(job) for job in w.jobs)
-            inner_run!(w; nap_job = nap_job, saveas = saveas)
-            all(issucceeded(job) for job in w.jobs) ? break : sleep(nap)
+        if any(!issucceeded(job) for job in wf.jobs)
+            _run!(wf; nap_job = nap_job, saveas = saveas)
+        end
+        if all(issucceeded(job) for job in wf.jobs)
+            break  # Stop immediately
+        end
+        if !iszero(nap)  # Still unsuccessful
+            sleep(nap)  # `if-else` is faster than `sleep(0)`
         end
     end
-    return w
+    return wf
 end
-function inner_run!(w::Workflow; nap_job, saveas)
-    for job in w.jobs  # The nodes have been topologically sorted.
-        if !issucceeded(job)
-            if !isrunning(job)  # Run the job if it is not already running
-                run!(job; attempts = 1)
-            end
-            wait(job)
-            open(saveas, "w") do io
-                serialize(io, w)
-            end
-            sleep(nap_job)
+function _run!(wf::Workflow; nap_job, saveas)
+    jobs, graph = copy(wf.jobs), copy(wf.graph)  # This separation is necessary, or else we call this every iteration of `core_run!`
+    __run!(jobs, graph; nap_job = nap_job, saveas = saveas)
+    return wf
+end
+function __run!(jobs, graph; nap_job, saveas)  # This will modify `wf`
+    if isempty(jobs) && iszero(nv(graph))  # Stopping criterion
+        return
+    elseif isempty(jobs) && !iszero(nv(graph)) || !isempty(jobs) && iszero(nv(graph))
+        throw(
+            ArgumentError(
+                "either `jobs` is empty but `graph` is not, or `graph` is empty but `jobs` is not!",
+            ),
+        )
+    else
+        queue = findall(iszero, indegree(graph))
+        @sync for job in jobs[queue]
+            @async run!(job; attempts = 1, nap = nap_job)
         end
+        wait.(jobs[queue])
+        rem_vertices!(graph, queue; keep_order = true)
+        deleteat!(jobs, queue)
+        return __run!(jobs, graph; nap_job = nap_job, saveas = saveas)
     end
-    return w
 end
 
 function initialize!()
