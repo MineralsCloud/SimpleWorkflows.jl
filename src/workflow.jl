@@ -135,9 +135,7 @@ function __run!(jobs, graph; nap_job, saveas)  # This will modify `wf`
             end
         end
         rem_vertices!(graph, queue; keep_order = true)
-        for i in queue
-            popat!(jobs, i)
-        end
+        deleteat!(jobs, queue)
         return __run!(jobs, graph; nap_job, saveas)
     end
 end
