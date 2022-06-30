@@ -91,6 +91,7 @@ diamond(x::Job, ys::AbstractVector{<:Job}, z::Job) = converge(fork(x, ys), z)
 const ⋄ = diamond
 
 function run!(w::Workflow; nap_job = 3, attempts = 5, nap = 3, saveas = "status.jls")
+    @assert isinteger(attempts) && attempts >= 1
     if isfile(saveas)
         saved = open(saveas, "r") do io
             deserialize(io)
@@ -99,7 +100,6 @@ function run!(w::Workflow; nap_job = 3, attempts = 5, nap = 3, saveas = "status.
             w = saved
         end
     end
-    @assert isinteger(attempts) && attempts >= 1
     for _ in 1:attempts
         inner_run!(w; nap_job = nap_job, saveas = saveas)
         if any(!issucceeded(job) for job in w.jobs)
