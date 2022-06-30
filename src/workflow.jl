@@ -111,7 +111,7 @@ function run!(w::Workflow; nap_job = 3, attempts = 5, nap = 3, saveas = "status.
 end
 function _run!(wf::Workflow; nap_job, saveas)
     jobs, graph = copy(wf.jobs), copy(wf.graph)  # This separation is necessary, or else we call this every iteration of `core_run!`
-    __run!(jobs, graph; nap_job, saveas)
+    __run!(jobs, graph; nap_job = nap_job, saveas = saveas)
     return wf
 end
 function __run!(jobs, graph; nap_job, saveas)  # This will modify `wf`
@@ -133,7 +133,7 @@ function __run!(jobs, graph; nap_job, saveas)  # This will modify `wf`
         end
         rem_vertices!(graph, queue; keep_order = true)
         deleteat!(jobs, queue)
-        return __run!(jobs, graph; nap_job, saveas)
+        return __run!(jobs, graph; nap_job = nap_job, saveas = saveas)
     end
 end
 
