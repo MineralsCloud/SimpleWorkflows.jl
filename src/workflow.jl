@@ -1,16 +1,13 @@
 using Graphs:
-    AbstractGraph,
     DiGraph,
     add_edge!,
-    add_vertices!,
     nv,
     is_cyclic,
     is_connected,
-    edges,
     has_edge,
     topological_sort_by_dfs,
-    src,
-    dst
+    indegree,
+    rem_vertices!
 using Serialization: serialize, deserialize
 
 export Workflow, chain, fork, converge, diamond, ▷, ⋲, ⋺, ⋄
@@ -32,7 +29,7 @@ function Workflow(jobs::Job...)
         neighbors = vcat(job.parents, job.children)
         for neighbor in neighbors
             if neighbor ∉ all_possible_jobs
-                push!(all_possible_jobs, neighbor)  # This will alter `to_visit` dynamically
+                push!(all_possible_jobs, neighbor)  # This will alter `all_possible_jobs` dynamically
             end
         end
     end
