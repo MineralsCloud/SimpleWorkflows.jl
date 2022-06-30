@@ -101,21 +101,21 @@ function run!(w::Workflow; nap_job = 3, attempts = 5, nap = 3, saveas = "status.
         end
     end
     for _ in 1:attempts
-        inner_run!(w; nap_job = nap_job, saveas = saveas)
+        _run!(w; nap_job = nap_job, saveas = saveas)
         if any(!issucceeded(job) for job in w.jobs)
-            inner_run!(w; nap_job = nap_job, saveas = saveas)
+            _run!(w; nap_job = nap_job, saveas = saveas)
             all(issucceeded(job) for job in w.jobs) ? break : sleep(nap)
         end
     end
     return w
 end
-function inner_run!(wf::Workflow; nap_job, saveas)
+function _run!(wf::Workflow; nap_job, saveas)
     jobs, graph = wf.jobs, wf.graph  # This separation is necessary, or else we call this every iteration of `core_run!`
-    core_run!(wf, jobs, graph; nap_job, saveas)
+    __run!(jobs, graph; nap_job, saveas)
     return wf
 end
-function core_run!(wf, jobs, graph; nap_job, saveas)  # This will modify `wf`
-    if isempty(jobs) && iszero(nv(graph))
+function __run!(jobs, graph; nap_job, saveas)  # This will modify `wf`
+    if isempty(jobs) && iszero(nv(graph))  # Stopping criterion
         return
     elseif (isempty(jobs) && !iszero(nv(graph))) || (!isempty(jobs) && iszero(nv(graph)))
         throw(
@@ -138,7 +138,7 @@ function core_run!(wf, jobs, graph; nap_job, saveas)  # This will modify `wf`
         for i in queue
             popat!(jobs, i)
         end
-        return core_run!(wf, jobs, graph; nap_job, saveas)
+        return __run!(jobs, graph; nap_job, saveas)
     end
 end
 

@@ -90,13 +90,13 @@ function run!(job::Job; attempts = 1, nap = 3)
     @assert isinteger(attempts) && attempts >= 1
     for _ in 1:attempts
         if !issucceeded(job)
-            inner_run!(job)
+            _run!(job)
             issucceeded(job) ? break : sleep(nap)
         end
     end
     return job
 end
-function inner_run!(job::Job)
+function _run!(job::Job)
     if ispending(job)
         job.ref = @async begin
             job.status = RUNNING
@@ -104,15 +104,15 @@ function inner_run!(job::Job)
             if !isexecuted(job)
                 push!(JOB_REGISTRY, job)
             end
-            core_run!(job)
+            __run!(job)
         end
         return job
     else
         job.status = PENDING
-        return inner_run!(job)
+        return _run!(job)
     end
 end
-function core_run!(job::Job)
+function __run!(job::Job)
     # See https://github.com/JuliaLang/julia/issues/21130#issuecomment-288423284
     @try begin
         global result = job.def()
