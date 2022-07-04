@@ -144,14 +144,14 @@ function initialize!()
     return
 end
 
-function Base.show(io::IO, w::Workflow)
-    if get(io, :compact, false) || get(io, :typeinfo, nothing) == typeof(w)
-        Base.show_default(IOContext(io, :limit => true), w)  # From https://github.com/mauro3/Parameters.jl/blob/ecbf8df/src/Parameters.jl#L556
+function Base.show(io::IO, wf::Workflow)
+    if get(io, :compact, false) || get(io, :typeinfo, nothing) == typeof(wf)
+        Base.show_default(IOContext(io, :limit => true), wf)  # From https://github.com/mauro3/Parameters.jl/blob/ecbf8df/src/Parameters.jl#L556
     else
-        println(io, summary(w))
-        println(io, " ", w.graph)
+        println(io, summary(wf))
+        println(io, ' ', wf.graph)
         println(io, "jobs:")
-        for (i, job) in enumerate(w.jobs)
+        for (i, job) in enumerate(wf.jobs)
             println(io, " (", i, ") ", "id: ", job.id)
             if !isempty(job.desc)
                 print(io, ' '^5, "description: ")
@@ -163,14 +163,16 @@ function Base.show(io::IO, w::Workflow)
             print(io, '\n', ' '^5, "status: ")
             printstyled(io, getstatus(job); bold = true)
             if !ispending(job)
-                println(
+                print(
                     io,
                     '\n',
                     ' '^5,
                     "from: ",
                     format(starttime(job), "dd-u-YYYY HH:MM:SS.s"),
+                    '\n',
+                    ' '^5,
+                    "to: ",
                 )
-                print(io, ' '^5, "to: ")
                 if isrunning(job)
                     print(io, "still running...")
                 else
