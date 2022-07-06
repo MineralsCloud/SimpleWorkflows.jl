@@ -85,9 +85,9 @@ end
 
 const JOB_REGISTRY = Job[]
 
-function run!(job::Job; attempts = 1, nap = 1)
-    @assert isinteger(attempts) && attempts >= 1
-    for _ in 1:attempts
+function run!(job::Job; n = 1, nap = 1)
+    @assert isinteger(n) && n >= 1
+    for _ in 1:n
         if !issucceeded(job)
             _run!(job)
         end

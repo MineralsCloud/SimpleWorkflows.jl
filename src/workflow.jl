@@ -90,8 +90,8 @@ const ⋺ = converge
 diamond(x::Job, ys::AbstractVector{<:Job}, z::Job) = converge(fork(x, ys), z)
 const ⋄ = diamond
 
-function run!(wf::Workflow; nap_job = 1, attempts = 5, nap = 1, saveas = "status.jls")
-    @assert isinteger(attempts) && attempts >= 1
+function run!(wf::Workflow; nap_job = 1, n = 5, nap = 1, saveas = "status.jls")
+    @assert isinteger(n) && n >= 1
     if isfile(saveas)
         saved = open(saveas, "r") do io
             deserialize(io)
@@ -100,7 +100,7 @@ function run!(wf::Workflow; nap_job = 1, attempts = 5, nap = 1, saveas = "status
             wf = saved
         end
     end
-    for _ in 1:attempts
+    for _ in 1:n
         if any(!issucceeded(job) for job in wf.jobs)
             _run!(wf; nap_job = nap_job, saveas = saveas)
         end
@@ -130,7 +130,7 @@ function __run!(jobs, graph; nap_job, saveas)  # This will modify `wf`
     else
         queue = findall(iszero, indegree(graph))
         @sync for job in jobs[queue]
-            @async run!(job; attempts = 1, nap = nap_job)
+            @async run!(job; n = 1, nap = nap_job)
         end
         wait.(jobs[queue])
         rem_vertices!(graph, queue; keep_order = true)
