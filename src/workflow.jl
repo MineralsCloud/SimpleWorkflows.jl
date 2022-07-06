@@ -12,6 +12,11 @@ using Serialization: serialize, deserialize
 
 export Workflow, chain, fork, converge, diamond, ▷, ⋲, ⋺, ⋄
 
+"""
+    Workflow(jobs, graph)
+
+Create a `Workflow` from a list of `Job`s and a graph representing their relations.
+"""
 struct Workflow
     jobs::Vector{Job}
     graph::DiGraph{Int}
@@ -23,6 +28,14 @@ struct Workflow
         return new(jobs, graph)
     end
 end
+"""
+    Workflow(jobs::Job...)
+
+Create a `Workflow` from a given series of `Job`s.
+
+The list of `Job`s does not have to be complete, our algorithm will find all connected `Job`s
+automatically.
+"""
 function Workflow(jobs::Job...)
     all_possible_jobs = collect(jobs)
     for job in all_possible_jobs
@@ -51,6 +64,12 @@ function Workflow(jobs::Job...)
     return Workflow(all_possible_jobs, graph)
 end
 
+"""
+    chain(x::Job, y::Job)
+    x ▷ y
+
+Chain two `Job`s one after another.
+"""
 function chain(x::Job, y::Job)
     if x == y
         throw(ArgumentError("a job cannot be followed by itself!"))
@@ -60,6 +79,12 @@ function chain(x::Job, y::Job)
         return y
     end
 end
+"""
+    chain(xs::AbstractVector{<:Job}, ys::AbstractVector{<:Job})
+    xs ▷ ys
+
+Chain two vectors of `Job`s.
+"""
 function chain(xs::AbstractVector{<:Job}, ys::AbstractVector{<:Job})
     if size(xs) != size(ys)
         throw(DimensionMismatch("`xs` and `ys` must have the same size!"))
@@ -71,6 +96,12 @@ function chain(xs::AbstractVector{<:Job}, ys::AbstractVector{<:Job})
 end
 const ▷ = chain
 
+"""
+    fork(x::Job, ys::AbstractVector{<:Job})
+    x ⋲ ys
+
+Attach a group of parallel `Job`s (`ys`) to a single `Job` (`x`).
+"""
 function fork(x::Job, ys::AbstractVector{<:Job})
     for y in ys
         chain(x, y)
@@ -79,6 +110,12 @@ function fork(x::Job, ys::AbstractVector{<:Job})
 end
 const ⋲ = fork
 
+"""
+    converge(xs::AbstractVector{<:Job}, y::Job)
+    xs ⋺ y
+
+Finish a group a parallel `Job`s (`xs`) by a single `Job` (`y`).
+"""
 function converge(xs::AbstractVector{<:Job}, y::Job)
     for x in xs
         chain(x, y)
@@ -87,9 +124,21 @@ function converge(xs::AbstractVector{<:Job}, y::Job)
 end
 const ⋺ = converge
 
+"""
+    diamond(x::Job, ys::AbstractVector{<:Job}, z::Job)
+
+Start from `Job` (`x`), followed by a series of `Job`s (`ys`), finished by a single `Job` (`z`).
+"""
 diamond(x::Job, ys::AbstractVector{<:Job}, z::Job) = converge(fork(x, ys), z)
 const ⋄ = diamond
 
+"""
+    run!(job::Job; n=5, δt=1, Δt=1)
+
+Run a `Workflow` with maximum `n` attempts, with each attempt separated by `Δt` seconds.
+
+Cool down for `δt` seconds after each `Job` in the `Workflow`.
+"""
 function run!(wf::Workflow; δt = 1, n = 5, Δt = 1, filename = "status.jls")
     @assert isinteger(n) && n >= 1
     if isfile(filename)
