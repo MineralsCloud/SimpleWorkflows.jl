@@ -90,10 +90,10 @@ const ⋺ = converge
 diamond(x::Job, ys::AbstractVector{<:Job}, z::Job) = converge(fork(x, ys), z)
 const ⋄ = diamond
 
-function run!(wf::Workflow; δt = 1, n = 5, Δt = 1, saveas = "status.jls")
+function run!(wf::Workflow; δt = 1, n = 5, Δt = 1, filename = "status.jls")
     @assert isinteger(n) && n >= 1
-    if isfile(saveas)
-        saved = open(saveas, "r") do io
+    if isfile(filename)
+        saved = open(filename, "r") do io
             deserialize(io)
         end
         if saved isa Workflow && saved.graph == wf.graph
@@ -102,7 +102,7 @@ function run!(wf::Workflow; δt = 1, n = 5, Δt = 1, saveas = "status.jls")
     end
     for _ in 1:n
         if any(!issucceeded(job) for job in wf.jobs)
-            _run!(wf; δt = δt, saveas = saveas)
+            _run!(wf; δt = δt, filename = filename)
         end
         if all(issucceeded(job) for job in wf.jobs)
             break  # Stop immediately
@@ -113,12 +113,12 @@ function run!(wf::Workflow; δt = 1, n = 5, Δt = 1, saveas = "status.jls")
     end
     return wf
 end
-function _run!(wf::Workflow; δt, saveas)
+function _run!(wf::Workflow; δt, filename)
     jobs, graph = copy(wf.jobs), copy(wf.graph)  # This separation is necessary, or else we call this every iteration of `core_run!`
-    __run!(jobs, graph; δt = δt, saveas = saveas)
+    __run!(jobs, graph; δt = δt, filename = filename)
     return wf
 end
-function __run!(jobs, graph; δt, saveas)  # This will modify `wf`
+function __run!(jobs, graph; δt, filename)  # This will modify `wf`
     if isempty(jobs) && iszero(nv(graph))  # Stopping criterion
         return
     elseif isempty(jobs) && !iszero(nv(graph)) || !isempty(jobs) && iszero(nv(graph))
@@ -135,7 +135,7 @@ function __run!(jobs, graph; δt, saveas)  # This will modify `wf`
         wait.(jobs[queue])
         rem_vertices!(graph, queue; keep_order = true)
         deleteat!(jobs, queue)
-        return __run!(jobs, graph; δt = δt, saveas = saveas)
+        return __run!(jobs, graph; δt = δt, filename = filename)
     end
 end
 
