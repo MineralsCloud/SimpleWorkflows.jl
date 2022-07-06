@@ -12,7 +12,7 @@ j ▷ l
 k ▷ n
 w = Workflow(k)
 # @test w.jobs == Workflow(k, j, l, n, m).jobs == Workflow(k, l, m, n, j).jobs
-run!(w; nap_job = 0, attempts = 1)
+run!(w; δt = 0, n = 1)
 @test something(getresult(i)) === nothing
 @test something(getresult(j)) == 7.38905609893065
 @test something(getresult(k)) === nothing

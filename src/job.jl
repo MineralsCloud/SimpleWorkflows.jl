@@ -85,17 +85,17 @@ end
 
 const JOB_REGISTRY = Job[]
 
-function run!(job::Job; attempts = 1, nap = 1)
-    @assert isinteger(attempts) && attempts >= 1
-    for _ in 1:attempts
+function run!(job::Job; n = 1, δt = 1)
+    @assert isinteger(n) && n >= 1
+    for _ in 1:n
         if !issucceeded(job)
             _run!(job)
         end
         if issucceeded(job)
             break  # Stop immediately
         end
-        if !iszero(nap)  # Still unsuccessful
-            sleep(nap)  # `if-else` is faster than `sleep(0)`
+        if !iszero(δt)  # Still unsuccessful
+            sleep(δt)  # `if-else` is faster than `sleep(0)`
         end
     end
     return job

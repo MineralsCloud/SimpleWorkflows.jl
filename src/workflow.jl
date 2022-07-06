@@ -90,35 +90,35 @@ const ⋺ = converge
 diamond(x::Job, ys::AbstractVector{<:Job}, z::Job) = converge(fork(x, ys), z)
 const ⋄ = diamond
 
-function run!(wf::Workflow; nap_job = 1, attempts = 5, nap = 1, saveas = "status.jls")
-    @assert isinteger(attempts) && attempts >= 1
-    if isfile(saveas)
-        saved = open(saveas, "r") do io
+function run!(wf::Workflow; δt = 1, n = 5, Δt = 1, filename = "status.jls")
+    @assert isinteger(n) && n >= 1
+    if isfile(filename)
+        saved = open(filename, "r") do io
             deserialize(io)
         end
         if saved isa Workflow && saved.graph == wf.graph
             wf = saved
         end
     end
-    for _ in 1:attempts
+    for _ in 1:n
         if any(!issucceeded(job) for job in wf.jobs)
-            _run!(wf; nap_job = nap_job, saveas = saveas)
+            _run!(wf; δt = δt, filename = filename)
         end
         if all(issucceeded(job) for job in wf.jobs)
             break  # Stop immediately
         end
-        if !iszero(nap)  # Still unsuccessful
-            sleep(nap)  # `if-else` is faster than `sleep(0)`
+        if !iszero(Δt)  # If still unsuccessful
+            sleep(Δt)  # `if-else` is faster than `sleep(0)`
         end
     end
     return wf
 end
-function _run!(wf::Workflow; nap_job, saveas)
+function _run!(wf::Workflow; δt, filename)
     jobs, graph = copy(wf.jobs), copy(wf.graph)  # This separation is necessary, or else we call this every iteration of `core_run!`
-    __run!(jobs, graph; nap_job = nap_job, saveas = saveas)
+    __run!(jobs, graph; δt = δt, filename = filename)
     return wf
 end
-function __run!(jobs, graph; nap_job, saveas)  # This will modify `wf`
+function __run!(jobs, graph; δt, filename)  # This will modify `wf`
     if isempty(jobs) && iszero(nv(graph))  # Stopping criterion
         return
     elseif isempty(jobs) && !iszero(nv(graph)) || !isempty(jobs) && iszero(nv(graph))
@@ -130,12 +130,12 @@ function __run!(jobs, graph; nap_job, saveas)  # This will modify `wf`
     else
         queue = findall(iszero, indegree(graph))
         @sync for job in jobs[queue]
-            @async run!(job; attempts = 1, nap = nap_job)
+            @async run!(job; n = 1, δt = δt)
         end
         wait.(jobs[queue])
         rem_vertices!(graph, queue; keep_order = true)
         deleteat!(jobs, queue)
-        return __run!(jobs, graph; nap_job = nap_job, saveas = saveas)
+        return __run!(jobs, graph; δt = δt, filename = filename)
     end
 end
 
