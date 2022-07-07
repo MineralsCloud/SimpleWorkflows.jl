@@ -11,6 +11,7 @@ Documentation for [SimpleWorkflows](https://github.com/MineralsCloud/SimpleWorkf
 ```@contents
 Pages = [
     "installation.md",
+    "api.md",
 ]
 Depth = 3
 ```

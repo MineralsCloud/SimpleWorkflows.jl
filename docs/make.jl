@@ -18,6 +18,7 @@ makedocs(;
         "Manual" => [
             "Installation guide" => "installation.md",
         ],
+        "API" => "api.md",
     ],
 )
 
