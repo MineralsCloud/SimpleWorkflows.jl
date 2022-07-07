@@ -17,7 +17,10 @@ makedocs(;
         "Home" => "index.md",
         "Manual" => [
             "Installation guide" => "installation.md",
+            "Contributing" => "contributing.md",
         ],
+        "Library" => "public.md",
+        "Troubleshooting" => "troubleshooting.md",
     ],
 )
 
