@@ -249,14 +249,14 @@ createdtime(job::Job) = job.created_time
 
 """
     starttime(job::Job)
-    
+
 Return the start time of a `Job`. Return `nothing` if it is still pending.
 """
 starttime(job::Job) = ispending(job) ? nothing : job.start_time
 
 """
     stoptime(job::Job)
-    
+
 Return the stop time of a `Job`. Return `nothing` if it has not exited.
 """
 stoptime(job::Job) = isexited(job) ? job.stop_time : nothing
@@ -284,7 +284,7 @@ end
 
 Get the running result of a `Job`.
 
-The result is wrapped by a [`Some`](@ref) type. Use [`something`](@ref) to retrieve its value.
+The result is wrapped by a `Some` type. Use `something` to retrieve its value.
 If it is `nothing`, the `Job` is not finished.
 """
 getresult(job::Job) = isexited(job) ? Some(fetch(job.ref)) : nothing
