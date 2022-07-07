@@ -20,6 +20,7 @@ makedocs(;
             "Contributing" => "contributing.md",
         ],
         "Library" => "public.md",
+        "Troubleshooting" => "troubleshooting.md",
     ],
 )
 

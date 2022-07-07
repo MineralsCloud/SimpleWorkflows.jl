@@ -66,6 +66,7 @@ a few guidelines that should be followed when opening pull requests and contribu
 Pages = [
     "installation.md",
     "contributing.md",
+    "troubleshooting.md",
 ]
 Depth = 3
 ```
