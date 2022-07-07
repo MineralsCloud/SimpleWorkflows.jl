@@ -224,7 +224,7 @@ ntimes(job::Job) = Int(job.count)
 """
     getstatus(x::Job)
 
-Get the current status of the `Job`.
+Get the current status of a `Job`.
 """
 getstatus(job::Job) = job.status
 
