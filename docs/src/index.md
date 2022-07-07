@@ -43,7 +43,7 @@ julia> import Pkg; Pkg.add("SimpleWorkflows")
 ## Documentation
 
 - [**STABLE**](https://MineralsCloud.github.io/SimpleWorkflows.jl/stable) &mdash; **documentation of the most recently tagged version.**
-- [**DEV**](https://MineralsCloud.github.io/SimpleWorkflows.jl/dev) &mdash; *documentation of the in-development version.*
+- [**DEV**](https://MineralsCloud.github.io/SimpleWorkflows.jl/dev) &mdash; _documentation of the in-development version._
 
 ## Project Status
 

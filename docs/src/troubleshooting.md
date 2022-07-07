@@ -2,7 +2,7 @@
 
 This page collects some possible errors you may encounter and trick how to fix them.
 
-*If you have additional tips, please submit a PR with suggestions.*
+_If you have additional tips, please submit a PR with suggestions._
 
 ## Installation problems
 

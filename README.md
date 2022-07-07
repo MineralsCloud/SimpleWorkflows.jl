@@ -4,7 +4,7 @@
 
 |                                 **Documentation**                                  |                                                                                                 **Build Status**                                                                                                 |                  **LICENSE**                  |
 | :--------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------: |
-| [![Stable][docs-stable-img]][docs-stable-url] [![Dev][docs-dev-img]][docs-dev-url] | [![Build Status][GHA-img]][GHA-url] [![Build Status][appveyor-img]][appveyor-url] [![Build Status][cirrus-img]][cirrus-url] [![pipeline status][gitlab-img]][gitlab-url] [![Coverage][codecov-img]][codecov-url] | [![GitHub license][license-img]][license-url] |
+| [![Stable][docs-stable-img]][docs-stable-url] [![Dev][docs-dev-img]][docs-dev-url] | [![Build Status][gha-img]][gha-url] [![Build Status][appveyor-img]][appveyor-url] [![Build Status][cirrus-img]][cirrus-url] [![pipeline status][gitlab-img]][gitlab-url] [![Coverage][codecov-img]][codecov-url] | [![GitHub license][license-img]][license-url] |
 
 Build workflows from atomic jobs. Run and monitor them.
 
@@ -29,8 +29,8 @@ Please cite [this package as](https://arxiv.org/abs/2109.11724):
 [docs-stable-url]: https://MineralsCloud.github.io/SimpleWorkflows.jl/stable
 [docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
 [docs-dev-url]: https://MineralsCloud.github.io/SimpleWorkflows.jl/dev
-[GHA-img]: https://github.com/MineralsCloud/SimpleWorkflows.jl/workflows/CI/badge.svg
-[GHA-url]: https://github.com/MineralsCloud/SimpleWorkflows.jl/actions
+[gha-img]: https://github.com/MineralsCloud/SimpleWorkflows.jl/workflows/CI/badge.svg
+[gha-url]: https://github.com/MineralsCloud/SimpleWorkflows.jl/actions
 [appveyor-img]: https://ci.appveyor.com/api/projects/status/github/MineralsCloud/SimpleWorkflows.jl?svg=true
 [appveyor-url]: https://ci.appveyor.com/project/singularitti/SimpleWorkflows-jl
 [cirrus-img]: https://api.cirrus-ci.com/github/MineralsCloud/SimpleWorkflows.jl.svg
@@ -60,7 +60,7 @@ julia> import Pkg; Pkg.add("SimpleWorkflows")
 ## Documentation
 
 - [**STABLE**][docs-stable-url] &mdash; **documentation of the most recently tagged version.**
-- [**DEVEL**][docs-dev-url] &mdash; *documentation of the in-development version.*
+- [**DEVEL**][docs-dev-url] &mdash; _documentation of the in-development version._
 
 ## Project Status
 
