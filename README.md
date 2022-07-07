@@ -1,4 +1,4 @@
-![logo]([docs/src/assets/logo.png](https://raw.githubusercontent.com/MineralsCloud/SimpleWorkflows.jl/master/docs/src/assets/logo.png))
+![logo](https://raw.githubusercontent.com/MineralsCloud/SimpleWorkflows.jl/master/docs/src/assets/logo.png)
 
 # SimpleWorkflows
 
