@@ -127,7 +127,7 @@ const ⋺ = converge
 """
     diamond(x::Job, ys::AbstractVector{Job}, z::Job)
 
-Start from `Job` (`x`), followed by a series of `Job`s (`ys`), finished by a single `Job` (`z`).
+Start from a `Job` (`x`), followed by a series of `Job`s (`ys`), finished by a single `Job` (`z`).
 """
 diamond(x::Job, ys::AbstractVector{Job}, z::Job) = converge(fork(x, ys), z)
 
@@ -178,9 +178,11 @@ function __run!(jobs, graph; δt, filename)  # This will modify `wf`
     else
         queue = findall(iszero, indegree(graph))
         @sync for job in jobs[queue]
-            @async run!(job; n = 1, δt = δt)
+            @async begin
+                run!(job; n = 1, δt = δt)
+                wait(job)
+            end
         end
-        wait.(jobs[queue])
         rem_vertices!(graph, queue; keep_order = true)
         deleteat!(jobs, queue)
         return __run!(jobs, graph; δt = δt, filename = filename)
