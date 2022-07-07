@@ -34,7 +34,7 @@ end
 
 # Reference: https://github.com/cihga39871/JobSchedulers.jl/blob/aca52de/src/jobs.jl#L35-L69
 """
-    Job(def; desc="", user="", max_time=Day(1), parents=Job[], children=Job[])
+    Job(def; desc="", user="", max_time=Day(1))
 
 Create a simple job.
 
@@ -43,13 +43,11 @@ Create a simple job.
 - `desc::String=""`: Describe briefly what this job does.
 - `user::String=""`: Indicate who executes this job.
 - `max_time::Dates.Period=Day(1)`: Set the maximum execution time of the job.
-- `parents::Vector{Job}=[]`: These jobs runs before the current job.
-- `children::Vector{Job}=[]`: These jobs runs after the current job.
 
 # Examples
 ```@repl
-a = Job(() -> sleep(5); user="me", desc="Sleep for 5 seconds", children=[b])
-b = Job(() -> run(`pwd` & `ls`); user="me", desc="Run some commands", parents=[a])
+a = Job(() -> sleep(5); user="me", desc="Sleep for 5 seconds")
+b = Job(() -> run(`pwd` & `ls`); user="me", desc="Run some commands")
 ```
 """
 mutable struct Job
@@ -61,12 +59,15 @@ mutable struct Job
     start_time::DateTime
     stop_time::DateTime
     max_time::Period
+    "Track the job status."
     status::JobStatus
     ref::Union{Task,Nothing}
     count::UInt64
+    "These jobs runs before the current job."
     parents::Vector{Job}
+    "These jobs runs after the current job."
     children::Vector{Job}
-    Job(def; desc = "", user = "", max_time = Day(1), parents = [], children = []) = new(
+    Job(def; desc = "", user = "", max_time = Day(1)) = new(
         generate_id(),
         def,
         desc,
@@ -78,8 +79,8 @@ mutable struct Job
         PENDING,
         nothing,
         0,
-        parents,
-        children,
+        [],
+        [],
     )
 end
 """
@@ -104,8 +105,8 @@ Create a `Job` from an `Expr`, not a `Function`.
 
 # Examples
 ```@repl
-a = @job sleep(5) user="me" desc="Sleep for 5 seconds" children=[b]
-b = @job run(`pwd` & `ls`) user="me" desc="Run some commands" parents=[a]
+a = @job sleep(5) user="me" desc="Sleep for 5 seconds"
+b = @job run(`pwd` & `ls`) user="me" desc="Run some commands"
 ```
 """
 macro job(ex, kwargs...)
@@ -160,16 +161,16 @@ function __run!(job::Job)
     # See https://github.com/JuliaLang/julia/issues/21130#issuecomment-288423284
     @try begin
         global result = job.def()
-        @catch e
+    @catch e
         job.stop_time = now()
         @error "come across `$e` when running!"
         job.status = e isa InterruptException ? INTERRUPTED : FAILED
         return e
-        @else
+    @else
         job.stop_time = now()
         job.status = SUCCEEDED
         return result
-        @finally
+    @finally
         job.count += 1
     end
 end
