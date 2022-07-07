@@ -161,16 +161,16 @@ function __run!(job::Job)
     # See https://github.com/JuliaLang/julia/issues/21130#issuecomment-288423284
     @try begin
         global result = job.def()
-        @catch e
+    @catch e
         job.stop_time = now()
         @error "come across `$e` when running!"
         job.status = e isa InterruptException ? INTERRUPTED : FAILED
         return e
-        @else
+    @else
         job.stop_time = now()
         job.status = SUCCEEDED
         return result
-        @finally
+    @finally
         job.count += 1
     end
 end
