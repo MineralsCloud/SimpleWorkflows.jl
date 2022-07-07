@@ -178,9 +178,11 @@ function __run!(jobs, graph; δt, filename)  # This will modify `wf`
     else
         queue = findall(iszero, indegree(graph))
         @sync for job in jobs[queue]
-            @async run!(job; n = 1, δt = δt)
+            @async begin
+                run!(job; n = 1, δt = δt)
+                wait(job)
+            end
         end
-        wait.(jobs[queue])
         rem_vertices!(graph, queue; keep_order = true)
         deleteat!(jobs, queue)
         return __run!(jobs, graph; δt = δt, filename = filename)
