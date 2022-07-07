@@ -1,4 +1,4 @@
-# Installation guide
+# [Installation guide](@id installation)
 
 Here are the installation instructions for package
 [`SimpleWorkflows`](https://github.com/MineralsCloud/SimpleWorkflows.jl).

@@ -2,15 +2,13 @@
 CurrentModule = SimpleWorkflows
 ```
 
-# API
+# Library
 
 ```@contents
 Pages = ["api.md"]
 ```
 
 ## Jobs
-
-### Public interfaces
 
 ```@docs
 Job
@@ -35,8 +33,6 @@ ntimes
 ```
 
 ## Workflows
-
-### Public interfaces
 
 ```@docs
 Workflow

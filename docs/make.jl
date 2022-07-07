@@ -17,8 +17,9 @@ makedocs(;
         "Home" => "index.md",
         "Manual" => [
             "Installation guide" => "installation.md",
+            "Contributing" => "contributing.md",
         ],
-        "API" => "api.md",
+        "Library" => "public.md",
     ],
 )
 
