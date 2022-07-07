@@ -132,13 +132,14 @@ Start from a `Job` (`x`), followed by a series of `Job`s (`ys`), finished by a s
 diamond(x::Job, ys::AbstractVector{Job}, z::Job) = converge(fork(x, ys), z)
 
 """
-    run!(job::Job; n=5, δt=1, Δt=1)
+    run!(wf::Workflow; n=5, δt=1, Δt=1, filename="saved.jld2")
 
 Run a `Workflow` with maximum `n` attempts, with each attempt separated by `Δt` seconds.
 
-Cool down for `δt` seconds after each `Job` in the `Workflow`.
+Cool down for `δt` seconds after each `Job` in the `Workflow`. Save the tracking information
+to a file named `saved.jld2`.
 """
-function run!(wf::Workflow; δt = 1, n = 5, Δt = 1, filename = "saved.jld2")
+function run!(wf::Workflow; n = 5, δt = 1, Δt = 1, filename = "saved.jld2")
     @assert isinteger(n) && n >= 1
     if isfile(filename)
         saved = load(filename)
