@@ -14,7 +14,7 @@ Pages = ["api.md"]
 Job
 @job
 getresult
-getstatus
+getstatus(x::Job)
 ispending
 isrunning
 isexited
@@ -26,7 +26,7 @@ starttime
 stoptime
 elapsed
 description
-run!
+run!(job::Job; n=1, δt=1)
 interrupt!
 queue
 query
@@ -37,6 +37,8 @@ ntimes
 
 ```@docs
 Workflow
+run!(wf::Workflow; n=5, δt=1, Δt=1, filename="saved.jld2")
+getstatus(wf::Workflow)
 chain
 fork
 converge
