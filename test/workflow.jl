@@ -1,4 +1,4 @@
-using SimpleWorkflows
+using SimpleWorkflows: SUCCEEDED, Workflow, getstatus, getresult
 
 i = @job (println("Start job `i`!"); sleep(5)) user = "me" desc = "i"
 j = @job (println("Start job `j`!"); sleep(3); exp(2)) user = "me" desc = "j"
@@ -10,9 +10,10 @@ i ▷ l
 j ▷ k ▷ m ▷ n
 j ▷ l
 k ▷ n
-w = Workflow(k)
+wf = Workflow(k)
 # @test w.jobs == Workflow(k, j, l, n, m).jobs == Workflow(k, l, m, n, j).jobs
-run!(w; δt = 0, n = 1)
+run!(wf; δt = 0, n = 1)
+@test all(==(SUCCEEDED), getstatus(wf))
 @test something(getresult(i)) === nothing
 @test something(getresult(j)) == 7.38905609893065
 @test something(getresult(k)) === nothing
