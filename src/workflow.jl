@@ -80,12 +80,12 @@ function chain(x::Job, y::Job)
     end
 end
 """
-    chain(xs::AbstractVector{<:Job}, ys::AbstractVector{<:Job})
+    chain(xs::AbstractVector{Job}, ys::AbstractVector{Job})
     xs ▷ ys
 
 Chain two vectors of `Job`s.
 """
-function chain(xs::AbstractVector{<:Job}, ys::AbstractVector{<:Job})
+function chain(xs::AbstractVector{Job}, ys::AbstractVector{Job})
     if size(xs) != size(ys)
         throw(DimensionMismatch("`xs` and `ys` must have the same size!"))
     end
@@ -97,12 +97,12 @@ end
 const ▷ = chain
 
 """
-    fork(x::Job, ys::AbstractVector{<:Job})
+    fork(x::Job, ys::AbstractVector{Job})
     x ⋲ ys
 
 Attach a group of parallel `Job`s (`ys`) to a single `Job` (`x`).
 """
-function fork(x::Job, ys::AbstractVector{<:Job})
+function fork(x::Job, ys::AbstractVector{Job})
     for y in ys
         chain(x, y)
     end
@@ -111,12 +111,12 @@ end
 const ⋲ = fork
 
 """
-    converge(xs::AbstractVector{<:Job}, y::Job)
+    converge(xs::AbstractVector{Job}, y::Job)
     xs ⋺ y
 
 Finish a group a parallel `Job`s (`xs`) by a single `Job` (`y`).
 """
-function converge(xs::AbstractVector{<:Job}, y::Job)
+function converge(xs::AbstractVector{Job}, y::Job)
     for x in xs
         chain(x, y)
     end
@@ -125,11 +125,11 @@ end
 const ⋺ = converge
 
 """
-    diamond(x::Job, ys::AbstractVector{<:Job}, z::Job)
+    diamond(x::Job, ys::AbstractVector{Job}, z::Job)
 
 Start from `Job` (`x`), followed by a series of `Job`s (`ys`), finished by a single `Job` (`z`).
 """
-diamond(x::Job, ys::AbstractVector{<:Job}, z::Job) = converge(fork(x, ys), z)
+diamond(x::Job, ys::AbstractVector{Job}, z::Job) = converge(fork(x, ys), z)
 const ⋄ = diamond
 
 """
