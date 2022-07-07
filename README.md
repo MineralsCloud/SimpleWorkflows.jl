@@ -60,7 +60,7 @@ julia> import Pkg; Pkg.add("SimpleWorkflows")
 ## Documentation
 
 - [**STABLE**][docs-stable-url] &mdash; **documentation of the most recently tagged version.**
-- [**DEVEL**][docs-dev-url] &mdash; _documentation of the in-development version._
+- [**DEV**][docs-dev-url] &mdash; _documentation of the in-development version._
 
 ## Project Status
 
