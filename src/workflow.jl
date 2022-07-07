@@ -127,7 +127,7 @@ const ⋺ = converge
 """
     diamond(x::Job, ys::AbstractVector{Job}, z::Job)
 
-Start from `Job` (`x`), followed by a series of `Job`s (`ys`), finished by a single `Job` (`z`).
+Start from a `Job` (`x`), followed by a series of `Job`s (`ys`), finished by a single `Job` (`z`).
 """
 diamond(x::Job, ys::AbstractVector{Job}, z::Job) = converge(fork(x, ys), z)
 
