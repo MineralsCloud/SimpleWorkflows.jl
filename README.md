@@ -39,3 +39,40 @@ Please cite [this package as](https://arxiv.org/abs/2109.11724):
 [codecov-url]: https://codecov.io/gh/MineralsCloud/SimpleWorkflows.jl
 [license-img]: https://img.shields.io/github/license/MineralsCloud/SimpleWorkflows.jl
 [license-url]: https://github.com/MineralsCloud/SimpleWorkflows.jl/blob/master/LICENSE
+
+## Installation
+
+The package can be installed with the Julia package manager.
+From the Julia REPL, type `]` to enter the Pkg REPL mode and run:
+
+```
+pkg> add SimpleWorkflows
+```
+
+Or, equivalently, via the `Pkg` API:
+
+```julia
+julia> import Pkg; Pkg.add("SimpleWorkflows")
+```
+
+## Documentation
+
+- [**STABLE**][docs-stable-url] &mdash; **documentation of the most recently tagged version.**
+- [**DEVEL**][docs-dev-url] &mdash; *documentation of the in-development version.*
+
+## Project Status
+
+The package is tested against, and being developed for, Julia `1.6` and above on Linux,
+macOS, and Windows.
+
+## Questions and Contributions
+
+Usage questions can be posted on [our discussion page][discussions-url].
+
+Contributions are very welcome, as are feature requests and suggestions. Please open an
+[issue][issues-url] if you encounter any problems. The [contributing](@ref) page has
+a few guidelines that should be followed when opening pull requests and contributing code.
+
+[discussions-url]: https://github.com/MineralsCloud/SimpleWorkflows.jl/discussions
+[issues-url]: https://github.com/MineralsCloud/SimpleWorkflows.jl/issues
+[contrib-url]: https://github.com/MineralsCloud/SimpleWorkflows.jl/discussions
