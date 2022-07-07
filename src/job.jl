@@ -66,7 +66,7 @@ mutable struct Job
     count::UInt64
     parents::Vector{Job}
     children::Vector{Job}
-    Job(def; desc = "", user = "", max_time = Day(1), parents = [], children = []) = new(
+    Job(def; desc = "", user = "", max_time = Day(1)) = new(
         generate_id(),
         def,
         desc,
@@ -78,8 +78,8 @@ mutable struct Job
         PENDING,
         nothing,
         0,
-        parents,
-        children,
+        [],
+        [],
     )
 end
 """
