@@ -1,13 +1,8 @@
 # SimpleWorkflows
 
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://MineralsCloud.github.io/SimpleWorkflows.jl/stable)
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://MineralsCloud.github.io/SimpleWorkflows.jl/dev)
-[![Build Status](https://github.com/MineralsCloud/SimpleWorkflows.jl/workflows/CI/badge.svg)](https://github.com/MineralsCloud/SimpleWorkflows.jl/actions)
-[![Build Status](https://ci.appveyor.com/api/projects/status/github/MineralsCloud/SimpleWorkflows.jl?svg=true)](https://ci.appveyor.com/project/singularitti/SimpleWorkflows-jl)
-[![Build Status](https://api.cirrus-ci.com/github/MineralsCloud/SimpleWorkflows.jl.svg)](https://cirrus-ci.com/github/MineralsCloud/SimpleWorkflows.jl)
-[![pipeline status](https://gitlab.com/singularitti/SimpleWorkflows.jl/badges/master/pipeline.svg)](https://gitlab.com/singularitti/SimpleWorkflows.jl/-/pipelines)
-[![Coverage](https://codecov.io/gh/MineralsCloud/SimpleWorkflows.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/MineralsCloud/SimpleWorkflows.jl)
-[![GitHub license](https://img.shields.io/github/license/MineralsCloud/SimpleWorkflows.jl)](https://github.com/MineralsCloud/SimpleWorkflows.jl/blob/master/LICENSE)
+|                                 **Documentation**                                  |                                                                                                 **Build Status**                                                                                                 |                  **LICENSE**                  |
+| :--------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------: |
+| [![Stable][docs-stable-img]][docs-stable-url] [![Dev][docs-dev-img]][docs-dev-url] | [![Build Status][GHA-img]][GHA-url] [![Build Status][appveyor-img]][appveyor-url] [![Build Status][cirrus-img]][cirrus-url] [![pipeline status][gitlab-img]][gitlab-url] [![Coverage][codecov-img]][codecov-url] | [![GitHub license][license-img]][license-url] |
 
 Build workflows from atomic jobs. Run and monitor them.
 
@@ -27,3 +22,20 @@ Please cite [this package as](https://arxiv.org/abs/2109.11724):
       primaryClass={physics.comp-ph}
 }
 ```
+
+[docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
+[docs-stable-url]: https://MineralsCloud.github.io/SimpleWorkflows.jl/stable
+[docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
+[docs-dev-url]: https://MineralsCloud.github.io/SimpleWorkflows.jl/dev
+[GHA-img]: https://github.com/MineralsCloud/SimpleWorkflows.jl/workflows/CI/badge.svg
+[GHA-url]: https://github.com/MineralsCloud/SimpleWorkflows.jl/actions
+[appveyor-img]: https://ci.appveyor.com/api/projects/status/github/MineralsCloud/SimpleWorkflows.jl?svg=true
+[appveyor-url]: https://ci.appveyor.com/project/singularitti/SimpleWorkflows-jl
+[cirrus-img]: https://api.cirrus-ci.com/github/MineralsCloud/SimpleWorkflows.jl.svg
+[cirrus-url]: https://cirrus-ci.com/github/MineralsCloud/SimpleWorkflows.jl
+[gitlab-img]: https://gitlab.com/singularitti/SimpleWorkflows.jl/badges/master/pipeline.svg
+[gitlab-url]: https://gitlab.com/singularitti/SimpleWorkflows.jl/-/pipelines
+[codecov-img]: https://codecov.io/gh/MineralsCloud/SimpleWorkflows.jl/branch/master/graph/badge.svg
+[codecov-url]: https://codecov.io/gh/MineralsCloud/SimpleWorkflows.jl
+[license-img]: https://img.shields.io/github/license/MineralsCloud/SimpleWorkflows.jl
+[license-url]: https://github.com/MineralsCloud/SimpleWorkflows.jl/blob/master/LICENSE
