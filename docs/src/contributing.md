@@ -83,7 +83,7 @@ please try to stick to the following points whenever applicable.
 
 - Use unbalanced `#` headers, i.e. no `#` on the right-hand side of the header text;
 - include a single blank line between top-level blocks;
-- do *not* hard wrap lines;
+- do _not_ hard wrap lines;
 - use emphasis (`*`) and bold (`**`) sparingly;
 - always use fenced code blocks instead of indented blocks;
 - follow the conventions outlined in the Julia documentation page on documentation.
