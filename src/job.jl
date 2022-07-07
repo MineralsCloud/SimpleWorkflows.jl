@@ -34,7 +34,7 @@ end
 
 # Reference: https://github.com/cihga39871/JobSchedulers.jl/blob/aca52de/src/jobs.jl#L35-L69
 """
-    Job(def; desc="", user="", max_time=Day(1))
+    Job(def; desc="", user="")
 
 Create a simple job.
 
@@ -42,7 +42,6 @@ Create a simple job.
 - `def`: A closure that encloses the job definition.
 - `desc::String=""`: Describe briefly what this job does.
 - `user::String=""`: Indicate who executes this job.
-- `max_time::Dates.Period=Day(1)`: Set the maximum execution time of the job.
 
 # Examples
 ```@repl
@@ -58,7 +57,6 @@ mutable struct Job
     created_time::DateTime
     start_time::DateTime
     stop_time::DateTime
-    max_time::Period
     "Track the job status."
     status::JobStatus
     ref::Union{Task,Nothing}
@@ -67,7 +65,7 @@ mutable struct Job
     parents::Vector{Job}
     "These jobs runs after the current job."
     children::Vector{Job}
-    Job(def; desc = "", user = "", max_time = Day(1)) = new(
+    Job(def; desc = "", user = "") = new(
         generate_id(),
         def,
         desc,
@@ -75,7 +73,6 @@ mutable struct Job
         now(),
         DateTime(0),
         DateTime(0),
-        max_time,
         PENDING,
         nothing,
         0,
@@ -92,7 +89,6 @@ Job(job::Job) = Job(
     job.def;
     desc = job.desc,
     user = job.user,
-    max_time = job.max_time,
     parents = job.parents,
     children = job.children,
 )
