@@ -43,13 +43,11 @@ Create a simple job.
 - `desc::String=""`: Describe briefly what this job does.
 - `user::String=""`: Indicate who executes this job.
 - `max_time::Dates.Period=Day(1)`: Set the maximum execution time of the job.
-- `parents::Vector{Job}=[]`: These jobs runs before the current job.
-- `children::Vector{Job}=[]`: These jobs runs after the current job.
 
 # Examples
 ```@repl
-a = Job(() -> sleep(5); user="me", desc="Sleep for 5 seconds", children=[b])
-b = Job(() -> run(`pwd` & `ls`); user="me", desc="Run some commands", parents=[a])
+a = Job(() -> sleep(5); user="me", desc="Sleep for 5 seconds")
+b = Job(() -> run(`pwd` & `ls`); user="me", desc="Run some commands")
 ```
 """
 mutable struct Job
@@ -104,8 +102,8 @@ Create a `Job` from an `Expr`, not a `Function`.
 
 # Examples
 ```@repl
-a = @job sleep(5) user="me" desc="Sleep for 5 seconds" children=[b]
-b = @job run(`pwd` & `ls`) user="me" desc="Run some commands" parents=[a]
+a = @job sleep(5) user="me" desc="Sleep for 5 seconds"
+b = @job run(`pwd` & `ls`) user="me" desc="Run some commands"
 ```
 """
 macro job(ex, kwargs...)
