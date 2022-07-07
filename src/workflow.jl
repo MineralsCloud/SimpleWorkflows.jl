@@ -10,7 +10,7 @@ using Graphs:
     rem_vertices!
 using Serialization: serialize, deserialize
 
-export Workflow, chain, fork, converge, diamond, ▷, ⋲, ⋺, ⋄
+export Workflow, chain, fork, converge, diamond, ▷, ⋲, ⋺
 
 """
     Workflow(jobs, graph)
@@ -130,7 +130,6 @@ const ⋺ = converge
 Start from `Job` (`x`), followed by a series of `Job`s (`ys`), finished by a single `Job` (`z`).
 """
 diamond(x::Job, ys::AbstractVector{Job}, z::Job) = converge(fork(x, ys), z)
-const ⋄ = diamond
 
 """
     run!(job::Job; n=5, δt=1, Δt=1)
