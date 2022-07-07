@@ -187,11 +187,6 @@ function __run!(jobs, graph; δt, filename)  # This will modify `wf`
     end
 end
 
-function initialize!()
-    empty!(JOB_REGISTRY)
-    return
-end
-
 function Base.show(io::IO, wf::Workflow)
     if get(io, :compact, false) || get(io, :typeinfo, nothing) == typeof(wf)
         Base.show_default(IOContext(io, :limit => true), wf)  # From https://github.com/mauro3/Parameters.jl/blob/ecbf8df/src/Parameters.jl#L556

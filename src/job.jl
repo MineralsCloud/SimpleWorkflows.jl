@@ -121,6 +121,11 @@ end
 
 const JOB_REGISTRY = Job[]
 
+function initialize!()
+    empty!(JOB_REGISTRY)
+    return
+end
+
 """
     run!(job::Job; n=1, δt=1)
 
