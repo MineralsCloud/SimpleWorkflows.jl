@@ -1,3 +1,5 @@
+![logo](docs/src/assets/logo.png)
+
 # SimpleWorkflows
 
 |                                 **Documentation**                                  |                                                                                                 **Build Status**                                                                                                 |                  **LICENSE**                  |
