@@ -59,10 +59,13 @@ mutable struct Job
     start_time::DateTime
     stop_time::DateTime
     max_time::Period
+    "Track the job status."
     status::JobStatus
     ref::Union{Task,Nothing}
     count::UInt64
+    "These jobs runs before the current job."
     parents::Vector{Job}
+    "These jobs runs after the current job."
     children::Vector{Job}
     Job(def; desc = "", user = "", max_time = Day(1)) = new(
         generate_id(),
