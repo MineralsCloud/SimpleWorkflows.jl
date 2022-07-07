@@ -13,6 +13,7 @@ TryCatch = "0ca489f0-7580-4b41-9fdc-1863c852da4c"
 [compat]
 DataFrames = "0.13, 0.14, 0.15, 0.16, 0.17, 0.18, 0.19, 0.20, 0.21, 0.22, 1"
 Graphs = "1.4"
+JLD2 = "0.4.4"
 TryCatch = "0.1"
 julia = "1"
 
