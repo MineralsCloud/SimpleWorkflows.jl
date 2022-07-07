@@ -8,7 +8,7 @@ using Graphs:
     topological_sort_by_dfs,
     indegree,
     rem_vertices!
-using Serialization: serialize, deserialize
+using JLD2: load, jldopen, jldsave
 
 export Workflow, chain, fork, converge, diamond, ▷, ⋲, ⋺
 
@@ -138,15 +138,17 @@ Run a `Workflow` with maximum `n` attempts, with each attempt separated by `Δt`
 
 Cool down for `δt` seconds after each `Job` in the `Workflow`.
 """
-function run!(wf::Workflow; δt = 1, n = 5, Δt = 1, filename = "status.jls")
+function run!(wf::Workflow; δt = 1, n = 5, Δt = 1, filename = "saved.jld2")
     @assert isinteger(n) && n >= 1
     if isfile(filename)
-        saved = open(filename, "r") do io
-            deserialize(io)
+        saved = load(filename)
+        if saved["jobs"] isa AbstractVector{Job} && saved["graph"] == wf.graph
+            for (job, status) in zip(wf.jobs, saved["status"])
+                job.status = status  # Inherit status from file
+            end
         end
-        if saved isa Workflow && saved.graph == wf.graph
-            wf = saved
-        end
+    else
+        jldsave(filename; jobs = wf.jobs, graph = wf.graph, status = getstatus(wf))
     end
     for _ in 1:n
         if any(!issucceeded(job) for job in wf.jobs)
@@ -162,11 +164,11 @@ function run!(wf::Workflow; δt = 1, n = 5, Δt = 1, filename = "status.jls")
     return wf
 end
 function _run!(wf::Workflow; δt, filename)
-    jobs, graph = copy(wf.jobs), copy(wf.graph)  # This separation is necessary, or else we call this every iteration of `core_run!`
-    __run!(jobs, graph; δt = δt, filename = filename)
+    jobs, graph = copy(wf.jobs), copy(wf.graph)  # This separation is necessary, or else we call this every iteration of `__run!`
+    __run!(wf, jobs, graph; δt = δt, filename = filename)
     return wf
 end
-function __run!(jobs, graph; δt, filename)  # This will modify `wf`
+function __run!(wf, jobs, graph; δt, filename)  # This will modify `wf`
     if isempty(jobs) && iszero(nv(graph))  # Stopping criterion
         return
     elseif isempty(jobs) && !iszero(nv(graph)) || !isempty(jobs) && iszero(nv(graph))
@@ -181,11 +183,15 @@ function __run!(jobs, graph; δt, filename)  # This will modify `wf`
             @async begin
                 run!(job; n = 1, δt = δt)
                 wait(job)
+                jldopen(filename, "r+") do file
+                    Base.delete!(file, "status")
+                    write(file, "status", getstatus(wf))
+                end
             end
         end
         rem_vertices!(graph, queue; keep_order = true)
         deleteat!(jobs, queue)
-        return __run!(jobs, graph; δt = δt, filename = filename)
+        return __run!(wf, jobs, graph; δt = δt, filename = filename)
     end
 end
 
