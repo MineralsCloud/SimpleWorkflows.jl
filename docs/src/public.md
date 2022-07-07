@@ -12,6 +12,7 @@ Pages = ["api.md"]
 
 ```@docs
 Job
+@job
 getresult
 getstatus
 ispending
