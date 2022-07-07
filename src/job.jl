@@ -34,7 +34,7 @@ end
 
 # Reference: https://github.com/cihga39871/JobSchedulers.jl/blob/aca52de/src/jobs.jl#L35-L69
 """
-    Job(def; desc="", user="", max_time=Day(1), parents=Job[], children=Job[])
+    Job(def; desc="", user="", max_time=Day(1))
 
 Create a simple job.
 
