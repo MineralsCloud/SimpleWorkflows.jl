@@ -98,7 +98,9 @@ function thread(xs::AbstractVector{Job}, ys::AbstractVector{Job})
     end
     return ys
 end
-const ⇶ = thread
+thread(xs::AbstractVector{Job}, ys::AbstractVector{Job}, zs::AbstractVector{Job}...) =
+    foldr(thread, (xs, ys, zs...))
+⇶(xs::AbstractVector{Job}, ys::AbstractVector{Job}) = thread(xs, ys)
 ⬱(xs::AbstractVector{Job}, ys::AbstractVector{Job}) = ⇶(ys, xs)
 
 """
