@@ -10,7 +10,7 @@ using Graphs:
     rem_vertices!
 using JLD2: load, jldopen, jldsave
 
-export Workflow, chain, fork, converge, diamond, ▷, ⋲, ⋺
+export Workflow, chain, fork, converge, spindle, ▷, ⋲, ⋺
 
 """
     Workflow(jobs, graph)
@@ -125,11 +125,11 @@ end
 const ⋺ = converge
 
 """
-    diamond(x::Job, ys::AbstractVector{Job}, z::Job)
+    spindle(x::Job, ys::AbstractVector{Job}, z::Job)
 
 Start from a `Job` (`x`), followed by a series of `Job`s (`ys`), finished by a single `Job` (`z`).
 """
-diamond(x::Job, ys::AbstractVector{Job}, z::Job) = converge(fork(x, ys), z)
+spindle(x::Job, ys::AbstractVector{Job}, z::Job) = converge(fork(x, ys), z)
 
 """
     run!(wf::Workflow; n=5, δt=1, Δt=1, filename="saved.jld2")

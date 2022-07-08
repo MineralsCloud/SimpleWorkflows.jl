@@ -42,5 +42,5 @@ getstatus(wf::Workflow)
 chain
 fork
 converge
-diamond
+spindle
 ```
