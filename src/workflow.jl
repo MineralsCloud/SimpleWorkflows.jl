@@ -10,7 +10,7 @@ using Graphs:
     rem_vertices!
 using JLD2: load, jldopen, jldsave
 
-export Workflow, chain, thread, fork, converge, spindle, →, ⇶, ⋲, ⋺
+export Workflow, chain, thread, fork, converge, spindle, →, ←, ⇶, ⬱
 
 """
     Workflow(jobs, graph)
@@ -80,6 +80,7 @@ function chain(x::Job, y::Job)
     end
 end
 const → = chain
+←(x::Job, y::Job) = →(y, x)
 
 """
     thread(xs::AbstractVector{Job}, ys::AbstractVector{Job})
@@ -97,6 +98,7 @@ function thread(xs::AbstractVector{Job}, ys::AbstractVector{Job})
     return ys
 end
 const ⇶ = thread
+⬱(xs::AbstractVector{Job}, ys::AbstractVector{Job}) = ⇶(ys, xs)
 
 """
     fork(x::Job, ys::AbstractVector{Job})
