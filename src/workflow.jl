@@ -10,7 +10,7 @@ using Graphs:
     rem_vertices!
 using JLD2: load, jldopen, jldsave
 
-export Workflow, chain, fork, converge, spindle, →, ⋲, ⋺
+export Workflow, chain, thread, fork, converge, spindle, →, ⇶, ⋲, ⋺
 
 """
     Workflow(jobs, graph)
@@ -82,12 +82,12 @@ end
 const → = chain
 
 """
-    chain(xs::AbstractVector{Job}, ys::AbstractVector{Job})
-    xs ▷ ys
+    thread(xs::AbstractVector{Job}, ys::AbstractVector{Job})
+    xs ⇶ ys
 
 Chain two vectors of `Job`s.
 """
-function chain(xs::AbstractVector{Job}, ys::AbstractVector{Job})
+function thread(xs::AbstractVector{Job}, ys::AbstractVector{Job})
     if size(xs) != size(ys)
         throw(DimensionMismatch("`xs` and `ys` must have the same size!"))
     end
@@ -96,6 +96,7 @@ function chain(xs::AbstractVector{Job}, ys::AbstractVector{Job})
     end
     return ys
 end
+const ⇶ = thread
 
 """
     fork(x::Job, ys::AbstractVector{Job})
