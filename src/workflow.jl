@@ -65,10 +65,9 @@ function Workflow(jobs::Job...)
 end
 
 """
-    chain(x::Job, y::Job)
-    x → y
+    chain(x::Job, y::Job, z::Job...)
 
-Chain two `Job`s one after another.
+Chain multiple `Job`s one after another.
 """
 function chain(x::Job, y::Job)
     if x == y
@@ -80,8 +79,18 @@ function chain(x::Job, y::Job)
     end
 end
 chain(x::Job, y::Job, z::Job...) = foldr(chain, (x, y, z...))
+"""
+    x → y
+
+Chain two `Job`s.
+"""
 →(x::Job, y::Job) = chain(x, y)
-←(x::Job, y::Job) = →(y, x)
+"""
+    y ← x
+
+Chain two `Job`s reversely.
+"""
+←(y::Job, x::Job) = x → y
 
 """
     thread(xs::AbstractVector{Job}, ys::AbstractVector{Job})

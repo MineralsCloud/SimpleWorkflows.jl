@@ -40,6 +40,8 @@ Workflow
 run!(wf::Workflow; n=5, δt=1, Δt=1, filename="saved.jld2")
 getstatus(wf::Workflow)
 chain
+→
+←
 fork
 converge
 spindle
