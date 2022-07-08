@@ -10,7 +10,7 @@ using Graphs:
     rem_vertices!
 using JLD2: load, jldopen, jldsave
 
-export Workflow, chain, thread, fork, converge, spindle, →, ←, ⇶, ⬱
+export Workflow, chain, thread, fork, converge, spindle, →, ←, ⇶, ⬱, ⇉, ⭃
 
 """
     Workflow(jobs, graph)
