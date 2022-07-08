@@ -22,3 +22,9 @@ using SimpleWorkflows: SUCCEEDED, Workflow, run!, getstatus, getresult, →, @jo
     @test something(getresult(m)) == 0.8414709848078965
     @test something(getresult(n)) isa Base.ProcessChain
 end
+
+@testset "Test association rules of operators" begin
+    @test Meta.parse("a → b ⇉ c → d ⭃ e → f → g → h ⇉ i → j ⭃ k → l → m") ==
+          :(a → (b ⇉ (c → (d ⭃ (e → (f → (g → (h ⇉ (i → (j ⭃ (k → (l → m))))))))))))
+    @test Meta.parse("x ⇉ ys ⭃ z") == :(x ⇉ (ys ⭃ z))
+end
