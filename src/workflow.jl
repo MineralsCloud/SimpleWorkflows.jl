@@ -123,7 +123,7 @@ Chain two vectors of `Job`s reversely.
 
 """
     fork(x::Job, ys::AbstractVector{Job})
-    x ⋲ ys
+    x ⇉ ys
 
 Attach a group of parallel `Job`s (`ys`) to a single `Job` (`x`).
 """
@@ -133,7 +133,7 @@ function fork(x::Job, ys::AbstractVector{Job})
     end
     return ys
 end
-const ⋲ = fork
+const ⇉ = fork
 
 """
     converge(xs::AbstractVector{Job}, y::Job)
