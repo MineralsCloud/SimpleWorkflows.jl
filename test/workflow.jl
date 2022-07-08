@@ -1,4 +1,4 @@
-using SimpleWorkflows: SUCCEEDED, Workflow, run!, getstatus, getresult, ▷, @job
+using SimpleWorkflows: SUCCEEDED, Workflow, run!, getstatus, getresult, →, @job
 
 i = @job (println("Start job `i`!"); sleep(5)) user = "me" desc = "i"
 j = @job (println("Start job `j`!"); sleep(3); exp(2)) user = "me" desc = "j"
@@ -6,10 +6,10 @@ k = @job (println("Start job `k`!"); sleep(6)) desc = "k"
 l = @job (println("Start job `l`!"); run(`sleep 3`)) desc = "l" user = "me"
 m = @job (println("Start job `m`!"); sleep(3); sin(1)) desc = "m"
 n = @job (println("Start job `n`!"); run(`pwd` & `ls`)) user = "me" desc = "n"
-i ▷ l
-j ▷ k ▷ m ▷ n
-j ▷ l
-k ▷ n
+i → l
+j → k → m → n
+j → l
+k → n
 wf = Workflow(k)
 # @test w.jobs == Workflow(k, j, l, n, m).jobs == Workflow(k, l, m, n, j).jobs
 run!(wf; δt = 0, n = 1)

@@ -10,7 +10,7 @@ using Graphs:
     rem_vertices!
 using JLD2: load, jldopen, jldsave
 
-export Workflow, chain, fork, converge, diamond, ▷, ⋲, ⋺
+export Workflow, chain, thread, fork, converge, spindle, →, ←, ⇶, ⬱
 
 """
     Workflow(jobs, graph)
@@ -24,7 +24,7 @@ struct Workflow
         @assert !is_cyclic(graph) "`graph` must be acyclic"
         @assert is_connected(graph) "`graph` must be connected!"
         @assert nv(graph) == length(jobs) "`graph` has different size from `jobs`!"
-        @assert length(jobs) == length(unique(jobs)) "at least two jobs are identical!"
+        @assert allunique(jobs) "at least two jobs are identical!"
         return new(jobs, graph)
     end
 end
@@ -65,10 +65,9 @@ function Workflow(jobs::Job...)
 end
 
 """
-    chain(x::Job, y::Job)
-    x ▷ y
+    chain(x::Job, y::Job, z::Job...)
 
-Chain two `Job`s one after another.
+Chain multiple `Job`s one after another.
 """
 function chain(x::Job, y::Job)
     if x == y
@@ -79,13 +78,26 @@ function chain(x::Job, y::Job)
         return y
     end
 end
+chain(x::Job, y::Job, z::Job...) = foldr(chain, (x, y, z...))
 """
-    chain(xs::AbstractVector{Job}, ys::AbstractVector{Job})
-    xs ▷ ys
+    →(x, y)
 
-Chain two vectors of `Job`s.
+Chain two `Job`s.
 """
-function chain(xs::AbstractVector{Job}, ys::AbstractVector{Job})
+→(x::Job, y::Job) = chain(x, y)
+"""
+    ←(y, x)
+
+Chain two `Job`s reversely.
+"""
+←(y::Job, x::Job) = x → y
+
+"""
+    thread(xs::AbstractVector{Job}, ys::AbstractVector{Job}, zs::AbstractVector{Job}...)
+
+Chain multiple vectors of `Job`s, each `Job` in `xs` has a corresponding `Job` in `ys`.`
+"""
+function thread(xs::AbstractVector{Job}, ys::AbstractVector{Job})
     if size(xs) != size(ys)
         throw(DimensionMismatch("`xs` and `ys` must have the same size!"))
     end
@@ -94,11 +106,24 @@ function chain(xs::AbstractVector{Job}, ys::AbstractVector{Job})
     end
     return ys
 end
-const ▷ = chain
+thread(xs::AbstractVector{Job}, ys::AbstractVector{Job}, zs::AbstractVector{Job}...) =
+    foldr(thread, (xs, ys, zs...))
+"""
+    ⇶(xs, ys)
+
+Chain two vectors of `Job`s.
+"""
+⇶(xs::AbstractVector{Job}, ys::AbstractVector{Job}) = thread(xs, ys)
+"""
+    ⬱(ys, xs)
+
+Chain two vectors of `Job`s reversely.
+"""
+⬱(ys::AbstractVector{Job}, xs::AbstractVector{Job}) = xs ⇶ ys
 
 """
     fork(x::Job, ys::AbstractVector{Job})
-    x ⋲ ys
+    ⇉(x, ys)
 
 Attach a group of parallel `Job`s (`ys`) to a single `Job` (`x`).
 """
@@ -108,11 +133,11 @@ function fork(x::Job, ys::AbstractVector{Job})
     end
     return ys
 end
-const ⋲ = fork
+const ⇉ = fork
 
 """
     converge(xs::AbstractVector{Job}, y::Job)
-    xs ⋺ y
+    ⭃(xs, y)
 
 Finish a group a parallel `Job`s (`xs`) by a single `Job` (`y`).
 """
@@ -122,14 +147,14 @@ function converge(xs::AbstractVector{Job}, y::Job)
     end
     return y
 end
-const ⋺ = converge
+const ⭃ = converge
 
 """
-    diamond(x::Job, ys::AbstractVector{Job}, z::Job)
+    spindle(x::Job, ys::AbstractVector{Job}, z::Job)
 
 Start from a `Job` (`x`), followed by a series of `Job`s (`ys`), finished by a single `Job` (`z`).
 """
-diamond(x::Job, ys::AbstractVector{Job}, z::Job) = converge(fork(x, ys), z)
+spindle(x::Job, ys::AbstractVector{Job}, z::Job) = converge(fork(x, ys), z)
 
 """
     run!(wf::Workflow; n=5, δt=1, Δt=1, filename="saved.jld2")
