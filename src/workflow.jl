@@ -79,7 +79,8 @@ function chain(x::Job, y::Job)
         return y
     end
 end
-const → = chain
+chain(x::Job, y::Job, z::Job...) = foldr(chain, (x, y, z...))
+→(x::Job, y::Job) = chain(x, y)
 ←(x::Job, y::Job) = →(y, x)
 
 """
