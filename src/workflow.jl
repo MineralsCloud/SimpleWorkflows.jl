@@ -124,7 +124,7 @@ function converge(xs::AbstractVector{Job}, y::Job)
     end
     return y
 end
-const ⋺ = converge
+const ⭃ = converge
 
 """
     spindle(x::Job, ys::AbstractVector{Job}, z::Job)
