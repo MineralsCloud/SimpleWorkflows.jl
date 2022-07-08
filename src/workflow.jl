@@ -94,9 +94,8 @@ Chain two `Job`s reversely.
 
 """
     thread(xs::AbstractVector{Job}, ys::AbstractVector{Job})
-    xs ⇶ ys
 
-Chain two vectors of `Job`s.
+Chain multiple vectors of `Job`s, each `Job` in `xs` has a corresponding `Job` in `ys`.`
 """
 function thread(xs::AbstractVector{Job}, ys::AbstractVector{Job})
     if size(xs) != size(ys)
@@ -109,8 +108,18 @@ function thread(xs::AbstractVector{Job}, ys::AbstractVector{Job})
 end
 thread(xs::AbstractVector{Job}, ys::AbstractVector{Job}, zs::AbstractVector{Job}...) =
     foldr(thread, (xs, ys, zs...))
+"""
+    xs ⇶ ys
+
+Chain two vectors of `Job`s.
+"""
 ⇶(xs::AbstractVector{Job}, ys::AbstractVector{Job}) = thread(xs, ys)
-⬱(xs::AbstractVector{Job}, ys::AbstractVector{Job}) = ⇶(ys, xs)
+"""
+    ys ⬱ xs
+
+Chain two vectors of `Job`s reversely.
+"""
+⬱(ys::AbstractVector{Job}, xs::AbstractVector{Job}) = xs ⇶ ys
 
 """
     fork(x::Job, ys::AbstractVector{Job})

@@ -42,6 +42,9 @@ getstatus(wf::Workflow)
 chain
 →
 ←
+thread
+⇶
+⬱
 fork
 converge
 spindle
