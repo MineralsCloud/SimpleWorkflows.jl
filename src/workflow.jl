@@ -75,7 +75,7 @@ function chain(x::Job, y::Job)
     else
         push!(x.children, y)
         push!(y.parents, x)
-        return y
+        return x
     end
 end
 chain(x::Job, y::Job, z::Job...) = foldr(chain, (x, y, z...))
@@ -104,7 +104,7 @@ function thread(xs::AbstractVector{Job}, ys::AbstractVector{Job})
     for (x, y) in zip(xs, ys)
         chain(x, y)
     end
-    return ys
+    return xs
 end
 thread(xs::AbstractVector{Job}, ys::AbstractVector{Job}, zs::AbstractVector{Job}...) =
     foldr(thread, (xs, ys, zs...))
@@ -131,7 +131,7 @@ function fork(x::Job, ys::AbstractVector{Job})
     for y in ys
         chain(x, y)
     end
-    return ys
+    return x
 end
 const ⇉ = fork
 
@@ -145,7 +145,7 @@ function converge(xs::AbstractVector{Job}, y::Job)
     for x in xs
         chain(x, y)
     end
-    return y
+    return xs
 end
 const ⭃ = converge
 
@@ -154,7 +154,7 @@ const ⭃ = converge
 
 Start from a `Job` (`x`), followed by a series of `Job`s (`ys`), finished by a single `Job` (`z`).
 """
-spindle(x::Job, ys::AbstractVector{Job}, z::Job) = converge(fork(x, ys), z)
+spindle(x::Job, ys::AbstractVector{Job}, z::Job) = x ⇉ ys ⭃ z
 
 """
     run!(wf::Workflow; n=5, δt=1, Δt=1, filename="saved.jld2")
