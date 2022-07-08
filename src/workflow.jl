@@ -10,7 +10,7 @@ using Graphs:
     rem_vertices!
 using JLD2: load, jldopen, jldsave
 
-export Workflow, chain, fork, converge, spindle, ▷, ⋲, ⋺
+export Workflow, chain, fork, converge, spindle, →, ⋲, ⋺
 
 """
     Workflow(jobs, graph)
@@ -66,7 +66,7 @@ end
 
 """
     chain(x::Job, y::Job)
-    x ▷ y
+    x → y
 
 Chain two `Job`s one after another.
 """
@@ -79,6 +79,8 @@ function chain(x::Job, y::Job)
         return y
     end
 end
+const → = chain
+
 """
     chain(xs::AbstractVector{Job}, ys::AbstractVector{Job})
     xs ▷ ys
@@ -94,7 +96,6 @@ function chain(xs::AbstractVector{Job}, ys::AbstractVector{Job})
     end
     return ys
 end
-const ▷ = chain
 
 """
     fork(x::Job, ys::AbstractVector{Job})

@@ -1,4 +1,4 @@
-using SimpleWorkflows: SUCCEEDED, Workflow, run!, getstatus, getresult, ▷, @job
+using SimpleWorkflows: SUCCEEDED, Workflow, run!, getstatus, getresult, →, @job
 
 i = @job (println("Start job `i`!"); sleep(5)) user = "me" desc = "i"
 j = @job (println("Start job `j`!"); sleep(3); exp(2)) user = "me" desc = "j"
