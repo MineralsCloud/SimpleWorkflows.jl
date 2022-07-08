@@ -24,7 +24,7 @@ struct Workflow
         @assert !is_cyclic(graph) "`graph` must be acyclic"
         @assert is_connected(graph) "`graph` must be connected!"
         @assert nv(graph) == length(jobs) "`graph` has different size from `jobs`!"
-        @assert length(jobs) == length(unique(jobs)) "at least two jobs are identical!"
+        @assert allunique(jobs) "at least two jobs are identical!"
         return new(jobs, graph)
     end
 end
