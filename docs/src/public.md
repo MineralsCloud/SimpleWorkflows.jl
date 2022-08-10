@@ -5,7 +5,7 @@ CurrentModule = SimpleWorkflows
 # Library
 
 ```@contents
-Pages = ["api.md"]
+Pages = ["public.md"]
 ```
 
 ## Jobs
