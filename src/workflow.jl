@@ -10,7 +10,23 @@ using Graphs:
     rem_vertices!
 using JLD2: load, jldopen, jldsave
 
-export Workflow, chain, thread, fork, converge, spindle, →, ←, ⇶, ⬱, ⇉, ⭃
+export Workflow,
+    chain,
+    thread,
+    fork,
+    converge,
+    spindle,
+    pendingjobs,
+    runningjobs,
+    exitedjobs,
+    failedjobs,
+    interruptedjobs,
+    →,
+    ←,
+    ⇶,
+    ⬱,
+    ⇉,
+    ⭃
 
 """
     Workflow(jobs, graph)
@@ -227,6 +243,24 @@ end
 Get the current status of each `Job` in a `Workflow`.
 """
 getstatus(wf::Workflow) = map(getstatus, wf.jobs)
+
+pendingjobs(jobs) = filter(ispending, jobs)
+pendingjobs(wf::Workflow) = pendingjobs(wf.jobs)
+
+runningjobs(jobs) = filter(isrunning, jobs)
+runningjobs(wf::Workflow) = runningjobs(wf.jobs)
+
+exitedjobs(jobs) = filter(isexited, jobs)
+exitedjobs(wf::Workflow) = exitedjobs(wf.jobs)
+
+succeededjobs(jobs) = filter(issucceeded, jobs)
+succeededjobs(wf::Workflow) = succeededjobs(wf.jobs)
+
+failedjobs(jobs) = filter(isfailed, jobs)
+failedjobs(wf::Workflow) = failedjobs(wf.jobs)
+
+interruptedjobs(jobs) = filter(isinterrupted, jobs)
+interruptedjobs(wf::Workflow) = interruptedjobs(wf.jobs)
 
 function Base.show(io::IO, wf::Workflow)
     if get(io, :compact, false) || get(io, :typeinfo, nothing) == typeof(wf)
