@@ -63,7 +63,6 @@ mutable struct Job
     stop_time::DateTime
     "Track the job status."
     status::JobStatus
-    ref::Union{Task,Nothing}
     count::UInt64
     "These jobs runs before the current job."
     parents::Vector{Job}
