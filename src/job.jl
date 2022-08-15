@@ -120,7 +120,7 @@ macro job(ex, kwargs...)
     return ex
 end
 
-const JOB_REGISTRY = Job[]
+const JOB_REGISTRY = Dict{Job,Union{Nothing,Task}}()
 
 function initialize!()
     empty!(JOB_REGISTRY)
@@ -149,13 +149,10 @@ function run!(job::Job; n = 1, δt = 1)
 end
 function _run!(job::Job)
     if ispending(job)
-        job.ref = @async begin
-            if !isexecuted(job)
-                push!(JOB_REGISTRY, job)
-            end
-            __run!(job)
+        if !isexecuted(job)
+            push!(JOB_REGISTRY, job => nothing)
         end
-        return job
+        JOB_REGISTRY[job] = @async __run!(job)
     else
         job.status = PENDING
         return _run!(job)
@@ -210,7 +207,7 @@ Query a specific (or a list of `Job`s) by its (theirs) ID.
 query(id::Integer) = filter(row -> row.id == id, queue())
 query(ids::AbstractVector{<:Integer}) = map(id -> query(id), ids)
 
-isexecuted(job::Job) = job in JOB_REGISTRY
+isexecuted(job::Job) = job in keys(JOB_REGISTRY)
 
 """
     ntimes(id::Integer)
