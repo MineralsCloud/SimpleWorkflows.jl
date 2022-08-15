@@ -3,6 +3,8 @@ using Dates: DateTime, Period, Day, now, format
 using TryCatch: @try
 using UUIDs: UUID, uuid1
 
+using .Thunks: Thunk, reify!
+
 export Job
 export getstatus,
     getresult,
@@ -52,7 +54,7 @@ b = Job(() -> run(`pwd` & `ls`); user="me", desc="Run some commands")
 """
 mutable struct Job
     id::UUID
-    def::Function
+    thunk::Thunk
     desc::String
     user::String
     created_time::DateTime
@@ -66,9 +68,9 @@ mutable struct Job
     parents::Vector{Job}
     "These jobs runs after the current job."
     children::Vector{Job}
-    Job(def; desc = "", user = "") = new(
+    Job(thunk; desc = "", user = "") = new(
         uuid1(),
-        def,
+        thunk,
         desc,
         user,
         now(),
@@ -87,7 +89,7 @@ end
 Create a new `Job` from an existing `Job`.
 """
 Job(job::Job) = Job(
-    job.def;
+    job.thunk;
     desc = job.desc,
     user = job.user,
     parents = job.parents,
@@ -329,7 +331,25 @@ function Base.show(io::IO, job::Job)
             println(io)
         end
         print(io, ' ', "def: ")
-        show(io, job.def)
+        print(io, job.thunk.f, '(')
+        args = job.thunk.args
+        if length(args) > 0
+            for v in args[1:(end-1)]
+                print(io, v, ", ")
+            end
+            print(io, args[end])
+        end
+        kwargs = job.thunk.kwargs
+        if isempty(kwargs)
+            print(io, ')')
+        else
+            print(io, ";")
+            for (k, v) in zip(keys(kwargs)[1:(end-1)], Tuple(kwargs)[1:(end-1)])
+                print(io, ' ', k, '=', v, ",")
+            end
+            print(io, ' ', keys(kwargs)[end], '=', kwargs[end])
+            print(io, ')')
+        end
         print(io, '\n', ' ', "status: ")
         printstyled(io, getstatus(job); bold = true)
         if !ispending(job)
