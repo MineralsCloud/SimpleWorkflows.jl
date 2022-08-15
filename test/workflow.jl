@@ -31,12 +31,12 @@ using SimpleWorkflows.Thunks: Thunk
         cos(x)
         run(`pwd` & `ls`)
     end
-    i = Job(Thunk(f₁)(); user = "me", desc = "i")
-    j = Job(Thunk(f₂)(3); user = "he", desc = "j")
-    k = Job(Thunk(f₃)(6); desc = "k")
-    l = Job(Thunk(f₄)(); desc = "l", user = "me")
-    m = Job(Thunk(f₅)(3, 1); desc = "m")
-    n = Job(Thunk(f₆)(1; x = 3); user = "she", desc = "n")
+    i = Job(Thunk(f₁, ()); user = "me", desc = "i")
+    j = Job(Thunk(f₂, 3); user = "he", desc = "j")
+    k = Job(Thunk(f₃, 6); desc = "k")
+    l = Job(Thunk(f₄, ()); desc = "l", user = "me")
+    m = Job(Thunk(f₅, 3, 1); desc = "m")
+    n = Job(Thunk(f₆, 1; x = 3); user = "she", desc = "n")
     i → l
     j → k → m → n
     j → l
@@ -44,7 +44,7 @@ using SimpleWorkflows.Thunks: Thunk
     wf = Workflow(k)
     # @test w.jobs == Workflow(k, j, l, n, m).jobs == Workflow(k, l, m, n, j).jobs
     @testset "Test running a `SavedWorkflow`" begin
-        swf = SavedWorkflow(wf, "saved.bson")
+        swf = SavedWorkflow(wf, "saved.jld2")
         run!(swf; δt = 0, n = 1)
         @test all(==(SUCCEEDED), getstatus(wf))
         @test something(getresult(i)) === nothing
