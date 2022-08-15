@@ -1,6 +1,7 @@
 using DataFrames: DataFrame, sort, filter
 using Dates: DateTime, Period, Day, now, format
 using TryCatch: @try
+using UUIDs: UUID, uuid1
 
 export Job
 export getstatus,
@@ -50,7 +51,7 @@ b = Job(() -> run(`pwd` & `ls`); user="me", desc="Run some commands")
 ```
 """
 mutable struct Job
-    id::Int64
+    id::UUID
     def::Function
     desc::String
     user::String
@@ -66,7 +67,7 @@ mutable struct Job
     "These jobs runs after the current job."
     children::Vector{Job}
     Job(def; desc = "", user = "") = new(
-        generate_id(),
+        uuid1(),
         def,
         desc,
         user,
@@ -297,13 +298,6 @@ getresult(job::Job) = isexited(job) ? Some(fetch(job.ref)) : nothing
 Return the description of a `Job`.
 """
 description(job::Job) = job.desc
-
-# From https://github.com/cihga39871/JobSchedulers.jl/blob/aca52de/src/jobs.jl#L6-L10
-function generate_id()
-    time_value = (now().instant.periods.value - 63749462400000) << 16
-    rand_value = rand(UInt16)
-    return time_value + rand_value
-end
 
 """
     interrupt!(job::Job)
