@@ -185,11 +185,12 @@ Run a `Workflow` with maximum `n` attempts, with each attempt separated by `Δt`
 Cool down for `δt` seconds after each `Job` in the `Workflow`. Save the tracking information
 to a file named `saved.jld2`.
 """
-function run!(wf::Workflow; n = 5, δt = 1, Δt = 1, filename = "saved.jld2")
+function run!(wf::Union{Workflow,SavedWorkflow}; n = 5, δt = 1, Δt = 1)
     @assert isinteger(n) && n >= 1
+    save(wf)
     for _ in 1:n
         if any(!issucceeded(job) for job in wf.jobs)
-            _run!(wf; δt = δt, filename = filename)
+            _run!(wf; δt = δt)
         end
         if all(issucceeded(job) for job in wf.jobs)
             break  # Stop immediately
@@ -200,12 +201,12 @@ function run!(wf::Workflow; n = 5, δt = 1, Δt = 1, filename = "saved.jld2")
     end
     return wf
 end
-function _run!(wf::Workflow; δt, filename)
+function _run!(wf; δt)
     jobs, graph = copy(wf.jobs), copy(wf.graph)  # This separation is necessary, or else we call this every iteration of `__run!`
-    __run!(wf, jobs, graph; δt = δt, filename = filename)
+    __run!(wf, jobs, graph; δt = δt)
     return wf
 end
-function __run!(wf, jobs, graph; δt, filename)  # This will modify `wf`
+function __run!(wf, jobs, graph; δt)  # This will modify `wf`
     if isempty(jobs) && iszero(nv(graph))  # Stopping criterion
         return
     elseif isempty(jobs) && !iszero(nv(graph)) || !isempty(jobs) && iszero(nv(graph))
@@ -220,12 +221,12 @@ function __run!(wf, jobs, graph; δt, filename)  # This will modify `wf`
             @async begin
                 run!(job; n = 1, δt = δt)
                 wait(job)
-                jldsave(filename; workflow = wf)
+                save(wf)
             end
         end
         rem_vertices!(graph, queue; keep_order = true)
         deleteat!(jobs, queue)
-        return __run!(wf, jobs, graph; δt = δt, filename = filename)
+        return __run!(wf, jobs, graph; δt = δt)
     end
 end
 
