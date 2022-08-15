@@ -68,20 +68,8 @@ mutable struct Job
     parents::Vector{Job}
     "These jobs runs after the current job."
     children::Vector{Job}
-    Job(thunk; desc = "", user = "") = new(
-        uuid1(),
-        thunk,
-        desc,
-        user,
-        now(),
-        DateTime(0),
-        DateTime(0),
-        PENDING,
-        nothing,
-        0,
-        [],
-        [],
-    )
+    Job(thunk; desc = "", user = "") =
+        new(uuid1(), thunk, desc, user, now(), DateTime(0), DateTime(0), PENDING, 0, [], [])
 end
 """
     Job(job::Job)
