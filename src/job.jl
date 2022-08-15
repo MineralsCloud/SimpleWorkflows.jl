@@ -1,6 +1,7 @@
 using DataFrames: DataFrame, sort, filter
 using Dates: DateTime, Period, Day, now, format
 using TryCatch: @try
+using UUIDs: UUID, uuid1
 
 export Job
 export getstatus,
@@ -50,7 +51,7 @@ b = Job(() -> run(`pwd` & `ls`); user="me", desc="Run some commands")
 ```
 """
 mutable struct Job
-    id::Int64
+    id::UUID
     def::Function
     desc::String
     user::String
@@ -66,7 +67,7 @@ mutable struct Job
     "These jobs runs after the current job."
     children::Vector{Job}
     Job(def; desc = "", user = "") = new(
-        generate_id(),
+        uuid1(),
         def,
         desc,
         user,
