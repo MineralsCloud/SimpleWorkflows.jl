@@ -8,7 +8,7 @@ using Graphs:
     topological_sort_by_dfs,
     indegree,
     rem_vertices!
-using JLD2: load, jldopen, jldsave
+using JLD2: load, jldsave
 
 export Workflow,
     chain,
@@ -78,6 +78,11 @@ function Workflow(jobs::Job...)
         end
     end
     return Workflow(all_possible_jobs, graph)
+end
+
+struct SavedWorkflow{T}
+    wf::Workflow
+    file::T
 end
 
 """
@@ -172,6 +177,12 @@ Start from a `Job` (`x`), followed by a series of `Job`s (`ys`), finished by a s
 """
 spindle(x::Job, ys::AbstractVector{Job}, z::Job) = x ⇉ ys ⭃ z
 
+getjobs(wf::Workflow) = wf.jobs
+getjobs(wf::SavedWorkflow) = getjobs(wf.wf)
+
+getgraph(wf::Workflow) = wf.graph
+getgraph(wf::SavedWorkflow) = getgraph(wf.wf)
+
 """
     run!(wf::Workflow; n=5, δt=1, Δt=1, filename="saved.jld2")
 
@@ -180,23 +191,14 @@ Run a `Workflow` with maximum `n` attempts, with each attempt separated by `Δt`
 Cool down for `δt` seconds after each `Job` in the `Workflow`. Save the tracking information
 to a file named `saved.jld2`.
 """
-function run!(wf::Workflow; n = 5, δt = 1, Δt = 1, filename = "saved.jld2")
+function run!(wf::Union{Workflow,SavedWorkflow}; n = 5, δt = 1, Δt = 1)
     @assert isinteger(n) && n >= 1
-    if isfile(filename)
-        saved = load(filename)
-        if saved["jobs"] isa AbstractVector{Job} && saved["graph"] == wf.graph
-            for (job, status) in zip(wf.jobs, saved["status"])
-                job.status = status  # Inherit status from file
-            end
-        end
-    else
-        jldsave(filename; jobs = wf.jobs, graph = wf.graph, status = getstatus(wf))
-    end
+    save(wf)
     for _ in 1:n
-        if any(!issucceeded(job) for job in wf.jobs)
-            _run!(wf; δt = δt, filename = filename)
+        if any(!issucceeded(job) for job in getjobs(wf))
+            run_copy!(wf; δt = δt)
         end
-        if all(issucceeded(job) for job in wf.jobs)
+        if all(issucceeded(job) for job in getjobs(wf))
             break  # Stop immediately
         end
         if !iszero(Δt)  # If still unsuccessful
@@ -205,12 +207,12 @@ function run!(wf::Workflow; n = 5, δt = 1, Δt = 1, filename = "saved.jld2")
     end
     return wf
 end
-function _run!(wf::Workflow; δt, filename)
-    jobs, graph = copy(wf.jobs), copy(wf.graph)  # This separation is necessary, or else we call this every iteration of `__run!`
-    __run!(wf, jobs, graph; δt = δt, filename = filename)
+function run_copy!(wf; δt)  # Do not export!
+    jobs, graph = copy(getjobs(wf)), copy(getgraph(wf))  # This separation is necessary, or else we call this every iteration of `run_kahn_algo!`
+    run_kahn_algo!(wf, jobs, graph; δt = δt)
     return wf
 end
-function __run!(wf, jobs, graph; δt, filename)  # This will modify `wf`
+function run_kahn_algo!(wf, jobs, graph; δt)  # Do not export!
     if isempty(jobs) && iszero(nv(graph))  # Stopping criterion
         return
     elseif isempty(jobs) && !iszero(nv(graph)) || !isempty(jobs) && iszero(nv(graph))
@@ -225,15 +227,12 @@ function __run!(wf, jobs, graph; δt, filename)  # This will modify `wf`
             @async begin
                 run!(job; n = 1, δt = δt)
                 wait(job)
-                jldopen(filename, "r+") do file
-                    Base.delete!(file, "status")
-                    write(file, "status", getstatus(wf))
-                end
+                save(wf)
             end
         end
         rem_vertices!(graph, queue; keep_order = true)
         deleteat!(jobs, queue)
-        return __run!(wf, jobs, graph; δt = δt, filename = filename)
+        return run_kahn_algo!(wf, jobs, graph; δt = δt)
     end
 end
 
@@ -242,25 +241,30 @@ end
 
 Get the current status of each `Job` in a `Workflow`.
 """
-getstatus(wf::Workflow) = map(getstatus, wf.jobs)
+getstatus(jobs) = map(getstatus, jobs)
 
 pendingjobs(jobs) = filter(ispending, jobs)
-pendingjobs(wf::Workflow) = pendingjobs(wf.jobs)
 
 runningjobs(jobs) = filter(isrunning, jobs)
-runningjobs(wf::Workflow) = runningjobs(wf.jobs)
 
 exitedjobs(jobs) = filter(isexited, jobs)
-exitedjobs(wf::Workflow) = exitedjobs(wf.jobs)
 
 succeededjobs(jobs) = filter(issucceeded, jobs)
-succeededjobs(wf::Workflow) = succeededjobs(wf.jobs)
 
 failedjobs(jobs) = filter(isfailed, jobs)
-failedjobs(wf::Workflow) = failedjobs(wf.jobs)
 
 interruptedjobs(jobs) = filter(isinterrupted, jobs)
-interruptedjobs(wf::Workflow) = interruptedjobs(wf.jobs)
+
+for method in
+    (:getstatus, :pendingjobs, :runningjobs, :exitedjobs, :failedjobs, :interruptedjobs)
+    @eval begin
+        $method(wf::Workflow) = $method(wf.jobs)
+        $method(wf::SavedWorkflow) = $method(wf.wf)
+    end
+end
+
+save(::Workflow) = nothing
+save(wf::SavedWorkflow) = jldsave(wf.file; workflow = wf.wf)
 
 function Base.show(io::IO, wf::Workflow)
     if get(io, :compact, false) || get(io, :typeinfo, nothing) == typeof(wf)

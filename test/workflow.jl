@@ -1,4 +1,5 @@
-using SimpleWorkflows: SUCCEEDED, Workflow, run!, getstatus, getresult, →
+using SimpleWorkflows:
+    SUCCEEDED, Job, Workflow, SavedWorkflow, run!, getstatus, getresult, →
 using SimpleWorkflows.Thunks: Thunk
 
 @testset "Test running a `Workflow`" begin
@@ -7,7 +8,7 @@ using SimpleWorkflows.Thunks: Thunk
         sleep(5)
     end
     function f₂(n)
-        println("Start job `i`!")
+        println("Start job `j`!")
         sleep(n)
         exp(2)
     end
@@ -42,14 +43,17 @@ using SimpleWorkflows.Thunks: Thunk
     k → n
     wf = Workflow(k)
     # @test w.jobs == Workflow(k, j, l, n, m).jobs == Workflow(k, l, m, n, j).jobs
-    run!(wf; δt = 0, n = 1)
-    @test all(==(SUCCEEDED), getstatus(wf))
-    @test something(getresult(i)) === nothing
-    @test something(getresult(j)) == 7.38905609893065
-    @test something(getresult(k)) === nothing
-    @test something(getresult(l)) isa Base.Process
-    @test something(getresult(m)) == 0.8414709848078965
-    @test something(getresult(n)) isa Base.ProcessChain
+    @testset "Test running a `SavedWorkflow`" begin
+        swf = SavedWorkflow(wf, "saved.bson")
+        run!(swf; δt = 0, n = 1)
+        @test all(==(SUCCEEDED), getstatus(wf))
+        @test something(getresult(i)) === nothing
+        @test something(getresult(j)) == 7.38905609893065
+        @test something(getresult(k)) === nothing
+        @test something(getresult(l)) isa Base.Process
+        @test something(getresult(m)) == 0.8414709848078965
+        @test something(getresult(n)) isa Base.ProcessChain
+    end
 end
 
 @testset "Test association rules of operators" begin
