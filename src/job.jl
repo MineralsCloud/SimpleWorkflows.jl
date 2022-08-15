@@ -329,7 +329,25 @@ function Base.show(io::IO, job::Job)
             println(io)
         end
         print(io, ' ', "def: ")
-        show(io, job.def)
+        print(io, job.thunk.f, '(')
+        args = job.thunk.args
+        if length(args) > 0
+            for v in args[1:(end-1)]
+                print(io, v, ", ")
+            end
+            print(io, args[end])
+        end
+        kwargs = job.thunk.kwargs
+        if isempty(kwargs)
+            print(io, ')')
+        else
+            print(io, ";")
+            for (k, v) in zip(keys(kwargs)[1:(end-1)], Tuple(kwargs)[1:(end-1)])
+                print(io, ' ', k, '=', v, ",")
+            end
+            print(io, ' ', keys(kwargs)[end], '=', kwargs[end])
+            print(io, ')')
+        end
         print(io, '\n', ' ', "status: ")
         printstyled(io, getstatus(job); bold = true)
         if !ispending(job)
