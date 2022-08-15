@@ -5,6 +5,8 @@ using UUIDs: UUID, uuid1
 
 using .Thunks: Thunk, reify!
 
+import .Thunks: getresult
+
 export Job
 export getstatus,
     getresult,
@@ -148,8 +150,6 @@ end
 function _run!(job::Job)
     if ispending(job)
         job.ref = @async begin
-            job.status = RUNNING
-            job.start_time = now()
             if !isexecuted(job)
                 push!(JOB_REGISTRY, job)
             end
