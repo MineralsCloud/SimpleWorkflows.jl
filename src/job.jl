@@ -161,16 +161,17 @@ Accpetable arguments for `sortby` are `:created_time`, `:user`, `:start_time`, `
 function queue(; sortby = :created_time)
     @assert sortby in
             (:created_time, :user, :start_time, :stop_time, :elapsed, :status, :times)
+    jobs = collect(keys(JOB_REGISTRY))
     df = DataFrame(
-        id = [job.id for job in JOB_REGISTRY],
-        user = [job.user for job in JOB_REGISTRY],
-        created_time = map(createdtime, JOB_REGISTRY),
-        start_time = map(starttime, JOB_REGISTRY),
-        stop_time = map(stoptime, JOB_REGISTRY),
-        elapsed = map(elapsed, JOB_REGISTRY),
-        status = map(getstatus, JOB_REGISTRY),
-        times = map(ntimes, JOB_REGISTRY),
-        desc = map(description, JOB_REGISTRY),
+        id = [job.id for job in jobs],
+        user = [job.user for job in jobs],
+        created_time = map(createdtime, jobs),
+        start_time = map(starttime, jobs),
+        stop_time = map(stoptime, jobs),
+        elapsed = map(elapsed, jobs),
+        status = map(getstatus, jobs),
+        times = map(ntimes, jobs),
+        desc = map(description, jobs),
     )
     return sort(df, [:id, sortby])
 end
