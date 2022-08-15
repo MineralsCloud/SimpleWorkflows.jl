@@ -177,6 +177,12 @@ Start from a `Job` (`x`), followed by a series of `Job`s (`ys`), finished by a s
 """
 spindle(x::Job, ys::AbstractVector{Job}, z::Job) = x ⇉ ys ⭃ z
 
+getjobs(wf::Workflow) = wf.jobs
+getjobs(wf::SavedWorkflow) = getjobs(wf.wf)
+
+getgraph(wf::Workflow) = wf.graph
+getgraph(wf::SavedWorkflow) = getgraph(wf.wf)
+
 """
     run!(wf::Workflow; n=5, δt=1, Δt=1, filename="saved.jld2")
 
@@ -189,10 +195,10 @@ function run!(wf::Union{Workflow,SavedWorkflow}; n = 5, δt = 1, Δt = 1)
     @assert isinteger(n) && n >= 1
     save(wf)
     for _ in 1:n
-        if any(!issucceeded(job) for job in wf.jobs)
+        if any(!issucceeded(job) for job in getjobs(wf))
             run_copy!(wf; δt = δt)
         end
-        if all(issucceeded(job) for job in wf.jobs)
+        if all(issucceeded(job) for job in getjobs(wf))
             break  # Stop immediately
         end
         if !iszero(Δt)  # If still unsuccessful
@@ -202,7 +208,7 @@ function run!(wf::Union{Workflow,SavedWorkflow}; n = 5, δt = 1, Δt = 1)
     return wf
 end
 function run_copy!(wf; δt)  # Do not export!
-    jobs, graph = copy(wf.jobs), copy(wf.graph)  # This separation is necessary, or else we call this every iteration of `run_kahn_algo!`
+    jobs, graph = copy(getjobs(wf)), copy(getgraph(wf))  # This separation is necessary, or else we call this every iteration of `run_kahn_algo!`
     run_kahn_algo!(wf, jobs, graph; δt = δt)
     return wf
 end
