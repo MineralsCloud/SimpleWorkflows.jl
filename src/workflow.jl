@@ -8,7 +8,7 @@ using Graphs:
     topological_sort_by_dfs,
     indegree,
     rem_vertices!
-using JLD2: load, jldopen, jldsave
+using JLD2: load, jldsave
 
 export Workflow,
     chain,
@@ -225,10 +225,7 @@ function __run!(wf, jobs, graph; δt, filename)  # This will modify `wf`
             @async begin
                 run!(job; n = 1, δt = δt)
                 wait(job)
-                jldopen(filename, "r+") do file
-                    Base.delete!(file, "status")
-                    write(file, "status", getstatus(wf))
-                end
+                jldsave(filename; workflow = wf)
             end
         end
         rem_vertices!(graph, queue; keep_order = true)
