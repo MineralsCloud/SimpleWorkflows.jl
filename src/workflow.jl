@@ -80,6 +80,11 @@ function Workflow(jobs::Job...)
     return Workflow(all_possible_jobs, graph)
 end
 
+struct SavedWorkflow{T}
+    wf::Workflow
+    file::T
+end
+
 """
     chain(x::Job, y::Job, z::Job...)
 
@@ -248,6 +253,9 @@ failedjobs(wf::Workflow) = failedjobs(wf.jobs)
 
 interruptedjobs(jobs) = filter(isinterrupted, jobs)
 interruptedjobs(wf::Workflow) = interruptedjobs(wf.jobs)
+
+save(::Workflow) = nothing
+save(wf::SavedWorkflow) = jldsave(wf.file; workflow = wf.wf)
 
 function Base.show(io::IO, wf::Workflow)
     if get(io, :compact, false) || get(io, :typeinfo, nothing) == typeof(wf)
