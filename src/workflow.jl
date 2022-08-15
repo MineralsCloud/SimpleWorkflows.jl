@@ -182,16 +182,6 @@ to a file named `saved.jld2`.
 """
 function run!(wf::Workflow; n = 5, δt = 1, Δt = 1, filename = "saved.jld2")
     @assert isinteger(n) && n >= 1
-    if isfile(filename)
-        saved = load(filename)
-        if saved["jobs"] isa AbstractVector{Job} && saved["graph"] == wf.graph
-            for (job, status) in zip(wf.jobs, saved["status"])
-                job.status = status  # Inherit status from file
-            end
-        end
-    else
-        jldsave(filename; jobs = wf.jobs, graph = wf.graph, status = getstatus(wf))
-    end
     for _ in 1:n
         if any(!issucceeded(job) for job in wf.jobs)
             _run!(wf; δt = δt, filename = filename)
