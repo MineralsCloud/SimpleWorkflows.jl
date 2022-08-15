@@ -16,11 +16,6 @@ export Workflow,
     fork,
     converge,
     spindle,
-    pendingjobs,
-    runningjobs,
-    exitedjobs,
-    failedjobs,
-    interruptedjobs,
     →,
     ←,
     ⇶,
@@ -235,25 +230,6 @@ function run_kahn_algo!(wf, jobs, graph; δt)  # Do not export!
         return run_kahn_algo!(wf, jobs, graph; δt = δt)
     end
 end
-
-"""
-    getstatus(wf::Workflow)
-
-Get the current status of each `Job` in a `Workflow`.
-"""
-getstatus(jobs) = map(getstatus, jobs)
-
-pendingjobs(jobs) = filter(ispending, jobs)
-
-runningjobs(jobs) = filter(isrunning, jobs)
-
-exitedjobs(jobs) = filter(isexited, jobs)
-
-succeededjobs(jobs) = filter(issucceeded, jobs)
-
-failedjobs(jobs) = filter(isfailed, jobs)
-
-interruptedjobs(jobs) = filter(isinterrupted, jobs)
 
 for method in
     (:getstatus, :pendingjobs, :runningjobs, :exitedjobs, :failedjobs, :interruptedjobs)

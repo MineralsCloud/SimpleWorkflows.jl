@@ -17,6 +17,11 @@ export getstatus,
     issucceeded,
     isfailed,
     isinterrupted,
+    pendingjobs,
+    runningjobs,
+    exitedjobs,
+    failedjobs,
+    interruptedjobs,
     createdtime,
     starttime,
     stoptime,
@@ -275,6 +280,20 @@ function interrupt!(job::Job)
     end
     return job
 end
+
+getstatus(jobs) = map(getstatus, jobs)
+
+pendingjobs(jobs) = filter(ispending, jobs)
+
+runningjobs(jobs) = filter(isrunning, jobs)
+
+exitedjobs(jobs) = filter(isexited, jobs)
+
+succeededjobs(jobs) = filter(issucceeded, jobs)
+
+failedjobs(jobs) = filter(isfailed, jobs)
+
+interruptedjobs(jobs) = filter(isinterrupted, jobs)
 
 Base.wait(job::Job) = wait(JOB_REGISTRY[job])
 
