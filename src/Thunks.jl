@@ -8,8 +8,10 @@ mutable struct Thunk
     kwargs::NamedTuple
     evaluated::Bool
     result
-    Thunk(f, args, kwargs = NamedTuple()) = new(f, args, kwargs, false, nothing)
+    Thunk(f, args::Tuple, kwargs::NamedTuple = NamedTuple()) =
+        new(f, args, kwargs, false, nothing)
 end
+Thunk(f, args...; kwargs...) = Thunk(f, args, NamedTuple(kwargs))
 Thunk(f) = (args...; kwargs...) -> Thunk(f, args, NamedTuple(kwargs))
 
 function reify!(thunk::Thunk)
