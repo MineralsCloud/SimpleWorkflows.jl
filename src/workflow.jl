@@ -9,6 +9,7 @@ using Graphs:
     indegree,
     rem_vertices!
 using JLD2: load, jldsave
+using TypedDelegation: @delegate_onefield
 
 export Workflow,
     chain,
@@ -185,7 +186,7 @@ Run a `Workflow` with maximum `n` attempts, with each attempt separated by `Δt`
 Cool down for `δt` seconds after each `Job` in the `Workflow`. Save the tracking information
 to a file named `saved.jld2`.
 """
-function run!(wf::Union{Workflow,SavedWorkflow}; n = 5, δt = 1, Δt = 1)
+function run!(wf::Workflow; n = 5, δt = 1, Δt = 1)
     @assert isinteger(n) && n >= 1
     save(wf)
     for _ in 1:n
@@ -238,25 +239,36 @@ Get the current status of each `Job` in a `Workflow`.
 getstatus(wf::Workflow) = map(getstatus, wf.jobs)
 
 pendingjobs(jobs) = filter(ispending, jobs)
-pendingjobs(wf::Workflow) = pendingjobs(wf.jobs)
 
 runningjobs(jobs) = filter(isrunning, jobs)
-runningjobs(wf::Workflow) = runningjobs(wf.jobs)
 
 exitedjobs(jobs) = filter(isexited, jobs)
-exitedjobs(wf::Workflow) = exitedjobs(wf.jobs)
 
 succeededjobs(jobs) = filter(issucceeded, jobs)
-succeededjobs(wf::Workflow) = succeededjobs(wf.jobs)
 
 failedjobs(jobs) = filter(isfailed, jobs)
-failedjobs(wf::Workflow) = failedjobs(wf.jobs)
 
 interruptedjobs(jobs) = filter(isinterrupted, jobs)
-interruptedjobs(wf::Workflow) = interruptedjobs(wf.jobs)
 
 save(::Workflow) = nothing
 save(wf::SavedWorkflow) = jldsave(wf.file; workflow = wf.wf)
+
+@delegate_onefield Workflow jobs [
+    pendingjobs,
+    runningjobs,
+    exitedjobs,
+    failedjobs,
+    interruptedjobs,
+]
+@delegate_onefield SavedWorkflow wf [
+    run!,
+    getstatus,
+    pendingjobs,
+    runningjobs,
+    exitedjobs,
+    failedjobs,
+    interruptedjobs,
+]
 
 function Base.show(io::IO, wf::Workflow)
     if get(io, :compact, false) || get(io, :typeinfo, nothing) == typeof(wf)
