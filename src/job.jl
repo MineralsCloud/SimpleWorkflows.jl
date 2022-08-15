@@ -112,7 +112,7 @@ function run!(job::Job; n = 1, δt = 1)
     @assert isinteger(n) && n >= 1
     for _ in 1:n
         if !issucceeded(job)
-            _run!(job)
+            run_inner!(job)
         end
         if issucceeded(job)
             break  # Stop immediately
@@ -123,18 +123,18 @@ function run!(job::Job; n = 1, δt = 1)
     end
     return job
 end
-function _run!(job::Job)
+function run_inner!(job::Job)  # Do not export!
     if ispending(job)
         if !isexecuted(job)
             push!(JOB_REGISTRY, job => nothing)
         end
-        JOB_REGISTRY[job] = @async __run!(job)
+        JOB_REGISTRY[job] = @async run_core!(job)
     else
         job.status = PENDING
-        return _run!(job)
+        return run_inner!(job)
     end
 end
-function __run!(job::Job)
+function run_core!(job::Job)  # Do not export!
     job.status = RUNNING
     job.start_time = now()
     reify!(job.thunk)

@@ -190,7 +190,7 @@ function run!(wf::Union{Workflow,SavedWorkflow}; n = 5, δt = 1, Δt = 1)
     save(wf)
     for _ in 1:n
         if any(!issucceeded(job) for job in wf.jobs)
-            _run!(wf; δt = δt)
+            run_copy!(wf; δt = δt)
         end
         if all(issucceeded(job) for job in wf.jobs)
             break  # Stop immediately
@@ -201,12 +201,12 @@ function run!(wf::Union{Workflow,SavedWorkflow}; n = 5, δt = 1, Δt = 1)
     end
     return wf
 end
-function _run!(wf; δt)
-    jobs, graph = copy(wf.jobs), copy(wf.graph)  # This separation is necessary, or else we call this every iteration of `__run!`
-    __run!(wf, jobs, graph; δt = δt)
+function run_copy!(wf; δt)  # Do not export!
+    jobs, graph = copy(wf.jobs), copy(wf.graph)  # This separation is necessary, or else we call this every iteration of `run_kahn_algo!`
+    run_kahn_algo!(wf, jobs, graph; δt = δt)
     return wf
 end
-function __run!(wf, jobs, graph; δt)  # This will modify `wf`
+function run_kahn_algo!(wf, jobs, graph; δt)  # Do not export!
     if isempty(jobs) && iszero(nv(graph))  # Stopping criterion
         return
     elseif isempty(jobs) && !iszero(nv(graph)) || !isempty(jobs) && iszero(nv(graph))
@@ -226,7 +226,7 @@ function __run!(wf, jobs, graph; δt)  # This will modify `wf`
         end
         rem_vertices!(graph, queue; keep_order = true)
         deleteat!(jobs, queue)
-        return __run!(wf, jobs, graph; δt = δt)
+        return run_kahn_algo!(wf, jobs, graph; δt = δt)
     end
 end
 
