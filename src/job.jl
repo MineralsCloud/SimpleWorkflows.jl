@@ -27,7 +27,6 @@ export getstatus,
     query,
     isexecuted,
     ntimes
-export @job
 
 @enum JobStatus begin
     PENDING
@@ -97,28 +96,6 @@ Job(job::Job) = Job(
     parents = job.parents,
     children = job.children,
 )
-
-# Ideas from `@test`, see https://github.com/JuliaLang/julia/blob/6bd952c/stdlib/Test/src/Test.jl#L331-L341
-"""
-    @job(ex, kwargs...)
-
-Create a `Job` from an `Expr`, not a `Function`.
-
-# Examples
-```@repl
-a = @job sleep(5) user="me" desc="Sleep for 5 seconds"
-b = @job run(`pwd` & `ls`) user="me" desc="Run some commands"
-```
-"""
-macro job(ex, kwargs...)
-    ex = :(Job(() -> $(esc(ex))))
-    for kwarg in kwargs
-        kwarg isa Expr && kwarg.head === :(=) || error("argument $kwarg is invalid!")
-        kwarg.head = :kw
-        push!(ex.args, kwarg)
-    end
-    return ex
-end
 
 const JOB_REGISTRY = Dict{Job,Union{Nothing,Task}}()
 
