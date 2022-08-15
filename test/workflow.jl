@@ -1,12 +1,41 @@
-using SimpleWorkflows: SUCCEEDED, Workflow, run!, getstatus, getresult, →, @job
+using SimpleWorkflows: SUCCEEDED, Workflow, run!, getstatus, getresult, →
+using SimpleWorkflows.Thunks: Thunk
 
 @testset "Test running a `Workflow`" begin
-    i = @job (println("Start job `i`!"); sleep(5)) user = "me" desc = "i"
-    j = @job (println("Start job `j`!"); sleep(3); exp(2)) user = "me" desc = "j"
-    k = @job (println("Start job `k`!"); sleep(6)) desc = "k"
-    l = @job (println("Start job `l`!"); run(`sleep 3`)) desc = "l" user = "me"
-    m = @job (println("Start job `m`!"); sleep(3); sin(1)) desc = "m"
-    n = @job (println("Start job `n`!"); run(`pwd` & `ls`)) user = "me" desc = "n"
+    function f₁()
+        println("Start job `i`!")
+        sleep(5)
+    end
+    function f₂(n)
+        println("Start job `i`!")
+        sleep(n)
+        exp(2)
+    end
+    function f₃(n)
+        println("Start job `k`!")
+        sleep(n)
+    end
+    function f₄()
+        println("Start job `l`!")
+        run(`sleep 3`)
+    end
+    function f₅(n, x)
+        println("Start job `m`!")
+        sleep(n)
+        sin(x)
+    end
+    function f₆(n; x = 1)
+        println("Start job `n`!")
+        sleep(n)
+        cos(x)
+        run(`pwd` & `ls`)
+    end
+    i = Job(Thunk(f₁)(); user = "me", desc = "i")
+    j = Job(Thunk(f₂)(3); user = "he", desc = "j")
+    k = Job(Thunk(f₃)(6); desc = "k")
+    l = Job(Thunk(f₄)(); desc = "l", user = "me")
+    m = Job(Thunk(f₅)(3, 1); desc = "m")
+    n = Job(Thunk(f₆)(1; x = 3); user = "she", desc = "n")
     i → l
     j → k → m → n
     j → l

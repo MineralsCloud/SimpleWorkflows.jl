@@ -16,6 +16,7 @@ function reify!(thunk::Thunk)
     if thunk.evaluated
         return getresult(thunk)
     else
+        # See https://github.com/JuliaLang/julia/issues/21130#issuecomment-288423284
         try
             global result = thunk.f(thunk.args...; thunk.kwargs...)
         catch e
@@ -37,6 +38,41 @@ function setresult!(thunk::Thunk, result)
     thunk.args = ()
     thunk.kwargs = NamedTuple()
     return thunk
+end
+
+function Base.show(io::IO, thunk::Thunk)
+    if get(io, :compact, false) || get(io, :typeinfo, nothing) == typeof(thunk)
+        Base.show_default(IOContext(io, :limit => true), thunk)  # From https://github.com/mauro3/Parameters.jl/blob/ecbf8df/src/Parameters.jl#L556
+    else
+        println(io, summary(thunk))
+        print(io, ' ', "def: ")
+        printfunc(io, thunk)
+        println(io)
+        println(io, " evaluated: ", thunk.evaluated)
+        println(io, " result: ", thunk.result)
+    end
+end
+
+function printfunc(io::IO, thunk::Thunk)
+    print(io, thunk.f, '(')
+    args = thunk.args
+    if length(args) > 0
+        for v in args[1:(end-1)]
+            print(io, v, ", ")
+        end
+        print(io, args[end])
+    end
+    kwargs = thunk.kwargs
+    if isempty(kwargs)
+        print(io, ')')
+    else
+        print(io, ";")
+        for (k, v) in zip(keys(kwargs)[1:(end-1)], Tuple(kwargs)[1:(end-1)])
+            print(io, ' ', k, '=', v, ",")
+        end
+        print(io, ' ', keys(kwargs)[end], '=', kwargs[end])
+        print(io, ')')
+    end
 end
 
 end

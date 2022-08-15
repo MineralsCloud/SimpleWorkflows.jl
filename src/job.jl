@@ -3,7 +3,9 @@ using Dates: DateTime, Period, Day, now, format
 using TryCatch: @try
 using UUIDs: UUID, uuid1
 
-using .Thunks: Thunk, reify!
+using .Thunks: Thunk, reify!, printfunc
+
+import .Thunks: getresult
 
 export Job
 export getstatus,
@@ -25,7 +27,6 @@ export getstatus,
     query,
     isexecuted,
     ntimes
-export @job
 
 @enum JobStatus begin
     PENDING
@@ -62,7 +63,6 @@ mutable struct Job
     stop_time::DateTime
     "Track the job status."
     status::JobStatus
-    ref::Union{Task,Nothing}
     count::UInt64
     "These jobs runs before the current job."
     parents::Vector{Job}
@@ -96,29 +96,7 @@ Job(job::Job) = Job(
     children = job.children,
 )
 
-# Ideas from `@test`, see https://github.com/JuliaLang/julia/blob/6bd952c/stdlib/Test/src/Test.jl#L331-L341
-"""
-    @job(ex, kwargs...)
-
-Create a `Job` from an `Expr`, not a `Function`.
-
-# Examples
-```@repl
-a = @job sleep(5) user="me" desc="Sleep for 5 seconds"
-b = @job run(`pwd` & `ls`) user="me" desc="Run some commands"
-```
-"""
-macro job(ex, kwargs...)
-    ex = :(Job(() -> $(esc(ex))))
-    for kwarg in kwargs
-        kwarg isa Expr && kwarg.head === :(=) || error("argument $kwarg is invalid!")
-        kwarg.head = :kw
-        push!(ex.args, kwarg)
-    end
-    return ex
-end
-
-const JOB_REGISTRY = Job[]
+const JOB_REGISTRY = Dict{Job,Union{Nothing,Task}}()
 
 function initialize!()
     empty!(JOB_REGISTRY)
@@ -147,36 +125,28 @@ function run!(job::Job; n = 1, δt = 1)
 end
 function _run!(job::Job)
     if ispending(job)
-        job.ref = @async begin
-            job.status = RUNNING
-            job.start_time = now()
-            if !isexecuted(job)
-                push!(JOB_REGISTRY, job)
-            end
-            __run!(job)
+        if !isexecuted(job)
+            push!(JOB_REGISTRY, job => nothing)
         end
-        return job
+        JOB_REGISTRY[job] = @async __run!(job)
     else
         job.status = PENDING
         return _run!(job)
     end
 end
 function __run!(job::Job)
-    # See https://github.com/JuliaLang/julia/issues/21130#issuecomment-288423284
-    @try begin
-        global result = job.def()
-    @catch e
-        job.stop_time = now()
-        @error "come across `$e` when running!"
-        job.status = e isa InterruptException ? INTERRUPTED : FAILED
-        return e
-    @else
-        job.stop_time = now()
+    job.status = RUNNING
+    job.start_time = now()
+    reify!(job.thunk)
+    job.stop_time = now()
+    result = getresult(job.thunk)
+    if result isa ErrorException
+        job.status = result isa InterruptException ? INTERRUPTED : FAILED
+    else
         job.status = SUCCEEDED
-        return result
-    @finally
-        job.count += 1
     end
+    job.count += 1
+    return job
 end
 
 """
@@ -190,16 +160,17 @@ Accpetable arguments for `sortby` are `:created_time`, `:user`, `:start_time`, `
 function queue(; sortby = :created_time)
     @assert sortby in
             (:created_time, :user, :start_time, :stop_time, :elapsed, :status, :times)
+    jobs = collect(keys(JOB_REGISTRY))
     df = DataFrame(
-        id = [job.id for job in JOB_REGISTRY],
-        user = [job.user for job in JOB_REGISTRY],
-        created_time = map(createdtime, JOB_REGISTRY),
-        start_time = map(starttime, JOB_REGISTRY),
-        stop_time = map(stoptime, JOB_REGISTRY),
-        elapsed = map(elapsed, JOB_REGISTRY),
-        status = map(getstatus, JOB_REGISTRY),
-        times = map(ntimes, JOB_REGISTRY),
-        desc = map(description, JOB_REGISTRY),
+        id = [job.id for job in jobs],
+        user = [job.user for job in jobs],
+        created_time = map(createdtime, jobs),
+        start_time = map(starttime, jobs),
+        stop_time = map(stoptime, jobs),
+        elapsed = map(elapsed, jobs),
+        status = map(getstatus, jobs),
+        times = map(ntimes, jobs),
+        desc = map(description, jobs),
     )
     return sort(df, [:id, sortby])
 end
@@ -213,7 +184,7 @@ Query a specific (or a list of `Job`s) by its (theirs) ID.
 query(id::Integer) = filter(row -> row.id == id, queue())
 query(ids::AbstractVector{<:Integer}) = map(id -> query(id), ids)
 
-isexecuted(job::Job) = job in JOB_REGISTRY
+isexecuted(job::Job) = job in keys(JOB_REGISTRY)
 
 """
     ntimes(id::Integer)
@@ -292,7 +263,7 @@ Get the running result of a `Job`.
 The result is wrapped by a `Some` type. Use `something` to retrieve its value.
 If it is `nothing`, the `Job` is not finished.
 """
-getresult(job::Job) = isexited(job) ? Some(fetch(job.ref)) : nothing
+getresult(job::Job) = isexited(job) ? Some(job.thunk.result) : nothing
 
 """
     description(job::Job)
@@ -312,12 +283,12 @@ function interrupt!(job::Job)
     elseif ispending(job)
         @info "the job $(job.id) has not started!"
     else
-        schedule(job.ref, InterruptException(); error = true)
+        schedule(JOB_REGISTRY[job], InterruptException(); error = true)
     end
     return job
 end
 
-Base.wait(job::Job) = wait(job.ref)
+Base.wait(job::Job) = wait(JOB_REGISTRY[job])
 
 function Base.show(io::IO, job::Job)
     if get(io, :compact, false) || get(io, :typeinfo, nothing) == typeof(job)
@@ -331,25 +302,7 @@ function Base.show(io::IO, job::Job)
             println(io)
         end
         print(io, ' ', "def: ")
-        print(io, job.thunk.f, '(')
-        args = job.thunk.args
-        if length(args) > 0
-            for v in args[1:(end-1)]
-                print(io, v, ", ")
-            end
-            print(io, args[end])
-        end
-        kwargs = job.thunk.kwargs
-        if isempty(kwargs)
-            print(io, ')')
-        else
-            print(io, ";")
-            for (k, v) in zip(keys(kwargs)[1:(end-1)], Tuple(kwargs)[1:(end-1)])
-                print(io, ' ', k, '=', v, ",")
-            end
-            print(io, ' ', keys(kwargs)[end], '=', kwargs[end])
-            print(io, ')')
-        end
+        printfunc(io, job.thunk)
         print(io, '\n', ' ', "status: ")
         printstyled(io, getstatus(job); bold = true)
         if !ispending(job)

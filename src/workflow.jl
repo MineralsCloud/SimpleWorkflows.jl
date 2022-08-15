@@ -277,7 +277,7 @@ function Base.show(io::IO, wf::Workflow)
                 println(io)
             end
             print(io, ' '^5, "def: ")
-            show(io, job.def)
+            printfunc(io, job.thunk)
             print(io, '\n', ' '^5, "status: ")
             printstyled(io, getstatus(job); bold = true)
             if !ispending(job)
