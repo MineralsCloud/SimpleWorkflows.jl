@@ -299,13 +299,6 @@ Return the description of a `Job`.
 """
 description(job::Job) = job.desc
 
-# From https://github.com/cihga39871/JobSchedulers.jl/blob/aca52de/src/jobs.jl#L6-L10
-function generate_id()
-    time_value = (now().instant.periods.value - 63749462400000) << 16
-    rand_value = rand(UInt16)
-    return time_value + rand_value
-end
-
 """
     interrupt!(job::Job)
 
