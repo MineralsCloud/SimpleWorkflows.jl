@@ -3,7 +3,7 @@ using Dates: DateTime, Period, Day, now, format
 using TryCatch: @try
 using UUIDs: UUID, uuid1
 
-using .Thunks: Thunk, reify!
+using .Thunks: Thunk, reify!, printfunc
 
 import .Thunks: getresult
 
@@ -328,25 +328,7 @@ function Base.show(io::IO, job::Job)
             println(io)
         end
         print(io, ' ', "def: ")
-        print(io, job.thunk.f, '(')
-        args = job.thunk.args
-        if length(args) > 0
-            for v in args[1:(end-1)]
-                print(io, v, ", ")
-            end
-            print(io, args[end])
-        end
-        kwargs = job.thunk.kwargs
-        if isempty(kwargs)
-            print(io, ')')
-        else
-            print(io, ";")
-            for (k, v) in zip(keys(kwargs)[1:(end-1)], Tuple(kwargs)[1:(end-1)])
-                print(io, ' ', k, '=', v, ",")
-            end
-            print(io, ' ', keys(kwargs)[end], '=', kwargs[end])
-            print(io, ')')
-        end
+        printfunc(io, job.thunk)
         print(io, '\n', ' ', "status: ")
         printstyled(io, getstatus(job); bold = true)
         if !ispending(job)
