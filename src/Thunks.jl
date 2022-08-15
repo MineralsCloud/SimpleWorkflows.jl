@@ -16,6 +16,7 @@ function reify!(thunk::Thunk)
     if thunk.evaluated
         return getresult(thunk)
     else
+        # See https://github.com/JuliaLang/julia/issues/21130#issuecomment-288423284
         try
             global result = thunk.f(thunk.args...; thunk.kwargs...)
         catch e
