@@ -263,7 +263,7 @@ Get the running result of a `Job`.
 The result is wrapped by a `Some` type. Use `something` to retrieve its value.
 If it is `nothing`, the `Job` is not finished.
 """
-getresult(job::Job) = isexited(job) ? Some(fetch(job.ref)) : nothing
+getresult(job::Job) = isexited(job) ? Some(job.thunk.result) : nothing
 
 """
     description(job::Job)
@@ -283,12 +283,12 @@ function interrupt!(job::Job)
     elseif ispending(job)
         @info "the job $(job.id) has not started!"
     else
-        schedule(job.ref, InterruptException(); error = true)
+        schedule(JOB_REGISTRY[job], InterruptException(); error = true)
     end
     return job
 end
 
-Base.wait(job::Job) = wait(job.ref)
+Base.wait(job::Job) = wait(JOB_REGISTRY[job])
 
 function Base.show(io::IO, job::Job)
     if get(io, :compact, false) || get(io, :typeinfo, nothing) == typeof(job)
