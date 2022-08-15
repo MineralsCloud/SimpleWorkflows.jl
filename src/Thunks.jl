@@ -36,9 +36,6 @@ getresult(thunk::Thunk) = thunk.result
 function setresult!(thunk::Thunk, result)
     thunk.result = result
     thunk.evaluated = true
-    # Clear to allow garbage collection
-    thunk.args = ()
-    thunk.kwargs = NamedTuple()
     return thunk
 end
 
