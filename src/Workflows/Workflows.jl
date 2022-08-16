@@ -1,14 +1,14 @@
+module Workflows
+
+using Dates: format, now
 using Graphs:
-    DiGraph,
-    add_edge!,
-    nv,
-    is_cyclic,
-    is_connected,
-    has_edge,
-    topological_sort_by_dfs,
-    indegree,
-    rem_vertices!
+    DiGraph, add_edge!, nv, is_cyclic, is_connected, has_edge, indegree, rem_vertices!
 using JLD2: load, jldsave
+
+using ..Thunks: printfunc
+using ..Jobs: Job, issucceeded, ispending, isrunning, starttime, stoptime, elapsed
+
+import ..Jobs: getstatus, pendingjobs, runningjobs, exitedjobs, failedjobs, interruptedjobs
 
 export Workflow,
     chain,
@@ -21,7 +21,13 @@ export Workflow,
     ⇶,
     ⬱,
     ⇉,
-    ⭃
+    ⭃,
+    getstatus,
+    pendingjobs,
+    runningjobs,
+    exitedjobs,
+    failedjobs,
+    interruptedjobs
 
 """
     Workflow(jobs, graph)
@@ -281,4 +287,6 @@ function Base.show(io::IO, wf::Workflow)
             println(io)
         end
     end
+end
+
 end

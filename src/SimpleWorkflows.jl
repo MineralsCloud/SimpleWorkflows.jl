@@ -1,7 +1,7 @@
 module SimpleWorkflows
 
 include("Thunks.jl")
-include("job.jl")
-include("workflow.jl")
+include("Jobs/Jobs.jl")
+include("Workflows/Workflows.jl")
 
 end

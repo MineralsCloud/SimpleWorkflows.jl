@@ -1,10 +1,12 @@
-using DataFrames: DataFrame, sort, filter
-using Dates: DateTime, Period, Day, now, format
+module Jobs
+
+using DataFrames: DataFrame, sort
+using Dates: DateTime, now, format
 using UUIDs: UUID, uuid1
 
-using .Thunks: Thunk, reify!, printfunc
+using ..Thunks: Thunk, reify!, printfunc
 
-import .Thunks: getresult
+import ..Thunks: getresult
 
 export Job
 export getstatus,
@@ -322,4 +324,6 @@ function Base.show(io::IO, job::Job)
             end
         end
     end
+end
+
 end
