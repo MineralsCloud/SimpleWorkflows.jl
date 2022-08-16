@@ -1,3 +1,7 @@
+using DataFrames: DataFrame, sort
+
+export initialize!, queue, query, isexecuted
+
 const JOB_REGISTRY = Dict{Job,Union{Nothing,Task}}()
 
 function initialize!()

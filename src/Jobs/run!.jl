@@ -1,4 +1,10 @@
+using Dates: now
+
+using ..Thunks: reify!
+
 import ..SimpleWorkflows: run!
+
+export run!, interrupt!
 
 """
     run!(job::Job; n=1, δt=1)
@@ -45,3 +51,21 @@ function run_core!(job::Job)  # Do not export!
     job.count += 1
     return job
 end
+
+"""
+    interrupt!(job::Job)
+
+Manually interrupt a `Job`, works only if it is running.
+"""
+function interrupt!(job::Job)
+    if isexited(job)
+        @info "the job $(job.id) has already exited!"
+    elseif ispending(job)
+        @info "the job $(job.id) has not started!"
+    else
+        schedule(JOB_REGISTRY[job], InterruptException(); error = true)
+    end
+    return job
+end
+
+Base.wait(job::Job) = wait(JOB_REGISTRY[job])

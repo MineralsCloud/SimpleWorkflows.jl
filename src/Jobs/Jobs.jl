@@ -1,38 +1,11 @@
 module Jobs
 
-using DataFrames: DataFrame, sort
 using Dates: DateTime, now, format
 using UUIDs: UUID, uuid1
 
-using ..Thunks: Thunk, reify!, printfunc
-
-import ..Thunks: getresult
+using ..Thunks: Thunk, printfunc
 
 export Job
-export getstatus,
-    getresult,
-    description,
-    ispending,
-    isrunning,
-    isexited,
-    issucceeded,
-    isfailed,
-    isinterrupted,
-    pendingjobs,
-    runningjobs,
-    exitedjobs,
-    failedjobs,
-    interruptedjobs,
-    createdtime,
-    starttime,
-    stoptime,
-    elapsed,
-    run!,
-    interrupt!,
-    queue,
-    query,
-    isexecuted,
-    ntimes
 
 @enum JobStatus begin
     PENDING

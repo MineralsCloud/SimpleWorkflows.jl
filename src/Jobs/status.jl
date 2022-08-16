@@ -1,3 +1,17 @@
+export getstatus,
+    ispending,
+    isrunning,
+    isexited,
+    issucceeded,
+    isfailed,
+    isinterrupted,
+    pendingjobs,
+    runningjobs,
+    exitedjobs,
+    succeededjobs,
+    failedjobs,
+    interruptedjobs
+
 """
     getstatus(x::Job)
 

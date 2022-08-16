@@ -1,3 +1,7 @@
+import ..Thunks: getresult
+
+export ntimes, description, createdtime, starttime, stoptime, elapsed, interrupt!, getresult
+
 """
     ntimes(id::Integer)
     ntimes(job::Job)
@@ -6,6 +10,13 @@ Return how many times a `Job` has been rerun.
 """
 ntimes(id::Integer) = ntimes(first(filter(x -> x.id == id, JOB_REGISTRY)))
 ntimes(job::Job) = Int(job.count)
+
+"""
+    description(job::Job)
+
+Return the description of a `Job`.
+"""
+description(job::Job) = job.desc
 
 "Return the created time of a `Job`."
 createdtime(job::Job) = job.created_time
@@ -43,29 +54,6 @@ function elapsed(job::Job)
 end
 
 """
-    description(job::Job)
-
-Return the description of a `Job`.
-"""
-description(job::Job) = job.desc
-
-"""
-    interrupt!(job::Job)
-
-Manually interrupt a `Job`, works only if it is running.
-"""
-function interrupt!(job::Job)
-    if isexited(job)
-        @info "the job $(job.id) has already exited!"
-    elseif ispending(job)
-        @info "the job $(job.id) has not started!"
-    else
-        schedule(JOB_REGISTRY[job], InterruptException(); error = true)
-    end
-    return job
-end
-
-"""
     getresult(job::Job)
 
 Get the running result of a `Job`.
@@ -74,5 +62,3 @@ The result is wrapped by a `Some` type. Use `something` to retrieve its value.
 If it is `nothing`, the `Job` is not finished.
 """
 getresult(job::Job) = isexited(job) ? Some(job.thunk.result) : nothing
-
-Base.wait(job::Job) = wait(JOB_REGISTRY[job])
