@@ -43,16 +43,6 @@ function elapsed(job::Job)
 end
 
 """
-    getresult(job::Job)
-
-Get the running result of a `Job`.
-
-The result is wrapped by a `Some` type. Use `something` to retrieve its value.
-If it is `nothing`, the `Job` is not finished.
-"""
-getresult(job::Job) = isexited(job) ? Some(job.thunk.result) : nothing
-
-"""
     description(job::Job)
 
 Return the description of a `Job`.
@@ -74,5 +64,15 @@ function interrupt!(job::Job)
     end
     return job
 end
+
+"""
+    getresult(job::Job)
+
+Get the running result of a `Job`.
+
+The result is wrapped by a `Some` type. Use `something` to retrieve its value.
+If it is `nothing`, the `Job` is not finished.
+"""
+getresult(job::Job) = isexited(job) ? Some(job.thunk.result) : nothing
 
 Base.wait(job::Job) = wait(JOB_REGISTRY[job])
