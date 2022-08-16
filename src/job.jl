@@ -1,6 +1,5 @@
 using DataFrames: DataFrame, sort, filter
 using Dates: DateTime, Period, Day, now, format
-using TryCatch: @try
 using UUIDs: UUID, uuid1
 
 using .Thunks: Thunk, reify!, printfunc
