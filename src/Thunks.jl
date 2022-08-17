@@ -2,6 +2,14 @@ module Thunks
 
 export Thunk, reify!, getresult
 
+# Idea from https://github.com/tbenst/Thunks.jl/blob/ff2a553/src/core.jl#L11-L20
+"""
+    Thunk(function, args::Tuple, kwargs::NamedTuple)
+    Thunk(function, args...; kwargs...)
+    Thunk(function)
+
+Hold a function and its arguments for lazy evaluation. Use `reify!` to evaluate.
+"""
 mutable struct Thunk
     f
     args::Tuple
@@ -15,6 +23,16 @@ end
 Thunk(f, args...; kwargs...) = Thunk(f, args, NamedTuple(kwargs))
 Thunk(f) = (args...; kwargs...) -> Thunk(f, args, NamedTuple(kwargs))
 
+# See https://github.com/tbenst/Thunks.jl/blob/ff2a553/src/core.jl#L113-L123
+"""
+    reify(thunk::Thunk)
+
+Reify a `Thunk` into a value.
+
+Compute the value of the expression.
+Walk through the `Thunk`'s arguments and keywords, recursively evaluating each one,
+and then evaluating the `Thunk`'s function with the evaluated arguments.
+"""
 function reify!(thunk::Thunk)
     if thunk.evaluated
         return getresult(thunk)
@@ -30,6 +48,11 @@ function reify!(thunk::Thunk)
     end
 end
 
+"""
+    getresult(thunk::Thunk)
+
+Get the result of a `Thunk`. If `thunk` has not been evaluated, return `nothing`, else return a `Some`-wrapped result.
+"""
 getresult(thunk::Thunk) = thunk.evaluated ? thunk.result : nothing
 
 function Base.show(io::IO, thunk::Thunk)
