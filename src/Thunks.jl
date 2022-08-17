@@ -21,13 +21,12 @@ function reify!(thunk::Thunk)
     else
         # See https://github.com/JuliaLang/julia/issues/21130#issuecomment-288423284
         try
-            global result = thunk.f(thunk.args...; thunk.kwargs...)
+            thunk.result = Some(thunk.f(thunk.args...; thunk.kwargs...))
         catch e
-            setresult!(thunk, e)
-            return e
-        else
-            setresult!(thunk, result)
-            return result
+            thunk.erred = true
+            thunk.result = Some(e)
+        finally
+            thunk.evaluated = true
         end
     end
 end
