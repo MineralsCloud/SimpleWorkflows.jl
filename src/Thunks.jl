@@ -31,13 +31,7 @@ function reify!(thunk::Thunk)
     end
 end
 
-getresult(thunk::Thunk) = thunk.result
-
-function setresult!(thunk::Thunk, result)
-    thunk.result = result
-    thunk.evaluated = true
-    return thunk
-end
+getresult(thunk::Thunk) = thunk.evaluated ? thunk.result : nothing
 
 function Base.show(io::IO, thunk::Thunk)
     if get(io, :compact, false) || get(io, :typeinfo, nothing) == typeof(thunk)
