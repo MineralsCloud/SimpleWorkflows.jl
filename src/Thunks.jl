@@ -9,6 +9,21 @@ export Thunk, reify!, getresult
     Thunk(function)
 
 Hold a function and its arguments for lazy evaluation. Use `reify!` to evaluate.
+
+```@example
+a = Thunk(x -> 3x, 4)
+reify!(a)
+b = Thunk(+, 4, 5)
+reify!(b)
+c = Thunk(sleep)(1)
+getresult(c)  # `c` has not been evaluated
+reify!(c)  # `c` has been evaluated
+f(args...; kwargs...) = collect(kwargs)
+d = Thunk(f)(1, 2, 3; x=1.0, y=4, z="5")
+reify!(d)
+e = Thunk(sin, "1")  # Catch errors
+reify!(e)
+```
 """
 mutable struct Thunk
     f
@@ -25,13 +40,15 @@ Thunk(f) = (args...; kwargs...) -> Thunk(f, args, NamedTuple(kwargs))
 
 # See https://github.com/tbenst/Thunks.jl/blob/ff2a553/src/core.jl#L113-L123
 """
-    reify(thunk::Thunk)
+    reify!(thunk::Thunk)
 
 Reify a `Thunk` into a value.
 
 Compute the value of the expression.
 Walk through the `Thunk`'s arguments and keywords, recursively evaluating each one,
 and then evaluating the `Thunk`'s function with the evaluated arguments.
+
+See also [`Thunk`](@ref).
 """
 function reify!(thunk::Thunk)
     if thunk.evaluated
