@@ -1,5 +1,5 @@
-using SimpleWorkflows:
-    SUCCEEDED, Job, Workflow, SavedWorkflow, run!, getstatus, getresult, →
+using SimpleWorkflows.Jobs: SUCCEEDED, Job, run!, getstatus, getresult
+using SimpleWorkflows.Workflows: Workflow, SavedWorkflow, →
 using SimpleWorkflows.Thunks: Thunk
 
 @testset "Test running a `Workflow`" begin
