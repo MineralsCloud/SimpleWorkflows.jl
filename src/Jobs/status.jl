@@ -38,14 +38,44 @@ isfailed(job::Job) = getstatus(job) === FAILED
 "Test if the `Job` was interrupted during running."
 isinterrupted(job::Job) = getstatus(job) === INTERRUPTED
 
+"""
+    pendingjobs(jobs)
+
+Filter only the pending jobs in a sequence of `Job`s.
+"""
 pendingjobs(jobs) = filter(ispending, jobs)
 
+"""
+    runningjobs(jobs)
+
+Filter only the running jobs in a sequence of `Job`s.
+"""
 runningjobs(jobs) = filter(isrunning, jobs)
 
+"""
+    exitedjobs(jobs)
+
+Filter only the exited jobs in a sequence of `Job`s.
+"""
 exitedjobs(jobs) = filter(isexited, jobs)
 
+"""
+    succeededjobs(jobs)
+
+Filter only the succeeded jobs in a sequence of `Job`s.
+"""
 succeededjobs(jobs) = filter(issucceeded, jobs)
 
+"""
+    failedjobs(jobs)
+
+Filter only the failed jobs in a sequence of `Job`s.
+"""
 failedjobs(jobs) = filter(isfailed, jobs)
 
+"""
+    interruptedjobs(jobs)
+
+Filter only the interrupted jobs in a sequence of `Job`s.
+"""
 interruptedjobs(jobs) = filter(isinterrupted, jobs)
