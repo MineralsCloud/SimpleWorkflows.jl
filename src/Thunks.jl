@@ -7,9 +7,10 @@ mutable struct Thunk
     args::Tuple
     kwargs::NamedTuple
     evaluated::Bool
-    result
+    erred::Bool
+    result::Union{Some,Nothing}
     Thunk(f, args::Tuple, kwargs::NamedTuple = NamedTuple()) =
-        new(f, args, kwargs, false, nothing)
+        new(f, args, kwargs, false, false, nothing)
 end
 Thunk(f, args...; kwargs...) = Thunk(f, args, NamedTuple(kwargs))
 Thunk(f) = (args...; kwargs...) -> Thunk(f, args, NamedTuple(kwargs))
