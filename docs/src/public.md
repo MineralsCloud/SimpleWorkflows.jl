@@ -10,7 +10,6 @@ Pages = ["public.md"]
 
 ```@meta
 CurrentModule = SimpleWorkflows.Thunks
-DocTestSetup  = :(using SimpleWorkflows.Thunks)
 ```
 
 ## `Thunks` module
@@ -23,7 +22,6 @@ getresult(::Thunk)
 
 ```@meta
 CurrentModule = SimpleWorkflows.Jobs
-DocTestSetup  = :(using SimpleWorkflows.Jobs)
 ```
 
 ## `Jobs` module
@@ -58,7 +56,6 @@ ntimes
 
 ```@meta
 CurrentModule = SimpleWorkflows.Workflows
-DocTestSetup  = :(using SimpleWorkflows.Workflows)
 ```
 
 ## `Workflows` module
