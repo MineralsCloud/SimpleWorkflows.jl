@@ -8,12 +8,11 @@ import ..SimpleWorkflows: run!
 export run!
 
 """
-    run!(wf::Workflow; n=5, δt=1, Δt=1, filename="saved.jld2")
+    run!(wf::Workflow; n=5, δt=1, Δt=1)
 
 Run a `Workflow` with maximum `n` attempts, with each attempt separated by `Δt` seconds.
 
-Cool down for `δt` seconds after each `Job` in the `Workflow`. Save the tracking information
-to a file named `saved.jld2`.
+Cool down for `δt` seconds after each `Job` in the `Workflow`.
 """
 function run!(wf::Union{Workflow,SavedWorkflow}; n = 5, δt = 1, Δt = 1)
     @assert isinteger(n) && n >= 1

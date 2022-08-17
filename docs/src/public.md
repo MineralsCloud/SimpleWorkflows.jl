@@ -8,37 +8,62 @@ CurrentModule = SimpleWorkflows
 Pages = ["public.md"]
 ```
 
-## Jobs
+```@meta
+CurrentModule = SimpleWorkflows.Thunks
+```
+
+## `Thunks` module
+
+```@docs
+Thunk
+reify!
+getresult(::Thunk)
+```
+
+```@meta
+CurrentModule = SimpleWorkflows.Jobs
+```
+
+## `Jobs` module
 
 ```@docs
 Job
-@job
-getresult
-getstatus(x::Job)
+getresult(::Job)
+getstatus(::Job)
 ispending
 isrunning
 isexited
 issucceeded
 isfailed
 isinterrupted
+pendingjobs
+runningjobs
+exitedjobs
+succeededjobs
+failedjobs
+interruptedjobs
 createdtime
 starttime
 stoptime
 elapsed
 description
-run!(job::Job; n=1, δt=1)
+run!(::Job)
 interrupt!
 queue
 query
 ntimes
 ```
 
-## Workflows
+```@meta
+CurrentModule = SimpleWorkflows.Workflows
+```
+
+## `Workflows` module
 
 ```@docs
 Workflow
-run!(wf::Workflow; n=5, δt=1, Δt=1, filename="saved.jld2")
-getstatus(wf::Workflow)
+run!(::Workflow)
+getstatus(::Workflow)
 chain
 →
 ←
@@ -48,4 +73,10 @@ thread
 fork
 converge
 spindle
+pendingjobs(::Workflow)
+runningjobs(::Workflow)
+exitedjobs(::Workflow)
+succeededjobs(::Workflow)
+failedjobs(::Workflow)
+interruptedjobs(::Workflow)
 ```

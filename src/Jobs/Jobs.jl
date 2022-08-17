@@ -17,19 +17,20 @@ end
 
 # Reference: https://github.com/cihga39871/JobSchedulers.jl/blob/aca52de/src/jobs.jl#L35-L69
 """
-    Job(def; desc="", user="")
+    Job(thunk::Thunk; desc="", user="")
 
 Create a simple job.
 
 # Arguments
-- `def`: A closure that encloses the job definition.
-- `desc::String=""`: Describe briefly what this job does.
-- `user::String=""`: Indicate who executes this job.
+- `thunk`: a `Thunk` that encloses the job definition.
+- `desc::String=""`: describe briefly what this job does.
+- `user::String=""`: indicate who executes this job.
 
 # Examples
-```@repl
-a = Job(() -> sleep(5); user="me", desc="Sleep for 5 seconds")
-b = Job(() -> run(`pwd` & `ls`); user="me", desc="Run some commands")
+```jldoctest
+julia> a = Job(Thunk(sleep)(5); user="me", desc="Sleep for 5 seconds");
+
+julia> b = Job(Thunk(run, `pwd` & `ls`); user="me", desc="Run some commands");
 ```
 """
 mutable struct Job
@@ -47,7 +48,7 @@ mutable struct Job
     parents::Vector{Job}
     "These jobs runs after the current job."
     children::Vector{Job}
-    Job(thunk; desc = "", user = "") =
+    Job(thunk::Thunk; desc = "", user = "") =
         new(uuid1(), thunk, desc, user, now(), DateTime(0), DateTime(0), PENDING, 0, [], [])
 end
 """
