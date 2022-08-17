@@ -61,4 +61,4 @@ Get the running result of a `Job`.
 The result is wrapped by a `Some` type. Use `something` to retrieve its value.
 If it is `nothing`, the `Job` is not finished.
 """
-getresult(job::Job) = isexited(job) ? Some(job.thunk.result) : nothing
+getresult(job::Job) = isexited(job) ? getresult(job.thunk) : nothing
