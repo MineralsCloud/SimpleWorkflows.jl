@@ -26,9 +26,11 @@ Create a simple job.
 - `desc::String=""`: describe briefly what this job does.
 - `user::String=""`: indicate who executes this job.
 
-```@example
-a = Job(Thunk(sleep)(5); user="me", desc="Sleep for 5 seconds")
-b = Job(Thunk(run, `pwd` & `ls`); user="me", desc="Run some commands")
+# Examples
+```jldoctest
+julia> a = Job(Thunk(sleep)(5); user="me", desc="Sleep for 5 seconds");
+
+julia> b = Job(Thunk(run, `pwd` & `ls`); user="me", desc="Run some commands");
 ```
 """
 mutable struct Job

@@ -4,25 +4,41 @@ export Thunk, reify!, getresult
 
 # Idea from https://github.com/tbenst/Thunks.jl/blob/ff2a553/src/core.jl#L11-L20
 """
-    Thunk(function, args::Tuple, kwargs::NamedTuple)
-    Thunk(function, args...; kwargs...)
-    Thunk(function)
+    Thunk(::Function, args::Tuple, kwargs::NamedTuple)
+    Thunk(::Function, args...; kwargs...)
+    Thunk(::Function)
 
-Hold a function and its arguments for lazy evaluation. Use `reify!` to evaluate.
+Hold a `Function` and its arguments for lazy evaluation. Use `reify!` to evaluate.
 
-```@example
-a = Thunk(x -> 3x, 4)
-reify!(a)
-b = Thunk(+, 4, 5)
-reify!(b)
-c = Thunk(sleep)(1)
-getresult(c)  # `c` has not been evaluated
-reify!(c)  # `c` has been evaluated
-f(args...; kwargs...) = collect(kwargs)
-d = Thunk(f)(1, 2, 3; x=1.0, y=4, z="5")
-reify!(d)
-e = Thunk(sin, "1")  # Catch errors
-reify!(e)
+# Examples
+```jldoctest
+julia> a = Thunk(x -> 3x, 4);
+
+julia> reify!(a)
+Some(12)
+
+julia> b = Thunk(+, 4, 5);
+
+julia> reify!(b)
+Some(9)
+
+julia> c = Thunk(sleep)(1);
+
+julia> getresult(c)  # `c` has not been evaluated
+
+julia> reify!(c)  # `c` has been evaluated
+Some(nothing)
+
+julia> f(args...; kwargs...) = collect(kwargs);
+
+julia> d = Thunk(f)(1, 2, 3; x=1.0, y=4, z="5");
+
+julia> reify!(d)
+Some(Pair{Symbol, Any}[:x => 1.0, :y => 4, :z => "5"])
+
+julia> e = Thunk(sin, "1");  # Catch errors
+
+julia> reify!(e);
 ```
 """
 mutable struct Thunk
