@@ -7,9 +7,10 @@ mutable struct Thunk
     args::Tuple
     kwargs::NamedTuple
     evaluated::Bool
-    result
+    erred::Bool
+    result::Union{Some,Nothing}
     Thunk(f, args::Tuple, kwargs::NamedTuple = NamedTuple()) =
-        new(f, args, kwargs, false, nothing)
+        new(f, args, kwargs, false, false, nothing)
 end
 Thunk(f, args...; kwargs...) = Thunk(f, args, NamedTuple(kwargs))
 Thunk(f) = (args...; kwargs...) -> Thunk(f, args, NamedTuple(kwargs))
@@ -18,26 +19,18 @@ function reify!(thunk::Thunk)
     if thunk.evaluated
         return getresult(thunk)
     else
-        # See https://github.com/JuliaLang/julia/issues/21130#issuecomment-288423284
         try
-            global result = thunk.f(thunk.args...; thunk.kwargs...)
+            thunk.result = Some(thunk.f(thunk.args...; thunk.kwargs...))
         catch e
-            setresult!(thunk, e)
-            return e
-        else
-            setresult!(thunk, result)
-            return result
+            thunk.erred = true
+            thunk.result = Some(e)
+        finally
+            thunk.evaluated = true
         end
     end
 end
 
-getresult(thunk::Thunk) = thunk.result
-
-function setresult!(thunk::Thunk, result)
-    thunk.result = result
-    thunk.evaluated = true
-    return thunk
-end
+getresult(thunk::Thunk) = thunk.evaluated ? thunk.result : nothing
 
 function Base.show(io::IO, thunk::Thunk)
     if get(io, :compact, false) || get(io, :typeinfo, nothing) == typeof(thunk)

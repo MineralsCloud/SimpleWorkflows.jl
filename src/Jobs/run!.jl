@@ -42,12 +42,10 @@ function run_core!(job::Job)  # Do not export!
     job.start_time = now()
     reify!(job.thunk)
     job.stop_time = now()
-    result = getresult(job.thunk)
-    if result isa ErrorException
-        job.status = result isa InterruptException ? INTERRUPTED : FAILED
-    else
-        job.status = SUCCEEDED
-    end
+    job.status =
+        job.thunk.erred ?
+        something(getresult(job.thunk)) isa InterruptException ? INTERRUPTED : FAILED :
+        SUCCEEDED
     job.count += 1
     return job
 end
