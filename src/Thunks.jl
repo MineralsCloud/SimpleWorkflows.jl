@@ -2,6 +2,11 @@ module Thunks
 
 export Thunk, reify!, getresult
 
+struct ErredResult{T}
+    thrown::T
+    stacktrace::Base.StackTraces.StackTrace
+end
+
 # Idea from https://github.com/tbenst/Thunks.jl/blob/ff2a553/src/core.jl#L11-L20
 """
     Thunk(::Function, args::Tuple, kwargs::NamedTuple)
