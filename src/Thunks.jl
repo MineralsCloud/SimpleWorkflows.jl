@@ -79,7 +79,8 @@ function reify!(thunk::Thunk)
             thunk.result = Some(thunk.f(thunk.args...; thunk.kwargs...))
         catch e
             thunk.erred = true
-            thunk.result = Some(e)
+            s = stacktrace(catch_backtrace())
+            thunk.result = Some(ErredResult(e, s))
         finally
             thunk.evaluated = true
         end
