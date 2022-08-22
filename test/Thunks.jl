@@ -1,0 +1,26 @@
+module Thunks
+
+using SimpleWorkflows.Thunks: Thunk, ErredResult, reify!, getresult
+using Test: @testset, @test
+
+@testset "Test `reify!` `Thunk`s" begin
+    a = Thunk(x -> 3x, 4)
+    reify!(a)
+    @test getresult(a) == Some(12)
+    b = Thunk(+, 4, 5)
+    reify!(b)
+    @test getresult(b) == Some(9)
+    c = Thunk(sleep)(1)
+    @test getresult(c) === nothing  # `c` has not been evaluated
+    reify!(c)  # `c` has been evaluated
+    @test getresult(c) === Some(nothing)
+    f(args...; kwargs...) = collect(kwargs)
+    d = Thunk(f)(1, 2, 3; x = 1.0, y = 4, z = "5")
+    reify!(d)
+    @test something(getresult(d)) == [:x => 1.0, :y => 4, :z => "5"]
+    e = Thunk(sin, "1")  # Catch errors
+    reify!(e)
+    @test something(getresult(e)) isa ErredResult{MethodError}
+end
+
+end
