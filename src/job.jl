@@ -171,7 +171,8 @@ function __run!(job::Job)
         job.stop_time = now()
         @error "come across `$e` when running!"
         job.status = e isa InterruptException ? INTERRUPTED : FAILED
-        return e
+        s = stacktrace(catch_backtrace())
+        return ErredResult(e, s)
     @else
         job.stop_time = now()
         job.status = SUCCEEDED
