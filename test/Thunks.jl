@@ -18,9 +18,21 @@ using Test: @testset, @test
     d = Thunk(f)(1, 2, 3; x = 1.0, y = 4, z = "5")
     reify!(d)
     @test something(getresult(d)) == [:x => 1.0, :y => 4, :z => "5"]
-    e = Thunk(sin, "1")  # Catch errors
-    reify!(e)
-    @test something(getresult(e)) isa ErredResult{MethodError}
+end
+
+@testset "Test `getresult` with an `ErredResult`" begin
+    i = Thunk(sin, "string")
+    reify!(i)
+    @test something(getresult(i)).thrown isa MethodError
+    j = Thunk(error, "an error occurred!")
+    reify!(j)
+    @test something(getresult(j)).thrown isa ErrorException
+    struct MyNonExceptionError
+        msg::String
+    end
+    k = Thunk(() -> throw(MyNonExceptionError("an error occurred!")), ())
+    reify!(k)
+    @test something(getresult(k)).thrown isa MyNonExceptionError
 end
 
 end
