@@ -356,3 +356,11 @@ function Base.show(io::IO, job::Job)
         end
     end
 end
+function Base.show(io::IO, erred::ErredResult)
+    if erred.thrown isa ErrorException
+        show(io, erred.thrown)
+    else
+        showerror(io, erred.thrown)
+    end
+    Base.show_backtrace(io, erred.stacktrace)
+end
