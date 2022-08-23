@@ -32,6 +32,11 @@ export @job
     INTERRUPTED
 end
 
+struct ErredResult{T}
+    thrown::T
+    stacktrace::Base.StackTraces.StackTrace
+end
+
 # Reference: https://github.com/cihga39871/JobSchedulers.jl/blob/aca52de/src/jobs.jl#L35-L69
 """
     Job(def; desc="", user="")
