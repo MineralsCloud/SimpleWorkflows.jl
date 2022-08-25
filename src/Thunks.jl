@@ -2,6 +2,7 @@ module Thunks
 
 export Thunk, reify!, getresult
 
+"Capture errors and stack traces from a running `Thunk`."
 struct ErredResult{T}
     thrown::T
     stacktrace::Base.StackTraces.StackTrace

@@ -16,6 +16,7 @@ CurrentModule = SimpleWorkflows.Thunks
 
 ```@docs
 Thunk
+ErredResult
 reify!
 getresult(::Thunk)
 ```
