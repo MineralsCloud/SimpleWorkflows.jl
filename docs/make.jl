@@ -30,7 +30,6 @@ makedocs(;
             "Style Guide" => "developers/style.md",
         ],
         "Troubleshooting" => "troubleshooting.md",
-        "FAQ" => "faq.md",
     ],
 )
 
