@@ -23,6 +23,7 @@ makedocs(;
         "Home" => "index.md",
         "Manual" => [
             "Installation guide" => "installation.md",
+            "Portability" => "portability.md",
         ],
         "API Reference" => "public.md",
         "Developer Docs" => [
