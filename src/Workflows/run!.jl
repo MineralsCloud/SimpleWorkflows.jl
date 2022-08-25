@@ -14,12 +14,12 @@ Run a `Workflow` with maximum `n` attempts, with each attempt separated by `Δt`
 
 Cool down for `δt` seconds after each `Job` in the `Workflow`.
 """
-function run!(wf::Union{Workflow,SavedWorkflow}; n = 5, δt = 1, Δt = 1)
+function run!(wf::Union{Workflow,SavedWorkflow}; n=5, δt=1, Δt=1)
     @assert isinteger(n) && n >= 1
     save(wf)
     for _ in 1:n
         if any(!issucceeded(job) for job in getjobs(wf))
-            run_copy!(wf; δt = δt)
+            run_copy!(wf; δt=δt)
         end
         if all(issucceeded(job) for job in getjobs(wf))
             break  # Stop immediately
@@ -32,12 +32,12 @@ function run!(wf::Union{Workflow,SavedWorkflow}; n = 5, δt = 1, Δt = 1)
 end
 function run_copy!(wf; δt)  # Do not export!
     jobs, graph = copy(getjobs(wf)), copy(getgraph(wf))  # This separation is necessary, or else we call this every iteration of `run_kahn_algo!`
-    run_kahn_algo!(wf, jobs, graph; δt = δt)
+    run_kahn_algo!(wf, jobs, graph; δt=δt)
     return wf
 end
 function run_kahn_algo!(wf, jobs, graph; δt)  # Do not export!
     if isempty(jobs) && iszero(nv(graph))  # Stopping criterion
-        return
+        return nothing
     elseif isempty(jobs) && !iszero(nv(graph)) || !isempty(jobs) && iszero(nv(graph))
         throw(
             ArgumentError(
@@ -48,14 +48,14 @@ function run_kahn_algo!(wf, jobs, graph; δt)  # Do not export!
         queue = findall(iszero, indegree(graph))
         @sync for job in jobs[queue]
             @async begin
-                run!(job; n = 1, δt = δt)
+                run!(job; n=1, δt=δt)
                 wait(job)
                 save(wf)
             end
         end
-        rem_vertices!(graph, queue; keep_order = true)
+        rem_vertices!(graph, queue; keep_order=true)
         deleteat!(jobs, queue)
-        return run_kahn_algo!(wf, jobs, graph; δt = δt)
+        return run_kahn_algo!(wf, jobs, graph; δt=δt)
     end
 end
 

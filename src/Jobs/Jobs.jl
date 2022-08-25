@@ -48,21 +48,22 @@ mutable struct Job
     parents::Vector{Job}
     "These jobs runs after the current job."
     children::Vector{Job}
-    Job(thunk::Thunk; desc = "", user = "") =
-        new(uuid1(), thunk, desc, user, now(), DateTime(0), DateTime(0), PENDING, 0, [], [])
+    function Job(thunk::Thunk; desc="", user="")
+        return new(
+            uuid1(), thunk, desc, user, now(), DateTime(0), DateTime(0), PENDING, 0, [], []
+        )
+    end
 end
 """
     Job(job::Job)
 
 Create a new `Job` from an existing `Job`.
 """
-Job(job::Job) = Job(
-    job.thunk;
-    desc = job.desc,
-    user = job.user,
-    parents = job.parents,
-    children = job.children,
-)
+function Job(job::Job)
+    return Job(
+        job.thunk; desc=job.desc, user=job.user, parents=job.parents, children=job.children
+    )
+end
 
 function Base.show(io::IO, job::Job)
     if get(io, :compact, false) || get(io, :typeinfo, nothing) == typeof(job)
@@ -78,7 +79,7 @@ function Base.show(io::IO, job::Job)
         print(io, ' ', "def: ")
         printfunc(io, job.thunk)
         print(io, '\n', ' ', "status: ")
-        printstyled(io, getstatus(job); bold = true)
+        printstyled(io, getstatus(job); bold=true)
         if !ispending(job)
             println(io, '\n', ' ', "from: ", format(starttime(job), "dd-u-YYYY HH:MM:SS.s"))
             print(io, ' ', "to: ")

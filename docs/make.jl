@@ -11,7 +11,7 @@ DocMeta.setdocmeta!(
 
 makedocs(;
     modules=[SimpleWorkflows],
-    authors="Reno <singularitti@outlook.com>",
+    authors="singularitti <singularitti@outlook.com>",
     repo="https://github.com/MineralsCloud/SimpleWorkflows.jl/blob/{commit}{path}#{line}",
     sitename="SimpleWorkflows.jl",
     format=Documenter.HTML(;
@@ -23,9 +23,12 @@ makedocs(;
         "Home" => "index.md",
         "Manual" => [
             "Installation guide" => "installation.md",
-            "Contributing" => "contributing.md",
         ],
-        "Library" => "public.md",
+        "API Reference" => "public.md",
+        "Developer Docs" => [
+            "Contributing" => "developers/contributing.md",
+            "Style Guide" => "developers/style.md",
+        ],
         "Troubleshooting" => "troubleshooting.md",
     ],
 )

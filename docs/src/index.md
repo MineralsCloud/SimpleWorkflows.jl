@@ -4,9 +4,9 @@ CurrentModule = SimpleWorkflows
 
 # SimpleWorkflows
 
-Documentation for [SimpleWorkflows](https://github.com/MineralsCloud/SimpleWorkflows.jl).
+Documentation for [`SimpleWorkflows`](https://github.com/MineralsCloud/SimpleWorkflows.jl).
 
-Build workflows from atomic jobs. Run and monitor them.
+Build workflows from jobs. Run, monitor, and get results from them.
 
 This package take inspiration from
 [`JobSchedulers.jl`](https://github.com/cihga39871/JobSchedulers.jl) and
@@ -25,32 +25,41 @@ Please cite [this package as](https://arxiv.org/abs/2109.11724):
 }
 ```
 
+See the [Index](@ref main-index) for the complete list of documented functions
+and types.
+
+The code is [hosted on GitHub](https://github.com/MineralsCloud/SimpleWorkflows.jl),
+with some continuous integration services to test its validity.
+
+This repository is created and maintained by [@singularitti](https://github.com/singularitti).
+You are very welcome to contribute.
+
 ## Installation
 
 The package can be installed with the Julia package manager.
 From the Julia REPL, type `]` to enter the Pkg REPL mode and run:
 
-```
+```julia
 pkg> add SimpleWorkflows
 ```
 
 Or, equivalently, via the `Pkg` API:
 
-```julia
-julia> import Pkg; Pkg.add("SimpleWorkflows")
+```@repl
+import Pkg; Pkg.add("SimpleWorkflows")
 ```
 
 ## Documentation
 
-- [**STABLE**](https://MineralsCloud.github.io/SimpleWorkflows.jl/stable) &mdash; **documentation of the most recently tagged version.**
-- [**DEV**](https://MineralsCloud.github.io/SimpleWorkflows.jl/dev) &mdash; _documentation of the in-development version._
+- [**STABLE**](https://MineralsCloud.github.io/SimpleWorkflows.jl/stable) — **documentation of the most recently tagged version.**
+- [**DEV**](https://MineralsCloud.github.io/SimpleWorkflows.jl/dev) — _documentation of the in-development version._
 
-## Project Status
+## Project status
 
 The package is tested against, and being developed for, Julia `1.6` and above on Linux,
 macOS, and Windows.
 
-## Questions and Contributions
+## Questions and contributions
 
 Usage questions can be posted on
 [our discussion page](https://github.com/MineralsCloud/SimpleWorkflows.jl/discussions).
@@ -60,18 +69,19 @@ Contributions are very welcome, as are feature requests and suggestions. Please 
 if you encounter any problems. The [contributing](@ref) page has
 a few guidelines that should be followed when opening pull requests and contributing code.
 
-## Manual Outline
+## Manual outline
 
 ```@contents
 Pages = [
     "installation.md",
-    "contributing.md",
+    "developers/contributing.md",
+    "developers/style.md",
     "troubleshooting.md",
 ]
 Depth = 3
 ```
 
-## Library Outline
+## Library outline
 
 ```@contents
 Pages = ["public.md"]

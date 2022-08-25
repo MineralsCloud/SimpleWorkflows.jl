@@ -42,8 +42,11 @@ function thread(xs::AbstractVector{Job}, ys::AbstractVector{Job})
     end
     return xs
 end
-thread(xs::AbstractVector{Job}, ys::AbstractVector{Job}, zs::AbstractVector{Job}...) =
-    foldr(thread, (xs, ys, zs...))
+function thread(
+    xs::AbstractVector{Job}, ys::AbstractVector{Job}, zs::AbstractVector{Job}...
+)
+    return foldr(thread, (xs, ys, zs...))
+end
 """
     ⇶(xs, ys)
 
