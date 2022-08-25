@@ -1,5 +1,5 @@
 using Graphs: indegree, rem_vertices!
-using JLD2: jldsave
+using Serialization: serialize
 
 using ..Jobs: issucceeded
 
@@ -66,4 +66,4 @@ getgraph(wf::Workflow) = wf.graph
 getgraph(wf::SavedWorkflow) = getgraph(wf.wf)
 
 save(::Workflow) = nothing
-save(wf::SavedWorkflow) = jldsave(wf.file; workflow = wf.wf)
+save(wf::SavedWorkflow) = serialize(wf.file, wf.wf)
