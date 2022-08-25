@@ -44,7 +44,7 @@ using SimpleWorkflows.Thunks: Thunk
     wf = Workflow(k)
     # @test w.jobs == Workflow(k, j, l, n, m).jobs == Workflow(k, l, m, n, j).jobs
     @testset "Test running a `SavedWorkflow`" begin
-        swf = SavedWorkflow(wf, "saved.jld2")
+        swf = SavedWorkflow(wf, "saved.jls")
         run!(swf; δt = 0, n = 1)
         @test all(==(SUCCEEDED), getstatus(wf))
         @test something(getresult(i)) === nothing
