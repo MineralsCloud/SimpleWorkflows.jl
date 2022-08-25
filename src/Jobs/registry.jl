@@ -6,7 +6,7 @@ const JOB_REGISTRY = Dict{Job,Union{Nothing,Task}}()
 
 function initialize!()
     empty!(JOB_REGISTRY)
-    return
+    return nothing
 end
 
 """
@@ -17,20 +17,20 @@ Print all `Job`s that are pending, running, or finished as a table.
 Accpetable arguments for `sortby` are `:created_time`, `:user`, `:start_time`, `:stop_time`,
 `:elapsed`, `:status`, and `:times`.
 """
-function queue(; sortby = :created_time)
+function queue(; sortby=:created_time)
     @assert sortby in
-            (:created_time, :user, :start_time, :stop_time, :elapsed, :status, :times)
+        (:created_time, :user, :start_time, :stop_time, :elapsed, :status, :times)
     jobs = collect(keys(JOB_REGISTRY))
-    df = DataFrame(
-        id = [job.id for job in jobs],
-        user = [job.user for job in jobs],
-        created_time = map(createdtime, jobs),
-        start_time = map(starttime, jobs),
-        stop_time = map(stoptime, jobs),
-        elapsed = map(elapsed, jobs),
-        status = map(getstatus, jobs),
-        times = map(ntimes, jobs),
-        desc = map(description, jobs),
+    df = DataFrame(;
+        id=[job.id for job in jobs],
+        user=[job.user for job in jobs],
+        created_time=map(createdtime, jobs),
+        start_time=map(starttime, jobs),
+        stop_time=map(stoptime, jobs),
+        elapsed=map(elapsed, jobs),
+        status=map(getstatus, jobs),
+        times=map(ntimes, jobs),
+        desc=map(description, jobs),
     )
     return sort(df, [:id, sortby])
 end

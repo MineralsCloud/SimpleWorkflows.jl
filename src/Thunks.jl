@@ -54,8 +54,9 @@ mutable struct Thunk
     evaluated::Bool
     erred::Bool
     result::Union{Some,Nothing}
-    Thunk(f, args::Tuple, kwargs::NamedTuple = NamedTuple()) =
-        new(f, args, kwargs, false, false, nothing)
+    function Thunk(f, args::Tuple, kwargs::NamedTuple=NamedTuple())
+        return new(f, args, kwargs, false, false, nothing)
+    end
 end
 Thunk(f, args...; kwargs...) = Thunk(f, args, NamedTuple(kwargs))
 Thunk(f) = (args...; kwargs...) -> Thunk(f, args, NamedTuple(kwargs))
@@ -112,7 +113,7 @@ function printfunc(io::IO, thunk::Thunk)
     print(io, thunk.f, '(')
     args = thunk.args
     if length(args) > 0
-        for v in args[1:(end-1)]
+        for v in args[1:(end - 1)]
             print(io, v, ", ")
         end
         print(io, args[end])
@@ -122,7 +123,7 @@ function printfunc(io::IO, thunk::Thunk)
         print(io, ')')
     else
         print(io, ";")
-        for (k, v) in zip(keys(kwargs)[1:(end-1)], Tuple(kwargs)[1:(end-1)])
+        for (k, v) in zip(keys(kwargs)[1:(end - 1)], Tuple(kwargs)[1:(end - 1)])
             print(io, ' ', k, '=', v, ",")
         end
         print(io, ' ', keys(kwargs)[end], '=', kwargs[end])
@@ -136,7 +137,7 @@ function Base.show(io::IO, erred::ErredResult)
     else
         showerror(io, erred.thrown)
     end
-    Base.show_backtrace(io, erred.stacktrace)
+    return Base.show_backtrace(io, erred.stacktrace)
 end
 
 end

@@ -45,7 +45,7 @@ complete.
 """
 function elapsed(job::Job)
     if ispending(job)
-        return
+        return nothing
     elseif isrunning(job)
         return now() - job.start_time
     else  # Exited

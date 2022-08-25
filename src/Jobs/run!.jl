@@ -11,7 +11,7 @@ export run!, interrupt!
 
 Run a `Job` with maximum `n` attempts, with each attempt separated by `δt` seconds.
 """
-function run!(job::Job; n = 1, δt = 1)
+function run!(job::Job; n=1, δt=1)
     @assert isinteger(n) && n >= 1
     for _ in 1:n
         if !issucceeded(job)
@@ -42,10 +42,11 @@ function run_core!(job::Job)  # Do not export!
     job.start_time = now()
     reify!(job.thunk)
     job.stop_time = now()
-    job.status =
-        job.thunk.erred ?
-        something(getresult(job.thunk)) isa InterruptException ? INTERRUPTED : FAILED :
+    job.status = if job.thunk.erred
+        something(getresult(job.thunk)) isa InterruptException ? INTERRUPTED : FAILED
+    else
         SUCCEEDED
+    end
     job.count += 1
     return job
 end
@@ -61,7 +62,7 @@ function interrupt!(job::Job)
     elseif ispending(job)
         @info "the job $(job.id) has not started!"
     else
-        schedule(JOB_REGISTRY[job], InterruptException(); error = true)
+        schedule(JOB_REGISTRY[job], InterruptException(); error=true)
     end
     return job
 end
