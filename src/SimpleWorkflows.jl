@@ -1,7 +1,5 @@
 module SimpleWorkflows
 
-function run! end
-
-include("Workflows/Workflows.jl")
+include("workflows.jl")
 
 end
