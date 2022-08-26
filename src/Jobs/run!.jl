@@ -66,9 +66,16 @@ function interrupt!(job::Job)
     elseif ispending(job)
         @info "the job $(job.id) has not started!"
     else
-        schedule(JOB_REGISTRY[job], InterruptException(); error=true)
+        killtask(JOB_REGISTRY[job])
     end
     return job
+end
+
+function killtask(task)
+    try
+        schedule(task, InterruptException(); error=true)
+    catch
+    end
 end
 
 Base.wait(job::Job) = wait(JOB_REGISTRY[job])
