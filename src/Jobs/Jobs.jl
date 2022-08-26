@@ -60,9 +60,10 @@ end
 Create a new `Job` from an existing `Job`.
 """
 function Job(job::Job)
-    return Job(
-        job.thunk; desc=job.desc, user=job.user, parents=job.parents, children=job.children
-    )
+    new_job = Job(job.thunk; desc=job.desc, user=job.user)
+    new_job.parents = job.parents
+    new_job.children = job.children
+    return new_job
 end
 
 function Base.show(io::IO, job::Job)
