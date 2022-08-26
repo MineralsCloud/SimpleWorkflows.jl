@@ -1,9 +1,8 @@
+using EasyJobs: issucceeded
 using Graphs: indegree, rem_vertices!
 using Serialization: serialize
 
-using ..Jobs: issucceeded
-
-import ..SimpleWorkflows: run!
+import EasyJobs: run!
 
 export run!
 
