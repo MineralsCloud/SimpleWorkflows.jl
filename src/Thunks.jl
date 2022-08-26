@@ -132,12 +132,14 @@ function printfunc(io::IO, thunk::Thunk)
 end
 
 function Base.show(io::IO, erred::ErredResult)
+    println(io, summary(erred))
     if erred.thrown isa ErrorException
         show(io, erred.thrown)
     else
         showerror(io, erred.thrown)
     end
-    return Base.show_backtrace(io, erred.stacktrace)
+    Base.show_backtrace(io, erred.stacktrace)
+    return nothing
 end
 
 end
