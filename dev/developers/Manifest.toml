@@ -267,11 +267,11 @@ version = "0.9.4"
 
 [[deps.SimpleWorkflows]]
 deps = ["DataFrames", "Dates", "Graphs", "Serialization", "UUIDs"]
-git-tree-sha1 = "d93bb0df2fa04f1d4efc60a7cdec0464e0dc1d01"
+git-tree-sha1 = "8258686734effbf11b852a3575f18f987d42c8a9"
 repo-rev = "master"
 repo-url = "https://github.com/MineralsCloud/SimpleWorkflows.jl"
 uuid = "6a97d125-85da-4b66-b300-4bba10360563"
-version = "0.18.0"
+version = "0.18.1"
 
 [[deps.Sockets]]
 uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
