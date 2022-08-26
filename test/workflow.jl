@@ -1,6 +1,6 @@
-using SimpleWorkflows.Jobs: SUCCEEDED, Job, run!, getstatus, getresult
-using SimpleWorkflows.Workflows: Workflow, SavedWorkflow, →
-using SimpleWorkflows.Thunks: Thunk
+using EasyJobs.Thunks: Thunk
+using EasyJobs: SUCCEEDED, SimpleJob, run!, getstatus, getresult, →
+using SimpleWorkflows: Workflow, SavedWorkflow
 
 @testset "Test running a `Workflow`" begin
     function f₁()
@@ -31,12 +31,12 @@ using SimpleWorkflows.Thunks: Thunk
         cos(x)
         return run(`pwd` & `ls`)
     end
-    i = Job(Thunk(f₁, ()); user="me", desc="i")
-    j = Job(Thunk(f₂, 3); user="he", desc="j")
-    k = Job(Thunk(f₃, 6); desc="k")
-    l = Job(Thunk(f₄, ()); desc="l", user="me")
-    m = Job(Thunk(f₅, 3, 1); desc="m")
-    n = Job(Thunk(f₆, 1; x=3); user="she", desc="n")
+    i = SimpleJob(Thunk(f₁, ()); user="me", desc="i")
+    j = SimpleJob(Thunk(f₂, 3); user="he", desc="j")
+    k = SimpleJob(Thunk(f₃, 6); desc="k")
+    l = SimpleJob(Thunk(f₄, ()); desc="l", user="me")
+    m = SimpleJob(Thunk(f₅, 3, 1); desc="m")
+    n = SimpleJob(Thunk(f₆, 1; x=3); user="she", desc="n")
     i → l
     j → k → m → n
     j → l
