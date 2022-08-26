@@ -15,7 +15,7 @@ using Test: @testset, @test
     reify!(c)  # `c` has been evaluated
     @test getresult(c) === Some(nothing)
     f(args...; kwargs...) = collect(kwargs)
-    d = Thunk(f)(1, 2, 3; x = 1.0, y = 4, z = "5")
+    d = Thunk(f)(1, 2, 3; x=1.0, y=4, z="5")
     reify!(d)
     @test something(getresult(d)) == [:x => 1.0, :y => 4, :z => "5"]
 end

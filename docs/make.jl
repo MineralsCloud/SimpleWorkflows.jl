@@ -21,10 +21,8 @@ makedocs(;
     ),
     pages=[
         "Home" => "index.md",
-        "Manual" => [
-            "Installation guide" => "installation.md",
-            "Portability" => "portability.md",
-        ],
+        "Manual" =>
+            ["Installation guide" => "installation.md", "Portability" => "portability.md"],
         "API Reference" => "public.md",
         "Developer Docs" => [
             "Contributing" => "developers/contributing.md",
@@ -34,6 +32,4 @@ makedocs(;
     ],
 )
 
-deploydocs(;
-    repo="github.com/MineralsCloud/SimpleWorkflows.jl",
-)
+deploydocs(; repo="github.com/MineralsCloud/SimpleWorkflows.jl")
