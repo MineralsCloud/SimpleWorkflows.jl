@@ -1,5 +1,3 @@
-module Workflows
-
 using Dates: format
 using Graphs: DiGraph, add_edge!, nv, is_cyclic, is_connected, has_edge
 
@@ -108,5 +106,3 @@ end
 
 include("run!.jl")
 include("status.jl")
-
-end
