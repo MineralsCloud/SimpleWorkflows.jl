@@ -1,3 +1,4 @@
+#! format: off
 using SimpleWorkflows
 using Documenter
 
