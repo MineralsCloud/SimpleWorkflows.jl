@@ -1,8 +1,7 @@
 using Dates: format
+using EasyJobs.Thunks: printfunc
+using EasyJobs: Job, ispending, isrunning, starttime, stoptime, elapsed
 using Graphs: DiGraph, add_edge!, nv, is_cyclic, is_connected, has_edge
-
-using ..Thunks: printfunc
-using ..Jobs: Job, ispending, isrunning, starttime, stoptime, elapsed
 
 export Workflow
 

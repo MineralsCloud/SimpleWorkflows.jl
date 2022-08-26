@@ -1,4 +1,4 @@
-import ..Jobs:
+import EasyJobs:
     getstatus,
     pendingjobs,
     runningjobs,
