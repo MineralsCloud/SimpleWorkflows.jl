@@ -31,7 +31,11 @@ This package take inspiration from
 [`JobSchedulers.jl`](https://github.com/cihga39871/JobSchedulers.jl) and
 [`Dispatcher.jl`](https://github.com/invenia/Dispatcher.jl) (unmaintained).
 
-Please cite [this package as](https://doi.org/10.1016/j.cpc.2022.108515):
+Please [cite this package](https://doi.org/10.1016/j.cpc.2022.108515) as:
+
+Q. Zhang, C. Gu, J. Zhuang et al., `express`: extensible, high-level workflows for swifter *ab initio* materials modeling, *Computer Physics Communications*, 108515, doi: https://doi.org/10.1016/j.cpc.2022.108515.
+
+The BibTeX format is: 
 
 ```bibtex
 @article{ZHANG2022108515,
@@ -46,6 +50,8 @@ Please cite [this package as](https://doi.org/10.1016/j.cpc.2022.108515):
   keywords = {automation, workflow, high-level, high-throughput, data lineage}
 }
 ```
+
+We also have an [arXiv prepint](https://arxiv.org/abs/2109.11724).
 
 The code is [hosted on GitHub](https://github.com/MineralsCloud/SimpleWorkflows.jl),
 with some continuous integration services to test its validity.
