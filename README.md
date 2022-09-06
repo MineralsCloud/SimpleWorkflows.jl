@@ -31,7 +31,7 @@ This package take inspiration from
 [`JobSchedulers.jl`](https://github.com/cihga39871/JobSchedulers.jl) and
 [`Dispatcher.jl`](https://github.com/invenia/Dispatcher.jl) (unmaintained).
 
-Please cite [this package as](https://arxiv.org/abs/2109.11724):
+Please cite [this package as](https://doi.org/10.1016/j.cpc.2022.108515):
 
 ```bibtex
 @article{ZHANG2022108515,
