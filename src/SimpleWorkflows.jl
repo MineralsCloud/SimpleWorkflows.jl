@@ -5,7 +5,7 @@ using EasyJobsBase.Thunks: printfunc
 using EasyJobsBase: Job, ispending, isrunning, starttime, stoptime, elapsed
 using Graphs: DiGraph, add_edge!, nv, is_cyclic, is_connected, has_edge
 
-export Workflow
+export Workflow, AutosaveWorkflow
 
 abstract type AbstractWorkflow end
 
@@ -62,9 +62,10 @@ function Workflow(jobs::Job...)
 end
 
 struct AutosaveWorkflow{T} <: AbstractWorkflow
+    path::T
     wf::Workflow
-    file::T
 end
+AutosaveWorkflow(path, jobs::Job...) = AutosaveWorkflow(path, Workflow(jobs...))
 
 function Base.show(io::IO, wf::Workflow)
     if get(io, :compact, false) || get(io, :typeinfo, nothing) == typeof(wf)
