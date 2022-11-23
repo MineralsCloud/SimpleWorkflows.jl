@@ -5,14 +5,16 @@ using EasyJobsBase.Thunks: printfunc
 using EasyJobsBase: Job, ispending, isrunning, starttime, stoptime, elapsed
 using Graphs: DiGraph, add_edge!, nv, is_cyclic, is_connected, has_edge
 
-export Workflow
+export Workflow, AutosaveWorkflow
+
+abstract type AbstractWorkflow end
 
 """
     Workflow(jobs, graph)
 
 Create a `Workflow` from a list of `Job`s and a graph representing their relations.
 """
-struct Workflow
+struct Workflow <: AbstractWorkflow
     jobs::Vector{Job}
     graph::DiGraph{Int}
     function Workflow(jobs, graph)
@@ -59,10 +61,11 @@ function Workflow(jobs::Job...)
     return Workflow(all_possible_jobs, graph)
 end
 
-struct SavedWorkflow{T}
+struct AutosaveWorkflow{T} <: AbstractWorkflow
+    path::T
     wf::Workflow
-    file::T
 end
+AutosaveWorkflow(path, jobs::Job...) = AutosaveWorkflow(path, Workflow(jobs...))
 
 function Base.show(io::IO, wf::Workflow)
     if get(io, :compact, false) || get(io, :typeinfo, nothing) == typeof(wf)
@@ -73,13 +76,13 @@ function Base.show(io::IO, wf::Workflow)
         println(io, "jobs:")
         for (i, job) in enumerate(wf.jobs)
             println(io, " (", i, ") ", "id: ", job.id)
-            if !isempty(job.desc)
+            if !isempty(job.description)
                 print(io, ' '^5, "description: ")
-                show(io, job.desc)
+                show(io, job.description)
                 println(io)
             end
             print(io, ' '^5, "def: ")
-            printfunc(io, job.thunk)
+            printfunc(io, job.core)
             print(io, '\n', ' '^5, "status: ")
             printstyled(io, getstatus(job); bold=true)
             if !ispending(job)

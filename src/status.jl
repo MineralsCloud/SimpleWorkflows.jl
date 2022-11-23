@@ -16,7 +16,7 @@ export getstatus,
 Get the current status of `Job`s in a `Workflow`.
 """
 getstatus(wf::Workflow) = getstatus(wf.jobs)
-getstatus(wf::SavedWorkflow) = getstatus(wf.wf)
+getstatus(wf::AutosaveWorkflow) = getstatus(wf.wf)
 
 # See https://docs.julialang.org/en/v1/manual/documentation/#Advanced-Usage
 for func in
@@ -29,6 +29,6 @@ for func in
         Filter only the pending jobs in a `Workflow`.
         """
         $func(wf::Workflow) = $func(wf.jobs)
-        $func(wf::SavedWorkflow) = $func(wf.wf)
+        $func(wf::AutosaveWorkflow) = $func(wf.wf)
     end
 end

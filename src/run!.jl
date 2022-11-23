@@ -13,7 +13,7 @@ Run a `Workflow` with maximum `n` attempts, with each attempt separated by `Δt`
 
 Cool down for `δt` seconds after each `Job` in the `Workflow`.
 """
-function run!(wf::Union{Workflow,SavedWorkflow}; n=5, δt=1, Δt=1)
+function run!(wf::AbstractWorkflow; n=5, δt=1, Δt=1)
     @assert isinteger(n) && n >= 1
     save(wf)
     for _ in 1:n
@@ -59,10 +59,10 @@ function run_kahn_algo!(wf, jobs, graph; δt)  # Do not export!
 end
 
 getjobs(wf::Workflow) = wf.jobs
-getjobs(wf::SavedWorkflow) = getjobs(wf.wf)
+getjobs(wf::AutosaveWorkflow) = getjobs(wf.wf)
 
 getgraph(wf::Workflow) = wf.graph
-getgraph(wf::SavedWorkflow) = getgraph(wf.wf)
+getgraph(wf::AutosaveWorkflow) = getgraph(wf.wf)
 
 save(::Workflow) = nothing
-save(wf::SavedWorkflow) = serialize(wf.file, wf.wf)
+save(wf::AutosaveWorkflow) = serialize(wf.path, wf.wf)

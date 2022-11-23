@@ -1,6 +1,6 @@
 using EasyJobsBase.Thunks: Thunk
 using EasyJobsBase: SUCCEEDED, SimpleJob, run!, getstatus, getresult, →
-using SimpleWorkflows: Workflow, SavedWorkflow
+using SimpleWorkflows: Workflow, AutosaveWorkflow
 
 @testset "Test running a `Workflow`" begin
     function f₁()
