@@ -61,7 +61,7 @@ function Workflow(jobs::Job...)
     return Workflow(all_possible_jobs, graph)
 end
 
-struct SavedWorkflow{T}
+struct AutosaveWorkflow{T} <: AbstractWorkflow
     wf::Workflow
     file::T
 end
