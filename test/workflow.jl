@@ -31,12 +31,12 @@ using SimpleWorkflows: Workflow, SavedWorkflow
         cos(x)
         return run(`pwd` & `ls`)
     end
-    i = SimpleJob(Thunk(f₁, ()); user="me", desc="i")
-    j = SimpleJob(Thunk(f₂, 3); user="he", desc="j")
-    k = SimpleJob(Thunk(f₃, 6); desc="k")
-    l = SimpleJob(Thunk(f₄, ()); desc="l", user="me")
-    m = SimpleJob(Thunk(f₅, 3, 1); desc="m")
-    n = SimpleJob(Thunk(f₆, 1; x=3); user="she", desc="n")
+    i = SimpleJob(Thunk(f₁, ()); username="me", name="i")
+    j = SimpleJob(Thunk(f₂, 3); username="he", name="j")
+    k = SimpleJob(Thunk(f₃, 6); name="k")
+    l = SimpleJob(Thunk(f₄, ()); name="l", username="me")
+    m = SimpleJob(Thunk(f₅, 3, 1); name="m")
+    n = SimpleJob(Thunk(f₆, 1; x=3); username="she", name="n")
     i → l
     j → k → m → n
     j → l
