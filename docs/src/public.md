@@ -2,20 +2,17 @@
 CurrentModule = SimpleWorkflows
 ```
 
-# Library
-
-```@contents
-Pages = ["public.md"]
-```
+# Public API
 
 ```@docs
 Workflow
-run!(::Workflow)
-getstatus(::Workflow)
-pendingjobs(::Workflow)
-runningjobs(::Workflow)
-exitedjobs(::Workflow)
-succeededjobs(::Workflow)
-failedjobs(::Workflow)
-interruptedjobs(::Workflow)
+AutosaveWorkflow
+run!
+getstatus
+pendingjobs
+runningjobs
+exitedjobs
+succeededjobs
+failedjobs
+interruptedjobs
 ```
