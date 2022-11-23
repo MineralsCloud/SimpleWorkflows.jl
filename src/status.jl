@@ -1,4 +1,4 @@
-import EasyJobs:
+import EasyJobsBase:
     getstatus,
     pendingjobs,
     runningjobs,

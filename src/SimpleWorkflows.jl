@@ -1,8 +1,8 @@
 module SimpleWorkflows
 
 using Dates: format
-using EasyJobs.Thunks: printfunc
-using EasyJobs: Job, ispending, isrunning, starttime, stoptime, elapsed
+using EasyJobsBase.Thunks: printfunc
+using EasyJobsBase: Job, ispending, isrunning, starttime, stoptime, elapsed
 using Graphs: DiGraph, add_edge!, nv, is_cyclic, is_connected, has_edge
 
 export Workflow
