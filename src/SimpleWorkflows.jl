@@ -9,11 +9,7 @@ export Workflow, AutosaveWorkflow
 
 abstract type AbstractWorkflow end
 
-"""
-    Workflow(jobs, graph)
-
-Create a `Workflow` from a list of `Job`s and a graph representing their relations.
-"""
+# Create a `Workflow` from a list of `Job`s and a graph representing their relations.
 struct Workflow <: AbstractWorkflow
     jobs::Vector{Job}
     graph::DiGraph{Int}
@@ -61,6 +57,13 @@ function Workflow(jobs::Job...)
     return Workflow(all_possible_jobs, graph)
 end
 
+"""
+    AutosaveWorkflow(path, jobs::Job...)
+
+Create a `AutosaveWorkflow` from a given series of `Job`s and a `path`.
+
+When running, the status of the workflow will be automatically saved to `path`.
+"""
 struct AutosaveWorkflow{T} <: AbstractWorkflow
     path::T
     wf::Workflow
