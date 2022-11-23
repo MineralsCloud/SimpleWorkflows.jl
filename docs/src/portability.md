@@ -49,12 +49,12 @@ wf = Workflow(k)
 ```
 
 To save the `Workflow` instance to disk while running in case it failed or is interrupted,
-use the `SavedWorkflow` type.
+use the `AutosaveWorkflow` type.
 
 ```@repl wf
-using SimpleWorkflows.Workflows: SavedWorkflow
-swf = SavedWorkflow(wf, "saved.jls")
-run!(swf; δt = 0, n = 1)
+using SimpleWorkflows.Workflows: AutosaveWorkflow
+wf = AutosaveWorkflow("saved.jls", k)
+run!(wf; δt = 0, n = 1)
 ```
 
 After the above steps are finished, a `saved.jls` file is saved to your local file system.
