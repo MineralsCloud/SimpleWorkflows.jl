@@ -14,7 +14,7 @@ abstract type AbstractWorkflow end
 
 Create a `Workflow` from a list of `Job`s and a graph representing their relations.
 """
-struct Workflow
+struct Workflow <: AbstractWorkflow
     jobs::Vector{Job}
     graph::DiGraph{Int}
     function Workflow(jobs, graph)
