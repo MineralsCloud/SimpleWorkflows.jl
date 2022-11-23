@@ -11,22 +11,31 @@ export getstatus,
     pendingjobs, runningjobs, exitedjobs, succeededjobs, failedjobs, interruptedjobs
 
 """
-    getstatus(wf::Workflow)
+    getstatus(wf::AbstractWorkflow)
 
-Get the current status of `Job`s in a `Workflow`.
+Get the current status of `Job`s in a `AbstractWorkflow`.
 """
 getstatus(wf::Workflow) = getstatus(wf.jobs)
 getstatus(wf::AutosaveWorkflow) = getstatus(wf.wf)
 
 # See https://docs.julialang.org/en/v1/manual/documentation/#Advanced-Usage
-for func in
-    (:pendingjobs, :runningjobs, :exitedjobs, :succeededjobs, :failedjobs, :interruptedjobs)
+for (func, adj) in zip(
+    (
+        :pendingjobs,
+        :runningjobs,
+        :exitedjobs,
+        :succeededjobs,
+        :failedjobs,
+        :interruptedjobs,
+    ),
+    ("pending", "running", "exited", "succeeded", "failed", "interrupted"),
+)
     name = string(func)
     @eval begin
         """
-            $($name)(wf::Workflow)
+            $($name)(wf::AbstractWorkflow)
 
-        Filter only the pending jobs in a `Workflow`.
+        Filter only the $($adj) jobs in a `Workflow`.
         """
         $func(wf::Workflow) = $func(wf.jobs)
         $func(wf::AutosaveWorkflow) = $func(wf.wf)
