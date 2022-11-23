@@ -8,18 +8,38 @@ julia&gt; Pkg.add(&quot;SimpleWorkflows&quot;)</code></pre></li><li><p>Run</p><p
     Updating git-repo `https://github.com/JuliaRegistries/General.git`
   No Changes to `~/work/SimpleWorkflows.jl/SimpleWorkflows.jl/docs/build/developers/Project.toml`
   No Changes to `~/work/SimpleWorkflows.jl/SimpleWorkflows.jl/docs/build/developers/Manifest.toml`</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; pkg&quot;add https://github.com/MineralsCloud/SimpleWorkflows.jl&quot;</code><code class="nohighlight hljs ansi" style="display:block;">┌ Warning: The Pkg REPL mode is intended for interactive use only, and should not be used from scripts. It is recommended to use the functional API instead.
-└ @ Pkg.REPLMode /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/usr/share/julia/stdlib/v1.8/Pkg/src/REPLMode/REPLMode.jl:379
+└ @ Pkg.REPLMode /cache/build/default-amdci5-6/julialang/julia-release-1-dot-8/usr/share/julia/stdlib/v1.8/Pkg/src/REPLMode/REPLMode.jl:379
      Cloning git-repo `https://github.com/MineralsCloud/SimpleWorkflows.jl`
     Updating git-repo `https://github.com/MineralsCloud/SimpleWorkflows.jl`
    Resolving package versions...
     Updating `~/work/SimpleWorkflows.jl/SimpleWorkflows.jl/docs/build/developers/Project.toml`
-  [6a97d125] ~ SimpleWorkflows v0.18.1 ⇒ v0.19.0 `https://github.com/MineralsCloud/SimpleWorkflows.jl#master`
+  [6a97d125] ~ SimpleWorkflows v0.19.0 ⇒ v0.19.0 `https://github.com/MineralsCloud/SimpleWorkflows.jl#master`
     Updating `~/work/SimpleWorkflows.jl/SimpleWorkflows.jl/docs/build/developers/Manifest.toml`
-  [66d786ec] + EasyJobs v0.1.0
-  [6a97d125] ~ SimpleWorkflows v0.18.1 ⇒ v0.19.0 `https://github.com/MineralsCloud/SimpleWorkflows.jl#master`
+  [5218b696] + Configurations v0.17.4
+  [9a962f9c] - DataAPI v1.13.0
+  [a93c6f00] - DataFrames v1.4.3
+  [e2d170a0] - DataValueInterfaces v1.0.0
+  [66d786ec] - EasyJobs v0.1.0
+  [db8ca866] + EasyJobsBase v0.1.0
+  [55351af7] + ExproniconLite v0.7.6
+  [59287772] - Formatting v0.4.2
+  [41ab1584] - InvertedIndices v1.1.0
+  [82899510] - IteratorInterfaceExtensions v1.0.0
+  [b964fa9f] - LaTeXStrings v1.3.0
+  [e1d29d7a] - Missings v1.0.2
+  [2dfb63ee] - PooledArrays v1.4.2
+  [08abe8d2] - PrettyTables v2.2.1
+  [189a3867] - Reexport v1.2.2
+  [6a97d125] ~ SimpleWorkflows v0.19.0 ⇒ v0.19.0 `https://github.com/MineralsCloud/SimpleWorkflows.jl#master`
+  [a2af1166] - SortingAlgorithms v1.1.0
+  [892a3eda] - StringManipulation v0.3.0
+  [3783bdb8] - TableTraits v1.0.1
+  [bd369af6] - Tables v1.10.0
+  [9fa8497b] - Future
+  [8dfed614] - Test
 Precompiling project...
 <span class="sgr33">  ✓ </span>SimpleWorkflows
-  1 dependency successfully precompiled in 3 seconds. 40 already precompiled.
+  1 dependency successfully precompiled in 1 seconds. 29 already precompiled.
   <span class="sgr33">1</span> dependency precompiled but a different version is currently loaded. Restart julia to access the new version</code></pre><p>in the second step above.</p><h2 id="Update-SimpleWorkflows"><a class="docs-heading-anchor" href="#Update-SimpleWorkflows">Update <code>SimpleWorkflows</code></a><a id="Update-SimpleWorkflows-1"></a><a class="docs-heading-anchor-permalink" href="#Update-SimpleWorkflows" title="Permalink"></a></h2><p>Please <a href="https://docs.github.com/en/account-and-profile/managing-subscriptions-and-notifications-on-github/setting-up-notifications/configuring-notifications#configuring-your-watch-settings-for-an-individual-repository">watch</a> our <a href="https://github.com/MineralsCloud/SimpleWorkflows.jl">GitHub repository</a> for new releases. Once we release a new version, you can update <code>SimpleWorkflows</code> by typing</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; using Pkg</code><code class="nohighlight hljs ansi" style="display:block;"></code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; Pkg.update(&quot;SimpleWorkflows&quot;)</code><code class="nohighlight hljs ansi" style="display:block;">    Updating registry at `~/.julia/registries/General`
     Updating git-repo `https://github.com/JuliaRegistries/General.git`
     Updating git-repo `https://github.com/MineralsCloud/SimpleWorkflows.jl`
@@ -31,4 +51,4 @@ Precompiling project...
 
 julia&gt; Pkg.rm(&quot;SimpleWorkflows&quot;)
 
-julia&gt; Pkg.gc()</code></pre></li><li><p>Press <code>ctrl+d</code> to quit the current session. Start a new Julia session and reinstall <code>SimpleWorkflows</code>.</p></li></ol></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../portability/">Portability »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.23 on <span class="colophon-date" title="Monday 10 October 2022 10:15">Monday 10 October 2022</span>. Using Julia version 1.8.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+julia&gt; Pkg.gc()</code></pre></li><li><p>Press <code>ctrl+d</code> to quit the current session. Start a new Julia session and reinstall <code>SimpleWorkflows</code>.</p></li></ol></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../portability/">Portability »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.23 on <span class="colophon-date" title="Wednesday 23 November 2022 10:39">Wednesday 23 November 2022</span>. Using Julia version 1.8.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
