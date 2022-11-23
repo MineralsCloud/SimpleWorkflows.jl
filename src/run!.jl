@@ -65,4 +65,4 @@ getgraph(wf::Workflow) = wf.graph
 getgraph(wf::AutosaveWorkflow) = getgraph(wf.wf)
 
 save(::Workflow) = nothing
-save(wf::AutosaveWorkflow) = serialize(wf.file, wf.wf)
+save(wf::AutosaveWorkflow) = serialize(wf.path, wf.wf)
