@@ -7,6 +7,8 @@ using Graphs: DiGraph, add_edge!, nv, is_cyclic, is_connected, has_edge
 
 export Workflow
 
+abstract type AbstractWorkflow end
+
 """
     Workflow(jobs, graph)
 
