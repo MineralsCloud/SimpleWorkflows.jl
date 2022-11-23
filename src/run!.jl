@@ -1,8 +1,8 @@
-using EasyJobs: issucceeded
+using EasyJobsBase: issucceeded
 using Graphs: indegree, rem_vertices!
 using Serialization: serialize
 
-import EasyJobs: run!
+import EasyJobsBase: run!
 
 export run!
 

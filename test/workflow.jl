@@ -1,5 +1,5 @@
-using EasyJobs.Thunks: Thunk
-using EasyJobs: SUCCEEDED, SimpleJob, run!, getstatus, getresult, →
+using EasyJobsBase.Thunks: Thunk
+using EasyJobsBase: SUCCEEDED, SimpleJob, run!, getstatus, getresult, →
 using SimpleWorkflows: Workflow, SavedWorkflow
 
 @testset "Test running a `Workflow`" begin
