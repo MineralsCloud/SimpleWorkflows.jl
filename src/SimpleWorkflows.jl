@@ -72,39 +72,46 @@ function Base.show(io::IO, wf::Workflow)
         Base.show_default(IOContext(io, :limit => true), wf)  # From https://github.com/mauro3/Parameters.jl/blob/ecbf8df/src/Parameters.jl#L556
     else
         println(io, summary(wf))
-        println(io, ' ', wf.graph)
-        println(io, "jobs:")
+        println(io, " jobs:")
         for (i, job) in enumerate(wf.jobs)
-            println(io, " (", i, ") ", "id: ", job.id)
+            println(io, "  (", i, ") ", "id: ", job.id)
             if !isempty(job.description)
-                print(io, ' '^5, "description: ")
+                print(io, ' '^6, "description: ")
                 show(io, job.description)
                 println(io)
             end
-            print(io, ' '^5, "def: ")
+            print(io, ' '^6, "def: ")
             printfunc(io, job.core)
-            print(io, '\n', ' '^5, "status: ")
+            print(io, '\n', ' '^6, "status: ")
             printstyled(io, getstatus(job); bold=true)
             if !ispending(job)
                 print(
                     io,
                     '\n',
-                    ' '^5,
+                    ' '^6,
                     "from: ",
                     format(starttime(job), "dd-u-YYYY HH:MM:SS.s"),
                     '\n',
-                    ' '^5,
+                    ' '^6,
                     "to: ",
                 )
                 if isrunning(job)
                     print(io, "still running...")
                 else
                     println(io, format(stoptime(job), "dd-u-YYYY HH:MM:SS.s"))
-                    print(io, ' '^5, "uses: ", elapsed(job))
+                    print(io, ' '^6, "uses: ", elapsed(job))
                 end
             end
             println(io)
         end
+    end
+end
+function Base.show(io::IO, wf::AutosaveWorkflow)
+    if get(io, :compact, false) || get(io, :typeinfo, nothing) == typeof(wf)
+        Base.show_default(IOContext(io, :limit => true), wf)  # From https://github.com/mauro3/Parameters.jl/blob/ecbf8df/src/Parameters.jl#L556
+    else
+        print(io, "Autosave", wf.wf)
+        println(io, " path: ", wf.path)
     end
 end
 
