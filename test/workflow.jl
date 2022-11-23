@@ -44,8 +44,8 @@ using SimpleWorkflows: Workflow, AutosaveWorkflow
     wf = Workflow(k)
     # @test w.jobs == Workflow(k, j, l, n, m).jobs == Workflow(k, l, m, n, j).jobs
     @testset "Test running a `AutosaveWorkflow`" begin
-        swf = AutosaveWorkflow(wf, "saved.jls")
-        run!(swf; δt=0, n=1)
+        wf = AutosaveWorkflow("saved.jls", wf)
+        run!(wf; δt=0, n=1)
         @test all(==(SUCCEEDED), getstatus(wf))
         @test something(getresult(i)) === nothing
         @test something(getresult(j)) == 7.38905609893065
