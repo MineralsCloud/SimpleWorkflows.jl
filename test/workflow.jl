@@ -56,7 +56,7 @@ using SimpleWorkflows: Workflow, AutosaveWorkflow
     end
 end
 
-@testset "Test running `PipeJob`s" begin
+@testset "Test running a `Workflow` with `PipeJob`s" begin
     f₁(x) = x^2
     f₂(y) = y + 1
     f₃(z) = z / 2
@@ -72,7 +72,7 @@ end
     @test getresult(k) == Some(13.0)
 end
 
-@testset "Test running a `PipeJob` with more than one parents" begin
+@testset "Test running a `Workflow` with a `PipeJob` which has more than one parents" begin
     f₁(x) = x^2
     f₂(y) = y + 1
     f₃(z) = z / 2
