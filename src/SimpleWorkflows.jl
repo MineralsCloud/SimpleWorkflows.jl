@@ -11,7 +11,7 @@ abstract type AbstractWorkflow end
 
 # Create a `Workflow` from a list of `AbstractJob`s and a graph representing their relations.
 struct Workflow <: AbstractWorkflow
-    jobs::Vector{<:AbstractJob}
+    jobs::Vector{AbstractJob}
     graph::DiGraph{Int}
     function Workflow(jobs, graph)
         @assert !is_cyclic(graph) "`graph` must be acyclic"
@@ -30,7 +30,7 @@ The list of `AbstractJob`s does not have to be complete, our algorithm will find
 connected `AbstractJob`s automatically.
 """
 function Workflow(jobs::AbstractJob...)
-    all_possible_jobs = collect(jobs)
+    all_possible_jobs = convert(Vector{AbstractJob}, collect(jobs))  # Need to relax type constraints to contain different types of jobs
     for job in all_possible_jobs
         neighbors = vcat(job.parents, job.children)
         for neighbor in neighbors
