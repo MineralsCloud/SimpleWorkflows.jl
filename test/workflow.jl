@@ -72,6 +72,27 @@ end
     @test getresult(k) == Some(13.0)
 end
 
+@testset "Test running a `PipeJob` with more than one parents" begin
+    f₁(x) = x^2
+    f₂(y) = y + 1
+    f₃(z) = z / 2
+    f₄(iter) = sum(iter)
+    i = Job(Thunk(f₁, 5); username="me", name="i")
+    j = Job(Thunk(f₂, 3); username="he", name="j")
+    k = Job(Thunk(f₃, 6); username="she", name="k")
+    l = PipeJob(Thunk(f₄, ()); username="she", name="me")
+    for job in (i, j, k)
+        job → l
+    end
+    wf = Workflow(k)
+    run!(wf)
+    @test all(==(SUCCEEDED), getstatus(wf))
+    @test getresult(i) == Some(25)
+    @test getresult(j) == Some(4)
+    @test getresult(k) == Some(3.0)
+    @test getresult(l) == Some(32.0)
+end
+
 @testset "Test association rules of operators" begin
     @test Meta.parse("a → b ⇉ c → d ⭃ e → f → g → h ⇉ i → j ⭃ k → l → m") ==
         :(a → (b ⇉ (c → (d ⭃ (e → (f → (g → (h ⇉ (i → (j ⭃ (k → (l → m))))))))))))
