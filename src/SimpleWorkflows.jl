@@ -30,19 +30,19 @@ The list of `AbstractJob`s does not have to be complete, our algorithm will find
 connected `AbstractJob`s automatically.
 """
 function Workflow(jobs::AbstractJob...)
-    all_possible_jobs = convert(Vector{AbstractJob}, collect(jobs))  # Need to relax type constraints to contain different types of jobs
-    for job in all_possible_jobs
+    foundjobs = convert(Vector{AbstractJob}, collect(jobs))  # Need to relax type constraints to contain different types of jobs
+    for job in foundjobs
         neighbors = vcat(job.parents, job.children)
         for neighbor in neighbors
-            if neighbor ∉ all_possible_jobs
-                push!(all_possible_jobs, neighbor)  # This will alter `all_possible_jobs` dynamically
+            if neighbor ∉ foundjobs
+                push!(foundjobs, neighbor)  # This will alter `all_possible_jobs` dynamically
             end
         end
     end
-    n = length(all_possible_jobs)
+    n = length(foundjobs)
     graph = DiGraph(n)
-    dict = IdDict(zip(all_possible_jobs, 1:n))
-    for (i, job) in enumerate(all_possible_jobs)
+    dict = IdDict(zip(foundjobs, 1:n))
+    for (i, job) in enumerate(foundjobs)
         for parent in job.parents
             if !has_edge(graph, dict[parent], i)
                 add_edge!(graph, dict[parent], i)
@@ -54,7 +54,7 @@ function Workflow(jobs::AbstractJob...)
             end
         end
     end
-    return Workflow(all_possible_jobs, graph)
+    return Workflow(foundjobs, graph)
 end
 
 """
