@@ -1,5 +1,5 @@
 using EasyJobsBase.Thunks: Thunk
-using EasyJobsBase: SUCCEEDED, SimpleJob, run!, getstatus, getresult, →
+using EasyJobsBase: SUCCEEDED, Job, run!, getstatus, getresult, →
 using SimpleWorkflows: Workflow, AutosaveWorkflow
 
 @testset "Test running a `Workflow`" begin
@@ -31,12 +31,12 @@ using SimpleWorkflows: Workflow, AutosaveWorkflow
         cos(x)
         return run(`pwd` & `ls`)
     end
-    i = SimpleJob(Thunk(f₁, ()); username="me", name="i")
-    j = SimpleJob(Thunk(f₂, 3); username="he", name="j")
-    k = SimpleJob(Thunk(f₃, 6); name="k")
-    l = SimpleJob(Thunk(f₄, ()); name="l", username="me")
-    m = SimpleJob(Thunk(f₅, 3, 1); name="m")
-    n = SimpleJob(Thunk(f₆, 1; x=3); username="she", name="n")
+    i = Job(Thunk(f₁, ()); username="me", name="i")
+    j = Job(Thunk(f₂, 3); username="he", name="j")
+    k = Job(Thunk(f₃, 6); name="k")
+    l = Job(Thunk(f₄, ()); name="l", username="me")
+    m = Job(Thunk(f₅, 3, 1); name="m")
+    n = Job(Thunk(f₆, 1; x=3); username="she", name="n")
     i → l
     j → k → m → n
     j → l
