@@ -1,5 +1,5 @@
 using EasyJobsBase.Thunks: Thunk
-using EasyJobsBase: SUCCEEDED, Job, run!, getstatus, getresult, →
+using EasyJobsBase: SUCCEEDED, Job, PipeJob, run!, getstatus, getresult, →
 using SimpleWorkflows: Workflow, AutosaveWorkflow
 
 @testset "Test running a `Workflow`" begin
@@ -54,6 +54,22 @@ using SimpleWorkflows: Workflow, AutosaveWorkflow
         @test something(getresult(m)) == 0.8414709848078965
         @test something(getresult(n)) isa Base.ProcessChain
     end
+end
+
+@testset "Test running `PipeJob`s" begin
+    f₁(x) = x^2
+    f₂(y) = y + 1
+    f₃(z) = z / 2
+    i = Job(Thunk(f₁, 5); username="me", name="i")
+    j = PipeJob(Thunk(f₂, 3); username="he", name="j")
+    k = PipeJob(Thunk(f₃, 6); username="she", name="k")
+    i → j → k
+    wf = Workflow(k)
+    run!(wf)
+    @test all(==(SUCCEEDED), getstatus(wf))
+    @test getresult(i) == Some(25)
+    @test getresult(j) == Some(26)
+    @test getresult(k) == Some(13.0)
 end
 
 @testset "Test association rules of operators" begin
