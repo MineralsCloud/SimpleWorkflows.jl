@@ -1,5 +1,5 @@
 using EasyJobsBase.Thunks: Thunk
-using EasyJobsBase: SUCCEEDED, Job, PipeJob, run!, getstatus, getresult, →
+using EasyJobsBase: SUCCEEDED, Job, SubsequentJob, PipeJob, run!, getstatus, getresult, →
 using SimpleWorkflows: Workflow, AutosaveWorkflow
 
 @testset "Test running a `Workflow`" begin
@@ -54,6 +54,20 @@ using SimpleWorkflows: Workflow, AutosaveWorkflow
         @test something(getresult(m)) == 0.8414709848078965
         @test something(getresult(n)) isa Base.ProcessChain
     end
+end
+
+@testset "Test running a `Workflow` with `SubsequentJob`s" begin
+    f₁(x) = write("file", string(x))
+    f₂() = read("file", String)
+    f₃() = rm("file")
+    i = Job(Thunk(f₁, 1001); username="me", name="i")
+    j = SubsequentJob(Thunk(f₂); username="he", name="j")
+    k = SubsequentJob(Thunk(f₃); username="she", name="k")
+    i → j → k
+    wf = Workflow(k)
+    run!(wf)
+    @test all(==(SUCCEEDED), getstatus(wf))
+    @test getresult(j) == Some("1001")
 end
 
 @testset "Test running a `Workflow` with `PipeJob`s" begin
