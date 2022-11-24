@@ -2,16 +2,16 @@ module SimpleWorkflows
 
 using Dates: format
 using EasyJobsBase.Thunks: printfunc
-using EasyJobsBase: Job, ispending, isrunning, starttime, stoptime, elapsed
+using EasyJobsBase: AbstractJob, ispending, isrunning, starttime, stoptime, elapsed
 using Graphs: DiGraph, add_edge!, nv, is_cyclic, is_connected, has_edge
 
 export Workflow, AutosaveWorkflow
 
 abstract type AbstractWorkflow end
 
-# Create a `Workflow` from a list of `Job`s and a graph representing their relations.
+# Create a `Workflow` from a list of `AbstractJob`s and a graph representing their relations.
 struct Workflow <: AbstractWorkflow
-    jobs::Vector{Job}
+    jobs::Vector{<:AbstractJob}
     graph::DiGraph{Int}
     function Workflow(jobs, graph)
         @assert !is_cyclic(graph) "`graph` must be acyclic"
@@ -22,14 +22,14 @@ struct Workflow <: AbstractWorkflow
     end
 end
 """
-    Workflow(jobs::Job...)
+    Workflow(jobs::AbstractJob...)
 
-Create a `Workflow` from a given series of `Job`s.
+Create a `Workflow` from a given series of `AbstractJob`s.
 
-The list of `Job`s does not have to be complete, our algorithm will find all connected `Job`s
-automatically.
+The list of `AbstractJob`s does not have to be complete, our algorithm will find all
+connected `AbstractJob`s automatically.
 """
-function Workflow(jobs::Job...)
+function Workflow(jobs::AbstractJob...)
     all_possible_jobs = collect(jobs)
     for job in all_possible_jobs
         neighbors = vcat(job.parents, job.children)
@@ -58,7 +58,7 @@ function Workflow(jobs::Job...)
 end
 
 """
-    AutosaveWorkflow(path, jobs::Job...)
+    AutosaveWorkflow(path, jobs::AbstractJob...)
 
 Create a `AutosaveWorkflow` from a given series of `Job`s and a `path`.
 
@@ -68,7 +68,7 @@ struct AutosaveWorkflow{T} <: AbstractWorkflow
     path::T
     wf::Workflow
 end
-AutosaveWorkflow(path, jobs::Job...) = AutosaveWorkflow(path, Workflow(jobs...))
+AutosaveWorkflow(path, jobs::AbstractJob...) = AutosaveWorkflow(path, Workflow(jobs...))
 
 function Base.show(io::IO, wf::Workflow)
     if get(io, :compact, false) || get(io, :typeinfo, nothing) == typeof(wf)
