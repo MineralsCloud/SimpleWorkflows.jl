@@ -1,5 +1,5 @@
 using EasyJobsBase.Thunks: Thunk
-using EasyJobsBase: SUCCEEDED, SimpleJob, run!, getstatus, getresult, →
+using EasyJobsBase: SUCCEEDED, Job, SubsequentJob, PipeJob, run!, getstatus, getresult, →
 using SimpleWorkflows: Workflow, AutosaveWorkflow
 
 @testset "Test running a `Workflow`" begin
@@ -31,12 +31,12 @@ using SimpleWorkflows: Workflow, AutosaveWorkflow
         cos(x)
         return run(`pwd` & `ls`)
     end
-    i = SimpleJob(Thunk(f₁, ()); username="me", name="i")
-    j = SimpleJob(Thunk(f₂, 3); username="he", name="j")
-    k = SimpleJob(Thunk(f₃, 6); name="k")
-    l = SimpleJob(Thunk(f₄, ()); name="l", username="me")
-    m = SimpleJob(Thunk(f₅, 3, 1); name="m")
-    n = SimpleJob(Thunk(f₆, 1; x=3); username="she", name="n")
+    i = Job(Thunk(f₁); username="me", name="i")
+    j = Job(Thunk(f₂, 3); username="he", name="j")
+    k = Job(Thunk(f₃, 6); name="k")
+    l = Job(Thunk(f₄); name="l", username="me")
+    m = Job(Thunk(f₅, 3, 1); name="m")
+    n = Job(Thunk(f₆, 1; x=3); username="she", name="n")
     i → l
     j → k → m → n
     j → l
@@ -54,6 +54,57 @@ using SimpleWorkflows: Workflow, AutosaveWorkflow
         @test something(getresult(m)) == 0.8414709848078965
         @test something(getresult(n)) isa Base.ProcessChain
     end
+end
+
+@testset "Test running a `Workflow` with `SubsequentJob`s" begin
+    f₁(x) = write("file", string(x))
+    f₂() = read("file", String)
+    f₃() = rm("file")
+    i = Job(Thunk(f₁, 1001); username="me", name="i")
+    j = SubsequentJob(Thunk(f₂); username="he", name="j")
+    k = SubsequentJob(Thunk(f₃); username="she", name="k")
+    i → j → k
+    wf = Workflow(k)
+    run!(wf)
+    @test all(==(SUCCEEDED), getstatus(wf))
+    @test getresult(j) == Some("1001")
+end
+
+@testset "Test running a `Workflow` with `PipeJob`s" begin
+    f₁(x) = x^2
+    f₂(y) = y + 1
+    f₃(z) = z / 2
+    i = Job(Thunk(f₁, 5); username="me", name="i")
+    j = PipeJob(Thunk(f₂, 3); username="he", name="j")
+    k = PipeJob(Thunk(f₃, 6); username="she", name="k")
+    i → j → k
+    wf = Workflow(k)
+    run!(wf)
+    @test all(==(SUCCEEDED), getstatus(wf))
+    @test getresult(i) == Some(25)
+    @test getresult(j) == Some(26)
+    @test getresult(k) == Some(13.0)
+end
+
+@testset "Test running a `Workflow` with a `PipeJob` which has more than one parents" begin
+    f₁(x) = x^2
+    f₂(y) = y + 1
+    f₃(z) = z / 2
+    f₄(iter) = sum(iter)
+    i = Job(Thunk(f₁, 5); username="me", name="i")
+    j = Job(Thunk(f₂, 3); username="he", name="j")
+    k = Job(Thunk(f₃, 6); username="she", name="k")
+    l = PipeJob(Thunk(f₄, ()); username="she", name="me")
+    for job in (i, j, k)
+        job → l
+    end
+    wf = Workflow(k)
+    run!(wf)
+    @test all(==(SUCCEEDED), getstatus(wf))
+    @test getresult(i) == Some(25)
+    @test getresult(j) == Some(4)
+    @test getresult(k) == Some(3.0)
+    @test getresult(l) == Some(32.0)
 end
 
 @testset "Test association rules of operators" begin

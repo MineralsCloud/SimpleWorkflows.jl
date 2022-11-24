@@ -2,16 +2,16 @@ module SimpleWorkflows
 
 using Dates: format
 using EasyJobsBase.Thunks: printfunc
-using EasyJobsBase: Job, ispending, isrunning, starttime, stoptime, elapsed
+using EasyJobsBase: AbstractJob, ispending, isrunning, starttime, stoptime, elapsed
 using Graphs: DiGraph, add_edge!, nv, is_cyclic, is_connected, has_edge
 
 export Workflow, AutosaveWorkflow
 
 abstract type AbstractWorkflow end
 
-# Create a `Workflow` from a list of `Job`s and a graph representing their relations.
+# Create a `Workflow` from a list of `AbstractJob`s and a graph representing their relations.
 struct Workflow <: AbstractWorkflow
-    jobs::Vector{Job}
+    jobs::Vector{AbstractJob}
     graph::DiGraph{Int}
     function Workflow(jobs, graph)
         @assert !is_cyclic(graph) "`graph` must be acyclic"
@@ -22,27 +22,27 @@ struct Workflow <: AbstractWorkflow
     end
 end
 """
-    Workflow(jobs::Job...)
+    Workflow(jobs::AbstractJob...)
 
-Create a `Workflow` from a given series of `Job`s.
+Create a `Workflow` from a given series of `AbstractJob`s.
 
-The list of `Job`s does not have to be complete, our algorithm will find all connected `Job`s
-automatically.
+The list of `AbstractJob`s does not have to be complete, our algorithm will find all
+connected `AbstractJob`s automatically.
 """
-function Workflow(jobs::Job...)
-    all_possible_jobs = collect(jobs)
-    for job in all_possible_jobs
+function Workflow(jobs::AbstractJob...)
+    foundjobs = convert(Vector{AbstractJob}, collect(jobs))  # Need to relax type constraints to contain different types of jobs
+    for job in foundjobs
         neighbors = vcat(job.parents, job.children)
         for neighbor in neighbors
-            if neighbor ∉ all_possible_jobs
-                push!(all_possible_jobs, neighbor)  # This will alter `all_possible_jobs` dynamically
+            if neighbor ∉ foundjobs
+                push!(foundjobs, neighbor)  # This will alter `all_possible_jobs` dynamically
             end
         end
     end
-    n = length(all_possible_jobs)
+    n = length(foundjobs)
     graph = DiGraph(n)
-    dict = IdDict(zip(all_possible_jobs, 1:n))
-    for (i, job) in enumerate(all_possible_jobs)
+    dict = IdDict(zip(foundjobs, 1:n))
+    for (i, job) in enumerate(foundjobs)
         for parent in job.parents
             if !has_edge(graph, dict[parent], i)
                 add_edge!(graph, dict[parent], i)
@@ -54,11 +54,11 @@ function Workflow(jobs::Job...)
             end
         end
     end
-    return Workflow(all_possible_jobs, graph)
+    return Workflow(foundjobs, graph)
 end
 
 """
-    AutosaveWorkflow(path, jobs::Job...)
+    AutosaveWorkflow(path, jobs::AbstractJob...)
 
 Create a `AutosaveWorkflow` from a given series of `Job`s and a `path`.
 
@@ -68,7 +68,7 @@ struct AutosaveWorkflow{T} <: AbstractWorkflow
     path::T
     wf::Workflow
 end
-AutosaveWorkflow(path, jobs::Job...) = AutosaveWorkflow(path, Workflow(jobs...))
+AutosaveWorkflow(path, jobs::AbstractJob...) = AutosaveWorkflow(path, Workflow(jobs...))
 
 function Base.show(io::IO, wf::Workflow)
     if get(io, :compact, false) || get(io, :typeinfo, nothing) == typeof(wf)

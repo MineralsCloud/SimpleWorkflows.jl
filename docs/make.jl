@@ -2,13 +2,7 @@
 using SimpleWorkflows
 using Documenter
 
-DocMeta.setdocmeta!(
-    SimpleWorkflows,
-    :DocTestSetup,
-    :(using SimpleWorkflows,
-        SimpleWorkflows.Thunks, SimpleWorkflows.Jobs, SimpleWorkflows.Workflows);
-    recursive=true,
-)
+DocMeta.setdocmeta!(SimpleWorkflows, :DocTestSetup, :(using SimpleWorkflows); recursive=true)
 
 makedocs(;
     modules=[SimpleWorkflows],
