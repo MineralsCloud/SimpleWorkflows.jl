@@ -4,8 +4,7 @@ Suppose you have a `Workflow` object defined with the following code:
 
 ```@repl wf
 using SimpleWorkflows.Thunks: Thunk
-using SimpleWorkflows.Jobs: Job
-using SimpleWorkflows.Workflows: Workflow, run!, →
+using SimpleWorkflows: Job, Workflow, run!, →
 
 function f₁()
    println("Start job `i`!")
@@ -52,7 +51,7 @@ To save the `Workflow` instance to disk while running in case it failed or is in
 use the `AutosaveWorkflow` type.
 
 ```@repl wf
-using SimpleWorkflows.Workflows: AutosaveWorkflow
+using SimpleWorkflows: AutosaveWorkflow
 wf = AutosaveWorkflow("saved.jls", k)
 run!(wf; δt = 0, n = 1)
 ```
