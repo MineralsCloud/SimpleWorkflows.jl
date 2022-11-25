@@ -1,5 +1,5 @@
 using EasyJobsBase.Thunks: Thunk
-using EasyJobsBase: SUCCEEDED, Job, DependentJob, run!, getstatus, getresult, →
+using EasyJobsBase: SUCCEEDED, Job, DependentJob, run!, getstatus, getresult, →, ↠, ⇒
 using SimpleWorkflows: Workflow, AutosaveWorkflow
 
 @testset "Test running a `Workflow`" begin
@@ -56,19 +56,19 @@ using SimpleWorkflows: Workflow, AutosaveWorkflow
     end
 end
 
-# @testset "Test running a `Workflow` with `SubsequentJob`s" begin
-#     f₁(x) = write("file", string(x))
-#     f₂() = read("file", String)
-#     f₃() = rm("file")
-#     i = Job(Thunk(f₁, 1001); username="me", name="i")
-#     j = SubsequentJob(Thunk(f₂); username="he", name="j")
-#     k = SubsequentJob(Thunk(f₃); username="she", name="k")
-#     i → j → k
-#     wf = Workflow(k)
-#     run!(wf)
-#     @test all(==(SUCCEEDED), getstatus(wf))
-#     @test getresult(j) == Some("1001")
-# end
+@testset "Test running a `Workflow` with `DependentJob`s" begin
+    f₁(x) = write("file", string(x))
+    f₂() = read("file", String)
+    f₃() = rm("file")
+    i = Job(Thunk(f₁, 1001); username="me", name="i")
+    j = DependentJob(Thunk(f₂); username="he", name="j")
+    k = DependentJob(Thunk(f₃); username="she", name="k")
+    i ↠ j ↠ k
+    wf = Workflow(k)
+    run!(wf)
+    @test all(==(SUCCEEDED), getstatus(wf))
+    @test getresult(j) == Some("1001")
+end
 
 @testset "Test running a `Workflow` with `DependentJob`s" begin
     f₁(x) = x^2
@@ -77,7 +77,7 @@ end
     i = Job(Thunk(f₁, 5); username="me", name="i")
     j = DependentJob(Thunk(f₂, 3); username="he", name="j")
     k = DependentJob(Thunk(f₃, 6); username="she", name="k")
-    i → j → k
+    i ⇒ j ⇒ k
     wf = Workflow(k)
     run!(wf)
     @test all(==(SUCCEEDED), getstatus(wf))
@@ -96,7 +96,7 @@ end
     k = Job(Thunk(f₃, 6); username="she", name="k")
     l = DependentJob(Thunk(f₄, ()); username="she", name="me")
     for job in (i, j, k)
-        job → l
+        job ⇒ l
     end
     wf = Workflow(k)
     run!(wf)
