@@ -75,9 +75,9 @@ version = "1.6.0"
 
 [[deps.EasyJobsBase]]
 deps = ["Configurations", "Dates", "UUIDs"]
-git-tree-sha1 = "785b8414b71366268fa0412ab8c724f34c74b130"
+git-tree-sha1 = "c526863ecaec2eed679f57540a216276d3bcb496"
 uuid = "db8ca866-b61f-4bd1-a9b9-75c107d645d4"
-version = "0.2.0"
+version = "0.3.0"
 
 [[deps.ExproniconLite]]
 git-tree-sha1 = "2321c9c5a07c2658484dacf8e68e3cd8e2470d5d"
@@ -226,7 +226,7 @@ version = "0.9.4"
 
 [[deps.SimpleWorkflows]]
 deps = ["Dates", "EasyJobsBase", "Graphs", "Serialization"]
-git-tree-sha1 = "27f2de71ea447e6abc2ff3e28c5b9a960a20e533"
+git-tree-sha1 = "b20249dd9a9e04dc0bf7134e9d2afb9abed23e1b"
 repo-rev = "master"
 repo-url = "https://github.com/MineralsCloud/SimpleWorkflows.jl"
 uuid = "6a97d125-85da-4b66-b300-4bba10360563"
