@@ -5,7 +5,7 @@ using EasyJobsBase.Thunks: printfunc
 using EasyJobsBase: AbstractJob, ispending, isrunning, starttime, stoptime, elapsed
 using Graphs: DiGraph, add_edge!, nv, is_cyclic, is_connected, has_edge
 
-export Workflow, AutosaveWorkflow
+export Workflow, AutosaveWorkflow, eachjob
 
 abstract type AbstractWorkflow end
 
@@ -69,6 +69,21 @@ struct AutosaveWorkflow{T} <: AbstractWorkflow
     wf::Workflow
 end
 AutosaveWorkflow(path, jobs::AbstractJob...) = AutosaveWorkflow(path, Workflow(jobs...))
+
+struct EachJob{T<:AbstractWorkflow}
+    wf::T
+end
+
+eachjob(wf::AbstractWorkflow) = EachJob(wf)
+
+Base.iterate(iter::EachJob{<:AbstractWorkflow}) = iterate(getjobs(iter.wf))
+Base.iterate(iter::EachJob{<:AbstractWorkflow}, state) = iterate(getjobs(iter.wf), state)
+
+Base.eltype(iter::EachJob) = eltype(getjobs(iter.wf))
+
+Base.length(iter::EachJob) = length(getjobs(iter.wf))
+
+Base.size(iter::EachJob, dim...) = size(getjobs(iter.wf), dim...)
 
 function Base.show(io::IO, wf::Workflow)
     if get(io, :compact, false) || get(io, :typeinfo, nothing) == typeof(wf)
