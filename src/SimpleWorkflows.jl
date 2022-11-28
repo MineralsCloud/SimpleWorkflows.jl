@@ -76,8 +76,8 @@ end
 
 eachjob(wf::AbstractWorkflow) = EachJob(wf)
 
-Base.iterate(iter::EachJob{<:AbstractWorkflow}) = iterate(getjobs(iter.wf))
-Base.iterate(iter::EachJob{<:AbstractWorkflow}, state) = iterate(getjobs(iter.wf), state)
+Base.iterate(iter::EachJob) = iterate(getjobs(iter.wf))
+Base.iterate(iter::EachJob, state) = iterate(getjobs(iter.wf), state)
 
 Base.eltype(iter::EachJob) = eltype(getjobs(iter.wf))
 
