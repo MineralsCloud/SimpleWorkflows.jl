@@ -85,6 +85,12 @@ Base.length(iter::EachJob) = length(getjobs(iter.wf))
 
 Base.size(iter::EachJob, dim...) = size(getjobs(iter.wf), dim...)
 
+Base.getindex(iter::EachJob, i) = getindex(getjobs(iter.wf), i)
+
+Base.firstindex(iter::EachJob) = 1
+
+Base.lastindex(iter::EachJob) = length(iter)
+
 function Base.show(io::IO, wf::Workflow)
     if get(io, :compact, false) || get(io, :typeinfo, nothing) == typeof(wf)
         Base.show_default(IOContext(io, :limit => true), wf)  # From https://github.com/mauro3/Parameters.jl/blob/ecbf8df/src/Parameters.jl#L556
