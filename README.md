@@ -16,12 +16,12 @@
 [appveyor-url]: https://ci.appveyor.com/project/singularitti/SimpleWorkflows-jl
 [cirrus-img]: https://api.cirrus-ci.com/github/MineralsCloud/SimpleWorkflows.jl.svg
 [cirrus-url]: https://cirrus-ci.com/github/MineralsCloud/SimpleWorkflows.jl
-[gitlab-img]: https://gitlab.com/singularitti/SimpleWorkflows.jl/badges/master/pipeline.svg
+[gitlab-img]: https://gitlab.com/singularitti/SimpleWorkflows.jl/badges/main/pipeline.svg
 [gitlab-url]: https://gitlab.com/singularitti/SimpleWorkflows.jl/-/pipelines
-[codecov-img]: https://codecov.io/gh/MineralsCloud/SimpleWorkflows.jl/branch/master/graph/badge.svg
+[codecov-img]: https://codecov.io/gh/MineralsCloud/SimpleWorkflows.jl/branch/main/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/MineralsCloud/SimpleWorkflows.jl
 [license-img]: https://img.shields.io/github/license/MineralsCloud/SimpleWorkflows.jl
-[license-url]: https://github.com/MineralsCloud/SimpleWorkflows.jl/blob/master/LICENSE
+[license-url]: https://github.com/MineralsCloud/SimpleWorkflows.jl/blob/main/LICENSE
 [style-img]: https://img.shields.io/badge/code%20style-blue-4495d1.svg
 [style-url]: https://github.com/invenia/BlueStyle
 
@@ -86,12 +86,11 @@ macOS, and Windows.
 
 ## Questions and contributions
 
-Usage questions can be posted on [our discussion page][discussions-url].
+You are welcome to post usage questions on [our discussion page][discussions-url].
 
 Contributions are very welcome, as are feature requests and suggestions. Please open an
-[issue][issues-url] if you encounter any problems. The [contributing](@ref) page has
-a few guidelines that should be followed when opening pull requests and contributing code.
+[issue][issues-url] if you encounter any problems. The [Contributing](@ref) page has
+guidelines that should be followed when opening pull requests and contributing code.
 
 [discussions-url]: https://github.com/MineralsCloud/SimpleWorkflows.jl/discussions
 [issues-url]: https://github.com/MineralsCloud/SimpleWorkflows.jl/issues
-[contrib-url]: https://github.com/MineralsCloud/SimpleWorkflows.jl/discussions
