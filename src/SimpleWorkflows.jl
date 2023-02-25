@@ -161,6 +161,5 @@ end
 include("operations.jl")
 include("run!.jl")
 include("status.jl")
-include("query.jl")
 
 end
