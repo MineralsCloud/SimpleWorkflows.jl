@@ -1,7 +1,7 @@
-# [Installation guide](@id installation)
+# [Installation Guide](@id installation)
 
 Here are the installation instructions for package
-[`SimpleWorkflows`](https://github.com/MineralsCloud/SimpleWorkflows.jl).
+[SimpleWorkflows](https://github.com/MineralsCloud/SimpleWorkflows.jl).
 If you have trouble installing it, please refer to our [Troubleshooting](@ref) page
 for more information.
 
@@ -82,7 +82,7 @@ installed on your machine. For Mac computers with M-series processors, this pack
 dependencies may not work. Please install the Intel-compatible version of Julia (for macOS
 x86-64) if any platform-related error occurs.
 
-## Install `SimpleWorkflows`
+## Install SimpleWorkflows
 
 Now I am using [macOS](https://en.wikipedia.org/wiki/MacOS) as a standard
 platform to explain the following steps:
@@ -111,7 +111,7 @@ platform to explain the following steps:
 4. While using, please keep this Julia session alive. Restarting might cost some time.
 
 If you want to install the latest in-development (probably buggy)
-version of `SimpleWorkflows`, type
+version of SimpleWorkflows, type
 
 ```@repl
 using Pkg
@@ -121,12 +121,12 @@ pkg"add https://github.com/MineralsCloud/SimpleWorkflows.jl"
 
 in the second step above.
 
-## Update `SimpleWorkflows`
+## Update SimpleWorkflows
 
 Please [watch](https://docs.github.com/en/account-and-profile/managing-subscriptions-and-notifications-on-github/setting-up-notifications/configuring-notifications#configuring-your-watch-settings-for-an-individual-repository)
 our [GitHub repository](https://github.com/MineralsCloud/SimpleWorkflows.jl)
 for new releases.
-Once we release a new version, you can update `SimpleWorkflows` by typing
+Once we release a new version, you can update SimpleWorkflows by typing
 
 ```@repl
 using Pkg
@@ -136,7 +136,7 @@ Pkg.gc()
 
 in the Julia REPL.
 
-## Uninstall and reinstall `SimpleWorkflows`
+## Uninstall and reinstall SimpleWorkflows
 
 Sometimes errors may occur if the package is not properly installed.
 In this case, you may want to uninstall and reinstall the package. Here is how to do that:
@@ -152,4 +152,4 @@ In this case, you may want to uninstall and reinstall the package. Here is how t
    ```
 
 2. Press `ctrl+d` to quit the current session. Start a new Julia session and
-   reinstall `SimpleWorkflows`.
+   reinstall SimpleWorkflows.

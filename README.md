@@ -26,10 +26,9 @@
 [style-url]: https://github.com/invenia/BlueStyle
 
 Build workflows from jobs. Run, monitor, and get results from them.
-
-This package take inspiration from
-[`JobSchedulers.jl`](https://github.com/cihga39871/JobSchedulers.jl) and
-[`Dispatcher.jl`](https://github.com/invenia/Dispatcher.jl) (unmaintained).
+This package takes inspiration from packages like
+[JobSchedulers](https://github.com/cihga39871/JobSchedulers.jl) and
+[Dispatcher](https://github.com/invenia/Dispatcher.jl) (unmaintained).
 
 Please [cite this package](https://doi.org/10.1016/j.cpc.2022.108515) as:
 

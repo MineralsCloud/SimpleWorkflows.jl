@@ -1,10 +1,11 @@
-# [Contributing](@id contributing)
+# Contributing
 
 ```@contents
 Pages = ["contributing.md"]
+Depth = 3
 ```
 
-Welcome! This document explains some ways you can contribute to `SimpleWorkflows`.
+Welcome! This document explains some ways you can contribute to SimpleWorkflows.
 
 ## Code of conduct
 
@@ -16,11 +17,11 @@ By participating, you are expected to uphold this code.
 
 First up, join the [community forum](https://github.com/MineralsCloud/SimpleWorkflows.jl/discussions).
 
-The forum is a good place to ask questions about how to use `SimpleWorkflows`. You can also
+The forum is a good place to ask questions about how to use SimpleWorkflows. You can also
 use the forum to discuss possible feature requests and bugs before raising a
 GitHub issue (more on this below).
 
-Aside from asking questions, the easiest way you can contribute to `SimpleWorkflows` is to
+Aside from asking questions, the easiest way you can contribute to SimpleWorkflows is to
 help answer questions on the forum!
 
 ## Improve the documentation
@@ -33,7 +34,7 @@ person to improve it!
 The docs are written in Markdown and are built using
 [Documenter.jl](https://github.com/JuliaDocs/Documenter.jl).
 You can find the source of all the docs
-[here](https://github.com/MineralsCloud/SimpleWorkflows.jl/tree/master/docs).
+[here](https://github.com/MineralsCloud/SimpleWorkflows.jl/tree/main/docs).
 
 If your change is small (like fixing typos, or one or two sentence corrections),
 the easiest way to do this is via GitHub's online editor. (GitHub has
@@ -43,16 +44,16 @@ on how to do this.)
 If your change is larger, or touches multiple files, you will need to make the
 change locally and then use Git to submit a
 [pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests).
-(See [Contribute code to `SimpleWorkflows`](@ref) below for more on this.)
+(See [Contribute code to SimpleWorkflows](@ref) below for more on this.)
 
 ## File a bug report
 
-Another way to contribute to `SimpleWorkflows` is to file
+Another way to contribute to SimpleWorkflows is to file
 [bug reports](https://github.com/MineralsCloud/SimpleWorkflows.jl/issues/new?template=bug_report.md).
 
 Make sure you read the info in the box where you write the body of the issue
 before posting. You can also find a copy of that info
-[here](https://github.com/MineralsCloud/SimpleWorkflows.jl/blob/master/.github/ISSUE_TEMPLATE/bug_report.md).
+[here](https://github.com/MineralsCloud/SimpleWorkflows.jl/blob/main/.github/ISSUE_TEMPLATE/bug_report.md).
 
 !!! tip
     If you're unsure whether you have a real bug, post on the
@@ -60,21 +61,21 @@ before posting. You can also find a copy of that info
     first. Someone will either help you fix the problem, or let you know the
     most appropriate place to open a bug report.
 
-## Contribute code to `SimpleWorkflows`
+## Contribute code to SimpleWorkflows
 
-Finally, you can also contribute code to `SimpleWorkflows`!
+Finally, you can also contribute code to SimpleWorkflows!
 
 !!! warning
     If you do not have experience with Git, GitHub, and Julia development, the
     first steps can be a little daunting. However, there are lots of tutorials
     available online, including:
-    * [GitHub](https://guides.github.com/activities/hello-world/)
-    * [Git and GitHub](https://try.github.io/)
-    * [Git](https://git-scm.com/book/en/v2)
-    * [Julia package development](https://docs.julialang.org/en/v1/stdlib/Pkg/#Developing-packages-1)
+    - [GitHub](https://guides.github.com/activities/hello-world/)
+    - [Git and GitHub](https://try.github.io/)
+    - [Git](https://git-scm.com/book/en/v2)
+    - [Julia package development](https://docs.julialang.org/en/v1/stdlib/Pkg/#Developing-packages-1)
 
 Once you are familiar with Git and GitHub, the workflow for contributing code to
-`SimpleWorkflows` is similar to the following:
+SimpleWorkflows is similar to the following:
 
 ### Step 1: decide what to work on
 
@@ -83,22 +84,22 @@ The first step is to find an [open issue](https://github.com/MineralsCloud/Simpl
 too much time on it, discuss what you are planning to do in the issue to see if
 other contributors are fine with your proposed changes. Getting feedback early can
 improve code quality, and avoid time spent writing code that does not get merged into
-`SimpleWorkflows`.
+SimpleWorkflows.
 
 !!! tip
     At this point, remember to be patient and polite; you may get a _lot_ of
     comments on your issue! However, do not be afraid! Comments mean that people are
-    willing to help you improve the code that you are contributing to `SimpleWorkflows`.
+    willing to help you improve the code that you are contributing to SimpleWorkflows.
 
-### Step 2: fork `SimpleWorkflows`
+### Step 2: fork SimpleWorkflows
 
 Go to [https://github.com/MineralsCloud/SimpleWorkflows.jl](https://github.com/MineralsCloud/SimpleWorkflows.jl)
 and click the "Fork" button in the top-right corner. This will create a copy of
-`SimpleWorkflows` under your GitHub account.
+SimpleWorkflows under your GitHub account.
 
-### Step 3: install `SimpleWorkflows` locally
+### Step 3: install SimpleWorkflows locally
 
-Similar to [installation](@ref), open the Julia REPL and run:
+Similar to [Installation](@ref), open the Julia REPL and run:
 
 ```@repl
 using Pkg
@@ -136,7 +137,7 @@ cd ~/.julia/dev/SimpleWorkflows
 
 git remote add GITHUB_ACCOUNT https://github.com/GITHUB_ACCOUNT/SimpleWorkflows.jl.git
 
-git checkout master  # or main
+git checkout main
 
 git pull
 
@@ -150,17 +151,17 @@ directory.
 
 Make sure you:
 
-* Follow the [Style guide](@ref style) and [run `JuliaFormatter.jl`](@ref formatter)
-* Add tests and documentation for any changes or new features
+- Follow our [Style Guide](@ref style) and [run `JuliaFormatter.jl`](@ref formatter)
+- Add tests and documentation for any changes or new features
 
 !!! tip
     When you change the source code, you'll need to restart Julia for the
     changes to take effect. This is a pain, so install
-    [`Revise.jl`](https://github.com/timholy/Revise.jl).
+    [Revise.jl](https://github.com/timholy/Revise.jl).
 
 ### Step 6a: test your code changes
 
-To test that your changes work, run the `SimpleWorkflows` test-suite by opening Julia and
+To test that your changes work, run the SimpleWorkflows test-suite by opening Julia and
 running:
 
 ```@repl
@@ -201,7 +202,7 @@ After a while, a folder `PKGROOT/docs/build` will appear. Open
 
 !!! tip
     If there's a problem with the tests that you don't know how to fix, don't
-    worry. Continue to step 5, and one of the `SimpleWorkflows` contributors will comment
+    worry. Continue to step 5, and one of the SimpleWorkflows contributors will comment
     on your pull request telling you how to fix things.
 
 ### Step 7: make a pull request
@@ -226,7 +227,7 @@ and follow the instructions that pop up to open a pull request.
 At this point, remember to be patient and polite; you may get a _lot_ of
 comments on your pull request! However, do not be afraid! A lot of comments
 means that people are willing to help you improve the code that you are
-contributing to `SimpleWorkflows`.
+contributing to SimpleWorkflows.
 
 To respond to the comments, go back to step 5, make any changes, test the
 changes in step 6, and then make a new commit in step 7. Your PR will
@@ -240,7 +241,7 @@ next contribution!
 ```shell
 cd ~/.julia/dev/SimpleWorkflows
 
-git checkout master
+git checkout main
 
 git pull
 ```
@@ -250,4 +251,4 @@ git pull
     It's particularly helpful if you do this after your first pull request
     because you'll know all the parts that could be explained better.
 
-Thanks for contributing to `SimpleWorkflows`!
+Thanks for contributing to SimpleWorkflows!

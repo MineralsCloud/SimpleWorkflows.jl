@@ -4,13 +4,14 @@ CurrentModule = SimpleWorkflows
 
 # SimpleWorkflows
 
-Documentation for [`SimpleWorkflows`](https://github.com/MineralsCloud/SimpleWorkflows.jl).
+Documentation for [SimpleWorkflows](https://github.com/MineralsCloud/SimpleWorkflows.jl).
 
 Build workflows from jobs. Run, monitor, and get results from them.
 
-This package take inspiration from
-[`JobSchedulers.jl`](https://github.com/cihga39871/JobSchedulers.jl) and
-[`Dispatcher.jl`](https://github.com/invenia/Dispatcher.jl) (unmaintained).
+Build workflows from jobs. Run, monitor, and get results from them.
+This package takes inspiration from packages like
+[JobSchedulers](https://github.com/cihga39871/JobSchedulers.jl) and
+[Dispatcher](https://github.com/invenia/Dispatcher.jl) (unmaintained).
 
 Please [cite this package](https://doi.org/10.1016/j.cpc.2022.108515) as:
 
@@ -75,7 +76,7 @@ Usage questions can be posted on
 
 Contributions are very welcome, as are feature requests and suggestions. Please open an
 [issue](https://github.com/MineralsCloud/SimpleWorkflows.jl/issues)
-if you encounter any problems. The [contributing](@ref) page has
+if you encounter any problems. The [Contributing](@ref) page has
 a few guidelines that should be followed when opening pull requests and contributing code.
 
 ## Manual outline
@@ -85,7 +86,8 @@ Pages = [
     "installation.md",
     "portability.md",
     "developers/contributing.md",
-    "developers/style.md",
+    "developers/style-guide.md",
+    "developers/design-principles.md",
     "troubleshooting.md",
 ]
 Depth = 3
