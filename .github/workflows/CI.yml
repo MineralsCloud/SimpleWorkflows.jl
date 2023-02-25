@@ -2,7 +2,7 @@ name: CI
 on:
   push:
     branches:
-      - master
+      - main
     tags: ['*']
   pull_request:
 concurrency:
@@ -52,6 +52,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      statuses: write
     steps:
       - uses: actions/checkout@v3
       - uses: julia-actions/setup-julia@v1
