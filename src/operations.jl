@@ -1,8 +1,6 @@
-import EasyJobsBase: chain!, follow!, pipe!, →, ←, ↠, ↞, ⇒, ⇐
+import EasyJobsBase: chain!, →, ←
 
-export chain!, follow!, pipe!, →, ←, ↠, ↞, ⇒, ⇐
-
-for (func, (op₁, op₂)) in zip((:chain!, :follow!, :pipe!), ((:→, :←), (:↠, :↞), (:⇒, :⇐)))
+for (func, (op₁, op₂)) in zip((:chain!,), ((:→, :←),))
     @eval begin
         $func(x::AbstractWorkflow, y::AbstractWorkflow) =
             $func(last(eachjob(x)), first(eachjob(y)))
