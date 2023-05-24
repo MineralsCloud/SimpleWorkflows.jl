@@ -29,11 +29,13 @@ function run!(wf::AbstractWorkflow; n=5, δt=1, Δt=1)
     end
     return wf
 end
+
 function run_copy!(wf; δt)  # Do not export!
     jobs, graph = copy(getjobs(wf)), copy(getgraph(wf))  # This separation is necessary, or else we call this every iteration of `run_kahn_algo!`
     run_kahn_algo!(wf, jobs, graph; δt=δt)
     return wf
 end
+
 function run_kahn_algo!(wf, jobs, graph; δt)  # Do not export!
     if isempty(jobs) && iszero(nv(graph))  # Stopping criterion
         return nothing
@@ -47,8 +49,8 @@ function run_kahn_algo!(wf, jobs, graph; δt)  # Do not export!
         queue = findall(iszero, indegree(graph))
         @sync for job in jobs[queue]
             @async begin
-                run!(job; n=1, δt=δt)
-                wait(job)
+                exec = run!(job; maxattempts=1, interval=δt, waitfor=0)  # Only run once for each job
+                wait(exec)
                 save(wf)
             end
         end
