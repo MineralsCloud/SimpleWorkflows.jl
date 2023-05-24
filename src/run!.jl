@@ -39,12 +39,10 @@ end
 function run_kahn_algo!(wf, jobs, graph; δt)  # Do not export!
     if isempty(jobs) && iszero(nv(graph))  # Stopping criterion
         return nothing
-    elseif isempty(jobs) && !iszero(nv(graph)) || !isempty(jobs) && iszero(nv(graph))
-        throw(
-            ArgumentError(
-                "either `jobs` is empty but `graph` is not, or `graph` is empty but `jobs` is not!",
-            ),
-        )
+    elseif isempty(jobs) && !iszero(nv(graph))
+        throw(ArgumentError("`jobs` is empty but `graph` is not!"))
+    elseif !isempty(jobs) && iszero(nv(graph))
+        throw(ArgumentError("`graph` is empty but `jobs` is not!"))
     else
         queue = findall(iszero, indegree(graph))
         @sync for job in jobs[queue]
