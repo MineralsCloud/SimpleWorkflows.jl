@@ -6,7 +6,7 @@ using EasyJobsBase:
 using Graphs:
     DiGraph, add_edge!, nv, is_cyclic, is_connected, has_edge, topological_sort_by_dfs
 
-export Workflow, AutosaveWorkflow, eachjob
+export Workflow, AutosaveWorkflow
 
 abstract type AbstractWorkflow end
 
@@ -89,27 +89,6 @@ struct AutosaveWorkflow{T} <: AbstractWorkflow
 end
 AutosaveWorkflow(path, jobs::AbstractJob...) = AutosaveWorkflow(path, Workflow(jobs...))
 
-struct EachJob{T<:AbstractWorkflow}
-    wf::T
-end
-
-eachjob(wf::AbstractWorkflow) = EachJob(wf)
-
-Base.iterate(iter::EachJob) = iterate(getjobs(iter.wf))
-Base.iterate(iter::EachJob, state) = iterate(getjobs(iter.wf), state)
-
-Base.eltype(iter::EachJob) = eltype(getjobs(iter.wf))
-
-Base.length(iter::EachJob) = length(getjobs(iter.wf))
-
-Base.size(iter::EachJob, dim...) = size(getjobs(iter.wf), dim...)
-
-Base.getindex(iter::EachJob, i) = getindex(getjobs(iter.wf), i)
-
-Base.firstindex(iter::EachJob) = 1
-
-Base.lastindex(iter::EachJob) = length(iter)
-
 function Base.show(io::IO, wf::Workflow)
     if get(io, :compact, false) || get(io, :typeinfo, nothing) == typeof(wf)
         Base.show_default(IOContext(io, :limit => true), wf)  # From https://github.com/mauro3/Parameters.jl/blob/ecbf8df/src/Parameters.jl#L556
@@ -158,6 +137,7 @@ function Base.show(io::IO, wf::AutosaveWorkflow)
     end
 end
 
+include("eachjob.jl")
 include("operations.jl")
 include("run.jl")
 include("status.jl")
