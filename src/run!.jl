@@ -2,9 +2,9 @@ using EasyJobsBase: Executor as JobExecutor, issucceeded
 using Graphs: indegree, rem_vertices!
 using Serialization: serialize
 
-import EasyJobsBase: run!
+import EasyJobsBase: run!, execute!
 
-export run!
+export run!, execute!
 
 struct Executor{T<:AbstractWorkflow}
     wf::T
@@ -31,21 +31,10 @@ Run a `Workflow` with maximum `n` attempts, with each attempt separated by `Δt`
 
 Cool down for `δt` seconds after each `Job` in the `Workflow`.
 """
-function run!(wf::AbstractWorkflow; n=5, δt=1, Δt=1)
-    @assert isinteger(n) && n >= 1
-    save(wf)
-    for _ in 1:n
-        if any(!issucceeded(job) for job in getjobs(wf))
-            run_copy!(wf; δt=δt)
-        end
-        if all(issucceeded(job) for job in getjobs(wf))
-            break  # Stop immediately
-        end
-        if !iszero(Δt)  # If still unsuccessful
-            sleep(Δt)  # `if-else` is faster than `sleep(0)`
-        end
-    end
-    return wf
+function run!(wf::AbstractWorkflow; kwargs...)
+    exec = Executor(wf; kwargs...)
+    execute!(exec)
+    return exec
 end
 
 function run_copy!(wf)  # Do not export!
