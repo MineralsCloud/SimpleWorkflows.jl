@@ -1,14 +1,14 @@
 import EasyJobsBase:
     getstatus,
-    pendingjobs,
-    runningjobs,
-    exitedjobs,
-    succeededjobs,
-    failedjobs,
-    interruptedjobs
+    listpending,
+    listrunning,
+    listexited,
+    listsucceeded,
+    listfailed,
+    listinterrupted
 
 export getstatus,
-    pendingjobs, runningjobs, exitedjobs, succeededjobs, failedjobs, interruptedjobs
+    listpending, listrunning, listexited, listsucceeded, listfailed, listinterrupted
 
 """
     getstatus(wf::AbstractWorkflow)
@@ -21,12 +21,12 @@ getstatus(wf::AutosaveWorkflow) = getstatus(wf.wf)
 # See https://docs.julialang.org/en/v1/manual/documentation/#Advanced-Usage
 for (func, adj) in zip(
     (
-        :pendingjobs,
-        :runningjobs,
-        :exitedjobs,
-        :succeededjobs,
-        :failedjobs,
-        :interruptedjobs,
+        :listpending,
+        :listrunning,
+        :listexited,
+        :listsucceeded,
+        :listfailed,
+        :listinterrupted,
     ),
     ("pending", "running", "exited", "succeeded", "failed", "interrupted"),
 )

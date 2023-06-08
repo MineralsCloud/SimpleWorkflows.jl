@@ -1,8 +1,8 @@
 module SimpleWorkflows
 
 using Dates: format
-using EasyJobsBase.Thunks: printfunc
-using EasyJobsBase: AbstractJob, ispending, isrunning, starttime, stoptime, elapsed
+using EasyJobsBase:
+    AbstractJob, ispending, isrunning, starttimeof, endtimeof, timecostof, printf
 using Graphs:
     DiGraph, add_edge!, nv, is_cyclic, is_connected, has_edge, topological_sort_by_dfs
 
@@ -123,8 +123,8 @@ function Base.show(io::IO, wf::Workflow)
                 show(io, job.description)
                 println(io)
             end
-            print(io, ' '^6, "def: ")
-            printfunc(io, job.core)
+            print(io, ' '^6, "core: ")
+            printf(io, job.core)
             print(io, '\n', ' '^6, "status: ")
             printstyled(io, getstatus(job); bold=true)
             if !ispending(job)
@@ -133,7 +133,7 @@ function Base.show(io::IO, wf::Workflow)
                     '\n',
                     ' '^6,
                     "from: ",
-                    format(starttime(job), "dd-u-YYYY HH:MM:SS.s"),
+                    format(starttimeof(job), "dd-u-YYYY HH:MM:SS.s"),
                     '\n',
                     ' '^6,
                     "to: ",
@@ -141,8 +141,8 @@ function Base.show(io::IO, wf::Workflow)
                 if isrunning(job)
                     print(io, "still running...")
                 else
-                    println(io, format(stoptime(job), "dd-u-YYYY HH:MM:SS.s"))
-                    print(io, ' '^6, "uses: ", elapsed(job))
+                    println(io, format(endtimeof(job), "dd-u-YYYY HH:MM:SS.s"))
+                    print(io, ' '^6, "uses: ", timecostof(job))
                 end
             end
             println(io)
