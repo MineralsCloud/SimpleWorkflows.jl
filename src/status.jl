@@ -21,7 +21,7 @@ export getstatus,
 """
     getstatus(wf::AbstractWorkflow)
 
-Get the current status of `Job`s in a `AbstractWorkflow`.
+Get the current status of `Job`s in a `AbstractWorkflow` as a graph.
 """
 function getstatus(wf::Workflow)
     graph = MetaDiGraph(wf.graph)
@@ -35,7 +35,9 @@ getstatus(wf::AutosaveWorkflow) = getstatus(wf.wf)
 """
     liststatus(wf::AbstractWorkflow)
 
-List the current status of `Job`s in a `AbstractWorkflow`.
+List the current status of `Job`s in a `AbstractWorkflow` as a vector.
+
+See also [`getstatus`](@ref).
 """
 liststatus(wf::AbstractWorkflow) =
     collect(get_prop(getstatus(wf), i, :status) for i in 1:nv(getstatus(wf)))
