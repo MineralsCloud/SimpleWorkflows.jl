@@ -38,7 +38,6 @@ function run!(wf::AbstractWorkflow; kwargs...)
 end
 
 function execute!(exec::Executor)
-    save(exec.wf)
     for _ in Base.OneTo(exec.maxattempts)
         if any(!issucceeded(job) for job in getjobs(exec))
             # This separation is necessary, since `run_kahn_algo!` modfiies the graph.
