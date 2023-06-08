@@ -5,6 +5,7 @@ using EasyJobsBase:
     AbstractJob, ispending, isrunning, starttimeof, endtimeof, timecostof, printf
 using Graphs:
     DiGraph, add_edge!, nv, is_cyclic, is_connected, has_edge, topological_sort_by_dfs
+using Serialization: serialize
 
 export Workflow, AutosaveWorkflow
 
@@ -88,6 +89,15 @@ struct AutosaveWorkflow{T} <: AbstractWorkflow
     wf::Workflow
 end
 AutosaveWorkflow(path, jobs::AbstractJob...) = AutosaveWorkflow(path, Workflow(jobs...))
+
+getjobs(wf::Workflow) = wf.jobs
+getjobs(wf::AutosaveWorkflow) = getjobs(wf.wf)
+
+getgraph(wf::Workflow) = wf.graph
+getgraph(wf::AutosaveWorkflow) = getgraph(wf.wf)
+
+save(::Workflow) = nothing
+save(wf::AutosaveWorkflow) = serialize(wf.path, wf.wf)
 
 function Base.show(io::IO, wf::Workflow)
     if get(io, :compact, false) || get(io, :typeinfo, nothing) == typeof(wf)

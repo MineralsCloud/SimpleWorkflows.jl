@@ -1,6 +1,5 @@
 using EasyJobsBase: Executor as JobExecutor, issucceeded
 using Graphs: indegree, rem_vertices!
-using Serialization: serialize
 
 import EasyJobsBase: run!, execute!
 
@@ -91,12 +90,3 @@ function run_kahn_algo!(execs, graph)  # Do not export!
         return run_kahn_algo!(execs, graph)
     end
 end
-
-getjobs(wf::Workflow) = wf.jobs
-getjobs(wf::AutosaveWorkflow) = getjobs(wf.wf)
-
-getgraph(wf::Workflow) = wf.graph
-getgraph(wf::AutosaveWorkflow) = getgraph(wf.wf)
-
-save(::Workflow) = nothing
-save(wf::AutosaveWorkflow) = serialize(wf.path, wf.wf)
