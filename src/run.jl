@@ -32,18 +32,18 @@ function run!(wf::AbstractWorkflow; kwargs...)
 end
 
 function execute!(exec::Executor)
+    jobs = getjobs(exec.wf)
     for _ in Base.OneTo(exec.maxattempts)
-        if any(!issucceeded(job) for job in getjobs(exec))
+        if any(!issucceeded(job) for job in jobs)
             # This separation is necessary, since `run_kahn_algo!` modfiies the graph.
             execs = collect(
-                JobExecutor(job; maxattempts=1, interval=0, waitfor=0) for
-                job in exec.wf.jobs
+                JobExecutor(job; maxattempts=1, interval=0, delay=0) for job in jobs
             )  # Job executors
             graph = copy(getgraph(exec.wf))
             run_kahn_algo!(execs, graph)
             return exec
         end
-        if all(issucceeded(job) for job in getjobs(exec))
+        if all(issucceeded(job) for job in jobs)
             break  # Stop immediately
         else
             sleep(exec.interval)
