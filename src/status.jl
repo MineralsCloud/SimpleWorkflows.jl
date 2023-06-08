@@ -1,3 +1,5 @@
+using MetaGraphs: MetaDiGraph, set_prop!
+
 import EasyJobsBase:
     getstatus,
     listpending,
@@ -15,7 +17,13 @@ export getstatus,
 
 Get the current status of `Job`s in a `AbstractWorkflow`.
 """
-getstatus(wf::Workflow) = getstatus(wf.jobs)
+function getstatus(wf::Workflow)
+    graph = MetaDiGraph(wf.graph)
+    for (i, job) in enumerate(wf.jobs)
+        set_prop!(graph, i, :status, getstatus(job))
+    end
+    return graph
+end
 getstatus(wf::AutosaveWorkflow) = getstatus(wf.wf)
 
 # See https://docs.julialang.org/en/v1/manual/documentation/#Advanced-Usage
