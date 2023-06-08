@@ -30,9 +30,9 @@ function run!(wf::AbstractWorkflow; n=5, δt=1, Δt=1)
     return wf
 end
 
-function run_copy!(wf; δt)  # Do not export!
+function run_copy!(wf)  # Do not export!
     jobs, graph = copy(getjobs(wf)), copy(getgraph(wf))  # This separation is necessary, or else we call this every iteration of `run_kahn_algo!`
-    run_kahn_algo!(wf, jobs, graph; δt=δt)
+    run_kahn_algo!(wf, jobs, graph)
     return wf
 end
 
