@@ -1,4 +1,4 @@
-using MetaGraphs: MetaDiGraph, set_prop!
+using MetaGraphs: MetaDiGraph, get_prop, set_prop!
 
 import EasyJobsBase:
     getstatus,
@@ -10,7 +10,13 @@ import EasyJobsBase:
     listinterrupted
 
 export getstatus,
-    listpending, listrunning, listexited, listsucceeded, listfailed, listinterrupted
+    liststatus,
+    listpending,
+    listrunning,
+    listexited,
+    listsucceeded,
+    listfailed,
+    listinterrupted
 
 """
     getstatus(wf::AbstractWorkflow)
@@ -25,6 +31,9 @@ function getstatus(wf::Workflow)
     return graph
 end
 getstatus(wf::AutosaveWorkflow) = getstatus(wf.wf)
+
+liststatus(wf::AbstractWorkflow) =
+    collect(get_prop(getstatus(wf), i, :status) for i in 1:nv(getstatus(wf)))
 
 # See https://docs.julialang.org/en/v1/manual/documentation/#Advanced-Usage
 for (func, adj) in zip(
