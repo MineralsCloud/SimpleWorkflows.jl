@@ -69,17 +69,17 @@ end
     @test getresult(j) == Some("1001")
 end
 
-@testset "Test running a `Workflow` with `DependentJob`s" begin
+@testset "Test running a `Workflow` with `StronglyDependentJob`s" begin
     f₁(x) = x^2
     f₂(y) = y + 1
     f₃(z) = z / 2
     i = Job(Thunk(f₁, 5); username="me", name="i")
-    j = DependentJob(Thunk(f₂, 3); username="he", name="j")
-    k = DependentJob(Thunk(f₃, 6); username="she", name="k")
-    i ⇒ j ⇒ k
+    j = StronglyDependentJob(Thunk(f₂, 3); username="he", name="j")
+    k = StronglyDependentJob(Thunk(f₃, 6); username="she", name="k")
+    i → j → k
     wf = Workflow(k)
     run!(wf)
-    @test all(==(SUCCEEDED), getstatus(wf))
+    @test all(==(SUCCEEDED), liststatus(wf))
     @test getresult(i) == Some(25)
     @test getresult(j) == Some(26)
     @test getresult(k) == Some(13.0)
