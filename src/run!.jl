@@ -41,7 +41,13 @@ function execute!(exec::Executor)
     save(exec.wf)
     for _ in Base.OneTo(exec.maxattempts)
         if any(!issucceeded(job) for job in getjobs(exec))
-            run_copy!(exec)
+            # This separation is necessary, since `run_kahn_algo!` modfiies the graph.
+            execs = collect(
+                JobExecutor(job; maxattempts=1, interval=0, waitfor=0) for job in wf.jobs
+            )  # Job executors
+            graph = copy(getgraph(exec.wf))
+            run_kahn_algo!(wf, execs, graph)
+            return exec
         end
         if all(issucceeded(job) for job in getjobs(exec))
             break  # Stop immediately
@@ -50,12 +56,6 @@ function execute!(exec::Executor)
         end
     end
     return exec
-end
-
-function run_copy!(wf)  # Do not export!
-    jobs, graph = copy(getjobs(wf)), copy(getgraph(wf))  # This separation is necessary, or else we call this every iteration of `run_kahn_algo!`
-    run_kahn_algo!(wf, jobs, graph)
-    return wf
 end
 
 # This function `run_kahn_algo!` is an implementation of Kahn's algorithm for job scheduling.
