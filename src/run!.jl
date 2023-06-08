@@ -1,10 +1,28 @@
-using EasyJobsBase: issucceeded
+using EasyJobsBase: Executor as JobExecutor, issucceeded
 using Graphs: indegree, rem_vertices!
 using Serialization: serialize
 
 import EasyJobsBase: run!
 
 export run!
+
+struct Executor{T<:AbstractWorkflow}
+    wf::T
+    maxattempts::UInt64
+    interval::Real
+    waitfor::Real
+    jobexecutors::Vector{JobExecutor}
+    function Executor(wf::T; maxattempts=1, interval=1, waitfor=0, jobinterval=1) where {T}
+        @assert maxattempts >= 1
+        @assert interval >= zero(interval)
+        @assert waitfor >= zero(waitfor)
+        jobexecutors = collect(
+            JobExecutor(job; maxattempts=1, interval=jobinterval, waitfor=0) for
+            job in wf.jobs
+        )
+        return new{T}(wf, maxattempts, interval, waitfor, jobexecutors)
+    end
+end
 
 """
     run!(wf::Workflow; n=5, δt=1, Δt=1)
