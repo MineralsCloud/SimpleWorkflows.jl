@@ -37,6 +37,21 @@ function run!(wf::AbstractWorkflow; kwargs...)
     return exec
 end
 
+function execute!(exec::Executor)
+    save(exec.wf)
+    for _ in Base.OneTo(exec.maxattempts)
+        if any(!issucceeded(job) for job in getjobs(exec))
+            run_copy!(exec)
+        end
+        if all(issucceeded(job) for job in getjobs(exec))
+            break  # Stop immediately
+        else
+            sleep(exec.interval)
+        end
+    end
+    return exec
+end
+
 function run_copy!(wf)  # Do not export!
     jobs, graph = copy(getjobs(wf)), copy(getgraph(wf))  # This separation is necessary, or else we call this every iteration of `run_kahn_algo!`
     run_kahn_algo!(wf, jobs, graph)
