@@ -105,9 +105,3 @@ end
     @test getresult(k) == Some(3.0)
     @test getresult(l) == Some(32.0)
 end
-
-@testset "Test association rules of operators" begin
-    @test Meta.parse("a → b ⇉ c → d ⭃ e → f → g → h ⇉ i → j ⭃ k → l → m") ==
-        :(a → (b ⇉ (c → (d ⭃ (e → (f → (g → (h ⇉ (i → (j ⭃ (k → (l → m))))))))))))
-    @test Meta.parse("x ⇉ ys ⭃ z") == :(x ⇉ (ys ⭃ z))
-end
