@@ -1,4 +1,4 @@
-using EasyJobsBase: SUCCEEDED, Job, DependentJob, run!, getstatus, getresult, →, ↠, ⇒
+using EasyJobsBase: SUCCEEDED, Job, StronglyDependentJob, run!, liststatus, getresult, →
 using SimpleWorkflows: Workflow, AutosaveWorkflow
 
 @testset "Test running a `Workflow`" begin
@@ -85,7 +85,7 @@ end
     @test getresult(k) == Some(13.0)
 end
 
-@testset "Test running a `Workflow` with a `DependentJob` which has more than one parents" begin
+@testset "Test running a `Workflow` with a `StronglyDependentJob` with more than one parent" begin
     f₁(x) = x^2
     f₂(y) = y + 1
     f₃(z) = z / 2
@@ -93,13 +93,13 @@ end
     i = Job(Thunk(f₁, 5); username="me", name="i")
     j = Job(Thunk(f₂, 3); username="he", name="j")
     k = Job(Thunk(f₃, 6); username="she", name="k")
-    l = DependentJob(Thunk(f₄, ()); username="she", name="me")
+    l = StronglyDependentJob(Thunk(f₄, ()); username="she", name="me")
     for job in (i, j, k)
-        job ⇒ l
+        job → l
     end
     wf = Workflow(k)
     run!(wf)
-    @test all(==(SUCCEEDED), getstatus(wf))
+    @test all(==(SUCCEEDED), liststatus(wf))
     @test getresult(i) == Some(25)
     @test getresult(j) == Some(4)
     @test getresult(k) == Some(3.0)
