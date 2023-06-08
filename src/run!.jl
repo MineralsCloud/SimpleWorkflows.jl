@@ -11,16 +11,11 @@ struct Executor{T<:AbstractWorkflow}
     maxattempts::UInt64
     interval::Real
     waitfor::Real
-    jobexecutors::Vector{JobExecutor}
-    function Executor(wf::T; maxattempts=1, interval=1, waitfor=0, jobinterval=1) where {T}
+    function Executor(wf::T; maxattempts=1, interval=1, waitfor=0) where {T}
         @assert maxattempts >= 1
         @assert interval >= zero(interval)
         @assert waitfor >= zero(waitfor)
-        jobexecutors = collect(
-            JobExecutor(job; maxattempts=1, interval=jobinterval, waitfor=0) for
-            job in wf.jobs
-        )
-        return new{T}(wf, maxattempts, interval, waitfor, jobexecutors)
+        return new{T}(wf, maxattempts, interval, waitfor)
     end
 end
 
