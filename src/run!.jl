@@ -80,6 +80,8 @@ function run_kahn_algo!(execs, graph)  # Do not export!
             # Run the jobs with no prerequisites in parallel since they are in the same level.
             @async begin
                 execute!(exec)
+                # The wait function is used here to ensure that the `@async` block does not
+                # exit until the task has completed.
                 wait(exec)
             end
         end
