@@ -32,6 +32,11 @@ function getstatus(wf::Workflow)
 end
 getstatus(wf::AutosaveWorkflow) = getstatus(wf.wf)
 
+"""
+    liststatus(wf::AbstractWorkflow)
+
+List the current status of `Job`s in a `AbstractWorkflow`.
+"""
 liststatus(wf::AbstractWorkflow) =
     collect(get_prop(getstatus(wf), i, :status) for i in 1:nv(getstatus(wf)))
 
