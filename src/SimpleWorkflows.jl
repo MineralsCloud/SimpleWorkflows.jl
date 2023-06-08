@@ -52,7 +52,7 @@ connected `AbstractJob`s automatically.
 function Workflow(jobs::AbstractJob...)
     foundjobs = convert(Vector{AbstractJob}, collect(jobs))  # Need to relax type constraints to contain different types of jobs
     for job in foundjobs
-        neighbors = vcat(job.parents, job.children)
+        neighbors = union(job.parents, job.children)
         for neighbor in neighbors
             if neighbor ∉ foundjobs
                 push!(foundjobs, neighbor)  # This will alter `all_possible_jobs` dynamically
