@@ -60,7 +60,7 @@ function run_kahn_algo!(wf, jobs, graph, execs)  # Do not export!
         @sync for exec in execs[queue]
             # Run the jobs with no prerequisites in parallel since they are in the same level.
             @async begin
-                start!(exec)
+                execute!(exec)
                 wait(exec)
                 save(wf)
             end
