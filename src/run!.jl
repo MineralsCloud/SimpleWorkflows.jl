@@ -36,7 +36,7 @@ function run_copy!(wf; δt)  # Do not export!
     return wf
 end
 
-function run_kahn_algo!(wf, jobs, graph; δt)  # Do not export!
+function run_kahn_algo!(wf, jobs, graph, execs)  # Do not export!
     if isempty(jobs) && iszero(nv(graph))  # Stopping criterion
         return nothing
     elseif isempty(jobs) && !iszero(nv(graph))
@@ -45,16 +45,16 @@ function run_kahn_algo!(wf, jobs, graph; δt)  # Do not export!
         throw(ArgumentError("`graph` is empty but `jobs` is not!"))
     else
         queue = findall(iszero, indegree(graph))
-        @sync for job in jobs[queue]
+        @sync for exec in execs[queue]
             @async begin
-                exec = run!(job; maxattempts=1, interval=δt, waitfor=0)  # Only run once for each job
+                start!(exec)
                 wait(exec)
                 save(wf)
             end
         end
         rem_vertices!(graph, queue; keep_order=true)
         deleteat!(jobs, queue)
-        return run_kahn_algo!(wf, jobs, graph; δt=δt)
+        return run_kahn_algo!(wf, jobs, graph, execs)
     end
 end
 
