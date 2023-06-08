@@ -9,6 +9,7 @@ Workflow
 AutosaveWorkflow
 run!
 getstatus
+liststatus
 pendingjobs
 runningjobs
 exitedjobs

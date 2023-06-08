@@ -1,3 +1,5 @@
+using MetaGraphs: MetaDiGraph, get_prop, set_prop!
+
 import EasyJobsBase:
     getstatus,
     listpending,
@@ -8,15 +10,37 @@ import EasyJobsBase:
     listinterrupted
 
 export getstatus,
-    listpending, listrunning, listexited, listsucceeded, listfailed, listinterrupted
+    liststatus,
+    listpending,
+    listrunning,
+    listexited,
+    listsucceeded,
+    listfailed,
+    listinterrupted
 
 """
     getstatus(wf::AbstractWorkflow)
 
-Get the current status of `Job`s in a `AbstractWorkflow`.
+Get the current status of `Job`s in a `AbstractWorkflow` as a graph.
 """
-getstatus(wf::Workflow) = getstatus(wf.jobs)
+function getstatus(wf::Workflow)
+    graph = MetaDiGraph(wf.graph)
+    for (i, job) in enumerate(wf.jobs)
+        set_prop!(graph, i, :status, getstatus(job))
+    end
+    return graph
+end
 getstatus(wf::AutosaveWorkflow) = getstatus(wf.wf)
+
+"""
+    liststatus(wf::AbstractWorkflow)
+
+List the current status of `Job`s in a `AbstractWorkflow` as a vector.
+
+See also [`getstatus`](@ref).
+"""
+liststatus(wf::AbstractWorkflow) =
+    collect(get_prop(getstatus(wf), i, :status) for i in 1:nv(getstatus(wf)))
 
 # See https://docs.julialang.org/en/v1/manual/documentation/#Advanced-Usage
 for (func, adj) in zip(
