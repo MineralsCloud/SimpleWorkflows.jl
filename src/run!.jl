@@ -42,10 +42,11 @@ function execute!(exec::Executor)
         if any(!issucceeded(job) for job in getjobs(exec))
             # This separation is necessary, since `run_kahn_algo!` modfiies the graph.
             execs = collect(
-                JobExecutor(job; maxattempts=1, interval=0, waitfor=0) for job in wf.jobs
+                JobExecutor(job; maxattempts=1, interval=0, waitfor=0) for
+                job in exec.wf.jobs
             )  # Job executors
             graph = copy(getgraph(exec.wf))
-            run_kahn_algo!(wf, execs, graph)
+            run_kahn_algo!(execs, graph)
             return exec
         end
         if all(issucceeded(job) for job in getjobs(exec))
