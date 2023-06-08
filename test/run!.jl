@@ -1,4 +1,3 @@
-using EasyJobsBase.Thunks: Thunk
 using EasyJobsBase: SUCCEEDED, Job, DependentJob, run!, getstatus, getresult, →, ↠, ⇒
 using SimpleWorkflows: Workflow, AutosaveWorkflow
 
