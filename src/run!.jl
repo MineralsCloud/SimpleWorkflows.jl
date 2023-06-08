@@ -58,10 +58,9 @@ function execute!(exec::Executor)
 end
 
 # This function `run_kahn_algo!` is an implementation of Kahn's algorithm for job scheduling.
-# `wf` is a workflow that will be saved after each job execution.
 # `graph` is a directed acyclic graph representing dependencies between jobs.
 # `execs` is a list of executors that can run the jobs.
-function run_kahn_algo!(wf, execs, graph)  # Do not export!
+function run_kahn_algo!(execs, graph)  # Do not export!
     # Check if `execs` is empty and if there are no vertices in the `graph`.
     # This is the base case of the recursion, if there are no jobs left to execute and no
     # vertices in the graph, the function will stop its execution.
@@ -82,7 +81,6 @@ function run_kahn_algo!(wf, execs, graph)  # Do not export!
             @async begin
                 execute!(exec)
                 wait(exec)
-                save(wf)
             end
         end
         # Remove the vertices corresponding to the executed jobs from the graph.
@@ -92,7 +90,7 @@ function run_kahn_algo!(wf, execs, graph)  # Do not export!
         deleteat!(execs, queue)
         # Recursively call the `run_kahn_algo!` with the updated jobs list and graph.
         # This will continue the execution with the remaining jobs that are now without prerequisites.
-        return run_kahn_algo!(wf, execs, graph)
+        return run_kahn_algo!(execs, graph)
     end
 end
 
