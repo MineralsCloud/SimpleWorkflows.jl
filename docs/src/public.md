@@ -8,6 +8,7 @@ CurrentModule = SimpleWorkflows
 Workflow
 AutosaveWorkflow
 run!
+execute!
 getstatus
 liststatus
 pendingjobs
