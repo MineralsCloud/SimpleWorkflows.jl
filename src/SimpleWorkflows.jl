@@ -7,7 +7,7 @@ using Graphs:
     DiGraph, add_edge!, nv, is_cyclic, is_connected, has_edge, topological_sort_by_dfs
 using Serialization: serialize
 
-export Workflow, AutosaveWorkflow
+export Workflow
 
 abstract type AbstractWorkflow end
 
@@ -77,27 +77,11 @@ function Workflow(jobs::AbstractJob...)
     return Workflow(foundjobs, graph)
 end
 
-"""
-    AutosaveWorkflow(path, jobs::AbstractJob...)
-
-Create a `AutosaveWorkflow` from a given series of `Job`s and a `path`.
-
-When running, the status of the workflow will be automatically saved to `path`.
-"""
-struct AutosaveWorkflow{T} <: AbstractWorkflow
-    path::T
-    wf::Workflow
-end
-AutosaveWorkflow(path, jobs::AbstractJob...) = AutosaveWorkflow(path, Workflow(jobs...))
-
 getjobs(wf::Workflow) = wf.jobs
-getjobs(wf::AutosaveWorkflow) = getjobs(wf.wf)
 
 getgraph(wf::Workflow) = wf.graph
-getgraph(wf::AutosaveWorkflow) = getgraph(wf.wf)
 
 save(::Workflow) = nothing
-save(wf::AutosaveWorkflow) = serialize(wf.path, wf.wf)
 
 include("eachjob.jl")
 include("operations.jl")

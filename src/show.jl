@@ -37,11 +37,3 @@ function Base.show(io::IO, wf::Workflow)
         end
     end
 end
-function Base.show(io::IO, wf::AutosaveWorkflow)
-    if get(io, :compact, false) || get(io, :typeinfo, nothing) == typeof(wf)
-        Base.show_default(IOContext(io, :limit => true), wf)  # From https://github.com/mauro3/Parameters.jl/blob/ecbf8df/src/Parameters.jl#L556
-    else
-        print(io, "Autosave", wf.wf)
-        println(io, " path: ", wf.path)
-    end
-end
