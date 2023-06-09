@@ -2,6 +2,6 @@ using SimpleWorkflows
 using Test
 
 @testset "SimpleWorkflow.jl" begin
-    include("operations.jl")
     include("run.jl")
+    include("operations.jl")
 end
