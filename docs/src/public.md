@@ -6,7 +6,6 @@ CurrentModule = SimpleWorkflows
 
 ```@docs
 Workflow
-AutosaveWorkflow
 run!
 execute!
 getstatus
