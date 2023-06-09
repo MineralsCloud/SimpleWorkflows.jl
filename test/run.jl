@@ -42,18 +42,16 @@ using SimpleWorkflows: Workflow, AutosaveWorkflow, liststatus
     j → l
     k → n
     wf = Workflow(k)
-    # @test w.jobs == Workflow(k, j, l, n, m).jobs == Workflow(k, l, m, n, j).jobs
-    @testset "Test running a `AutosaveWorkflow`" begin
-        wf = AutosaveWorkflow("saved.jls", wf)
-        run!(wf; δt=0, n=1)
-        @test all(==(SUCCEEDED), getstatus(wf))
-        @test something(getresult(i)) === nothing
-        @test something(getresult(j)) == 7.38905609893065
-        @test something(getresult(k)) === nothing
-        @test something(getresult(l)) isa Base.Process
-        @test something(getresult(m)) == 0.8414709848078965
-        @test something(getresult(n)) isa Base.ProcessChain
-    end
+    @test Set(wf.jobs) == Set([i, k, j, l, n, m])
+    run!(wf)
+    @test Set(wf.jobs) == Set([i, k, j, l, n, m])  # Test they are still the same
+    @test all(==(SUCCEEDED), liststatus(wf))
+    @test something(getresult(i)) === nothing
+    @test something(getresult(j)) == 7.38905609893065
+    @test something(getresult(k)) === nothing
+    @test something(getresult(l)) isa Base.Process
+    @test something(getresult(m)) == 0.8414709848078965
+    @test something(getresult(n)) isa Base.ProcessChain
 end
 
 @testset "Test running a `Workflow` with `WeaklyDependentJob`s" begin
