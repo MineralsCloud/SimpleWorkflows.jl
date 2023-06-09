@@ -30,7 +30,6 @@ function getstatus(wf::Workflow)
     end
     return graph
 end
-getstatus(wf::AutosaveWorkflow) = getstatus(wf.wf)
 
 """
     liststatus(wf::AbstractWorkflow)
@@ -62,6 +61,5 @@ for (func, adj) in zip(
         Filter only the $($adj) jobs in a `Workflow`.
         """
         $func(wf::Workflow) = $func(wf.jobs)
-        $func(wf::AutosaveWorkflow) = $func(wf.wf)
     end
 end

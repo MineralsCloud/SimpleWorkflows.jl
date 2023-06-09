@@ -91,13 +91,10 @@ end
 AutosaveWorkflow(path, jobs::AbstractJob...) = AutosaveWorkflow(path, Workflow(jobs...))
 
 getjobs(wf::Workflow) = wf.jobs
-getjobs(wf::AutosaveWorkflow) = getjobs(wf.wf)
 
 getgraph(wf::Workflow) = wf.graph
-getgraph(wf::AutosaveWorkflow) = getgraph(wf.wf)
 
 save(::Workflow) = nothing
-save(wf::AutosaveWorkflow) = serialize(wf.path, wf.wf)
 
 include("eachjob.jl")
 include("operations.jl")
