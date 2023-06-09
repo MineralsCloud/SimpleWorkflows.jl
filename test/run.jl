@@ -1,6 +1,6 @@
-using EasyJobsBase.Thunks: Thunk
-using EasyJobsBase: SUCCEEDED, Job, DependentJob, run!, getstatus, getresult, →, ↠, ⇒
-using SimpleWorkflows: Workflow, AutosaveWorkflow
+using Thinkers: Thunk
+using EasyJobsBase:
+    SUCCEEDED, Job, WeaklyDependentJob, StronglyDependentJob, run!, getresult, →
 
 @testset "Test running a `Workflow`" begin
     function f₁()
@@ -42,51 +42,48 @@ using SimpleWorkflows: Workflow, AutosaveWorkflow
     j → l
     k → n
     wf = Workflow(k)
-    # @test w.jobs == Workflow(k, j, l, n, m).jobs == Workflow(k, l, m, n, j).jobs
-    @testset "Test running a `AutosaveWorkflow`" begin
-        wf = AutosaveWorkflow("saved.jls", wf)
-        run!(wf; δt=0, n=1)
-        @test all(==(SUCCEEDED), getstatus(wf))
-        @test something(getresult(i)) === nothing
-        @test something(getresult(j)) == 7.38905609893065
-        @test something(getresult(k)) === nothing
-        @test something(getresult(l)) isa Base.Process
-        @test something(getresult(m)) == 0.8414709848078965
-        @test something(getresult(n)) isa Base.ProcessChain
-    end
+    @test Set(wf.jobs) == Set([i, k, j, l, n, m])
+    run!(wf)
+    @test Set(wf.jobs) == Set([i, k, j, l, n, m])  # Test they are still the same
+    @test all(==(SUCCEEDED), liststatus(wf))
+    @test something(getresult(i)) === nothing
+    @test something(getresult(j)) == 7.38905609893065
+    @test something(getresult(k)) === nothing
+    @test something(getresult(l)) isa Base.Process
+    @test something(getresult(m)) == 0.8414709848078965
+    @test something(getresult(n)) isa Base.ProcessChain
 end
 
-@testset "Test running a `Workflow` with `DependentJob`s" begin
+@testset "Test running a `Workflow` with `WeaklyDependentJob`s" begin
     f₁(x) = write("file", string(x))
     f₂() = read("file", String)
-    f₃() = rm("file")
+    h = Job(Thunk(sleep, 3); username="me", name="h")
     i = Job(Thunk(f₁, 1001); username="me", name="i")
-    j = DependentJob(Thunk(f₂); username="he", name="j")
-    k = DependentJob(Thunk(f₃); username="she", name="k")
-    i ↠ j ↠ k
-    wf = Workflow(k)
+    j = WeaklyDependentJob(Thunk(map, f₂); username="he", name="j")
+    [h, i] .→ Ref(j)
+    wf = Workflow(j)
     run!(wf)
-    @test all(==(SUCCEEDED), getstatus(wf))
+    @test all(==(SUCCEEDED), liststatus(wf))
     @test getresult(j) == Some("1001")
 end
 
-@testset "Test running a `Workflow` with `DependentJob`s" begin
+@testset "Test running a `Workflow` with `StronglyDependentJob`s" begin
     f₁(x) = x^2
     f₂(y) = y + 1
     f₃(z) = z / 2
     i = Job(Thunk(f₁, 5); username="me", name="i")
-    j = DependentJob(Thunk(f₂, 3); username="he", name="j")
-    k = DependentJob(Thunk(f₃, 6); username="she", name="k")
-    i ⇒ j ⇒ k
+    j = StronglyDependentJob(Thunk(f₂, 3); username="he", name="j")
+    k = StronglyDependentJob(Thunk(f₃, 6); username="she", name="k")
+    i → j → k
     wf = Workflow(k)
     run!(wf)
-    @test all(==(SUCCEEDED), getstatus(wf))
+    @test all(==(SUCCEEDED), liststatus(wf))
     @test getresult(i) == Some(25)
     @test getresult(j) == Some(26)
     @test getresult(k) == Some(13.0)
 end
 
-@testset "Test running a `Workflow` with a `DependentJob` which has more than one parents" begin
+@testset "Test running a `Workflow` with a `StronglyDependentJob` with more than one parent" begin
     f₁(x) = x^2
     f₂(y) = y + 1
     f₃(z) = z / 2
@@ -94,21 +91,15 @@ end
     i = Job(Thunk(f₁, 5); username="me", name="i")
     j = Job(Thunk(f₂, 3); username="he", name="j")
     k = Job(Thunk(f₃, 6); username="she", name="k")
-    l = DependentJob(Thunk(f₄, ()); username="she", name="me")
+    l = StronglyDependentJob(Thunk(f₄, ()); username="she", name="me")
     for job in (i, j, k)
-        job ⇒ l
+        job → l
     end
     wf = Workflow(k)
     run!(wf)
-    @test all(==(SUCCEEDED), getstatus(wf))
+    @test all(==(SUCCEEDED), liststatus(wf))
     @test getresult(i) == Some(25)
     @test getresult(j) == Some(4)
     @test getresult(k) == Some(3.0)
     @test getresult(l) == Some(32.0)
-end
-
-@testset "Test association rules of operators" begin
-    @test Meta.parse("a → b ⇉ c → d ⭃ e → f → g → h ⇉ i → j ⭃ k → l → m") ==
-        :(a → (b ⇉ (c → (d ⭃ (e → (f → (g → (h ⇉ (i → (j ⭃ (k → (l → m))))))))))))
-    @test Meta.parse("x ⇉ ys ⭃ z") == :(x ⇉ (ys ⭃ z))
 end
