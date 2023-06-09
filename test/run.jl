@@ -1,6 +1,6 @@
+using Thinkers: Thunk
 using EasyJobsBase:
     SUCCEEDED, Job, WeaklyDependentJob, StronglyDependentJob, run!, getresult, →
-using SimpleWorkflows: Workflow, AutosaveWorkflow, liststatus
 
 @testset "Test running a `Workflow`" begin
     function f₁()

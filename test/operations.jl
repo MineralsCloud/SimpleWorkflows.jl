@@ -1,7 +1,3 @@
-using Thinkers: Thunk
-using EasyJobsBase: SUCCEEDED, Job, DependentJob, run!, getstatus, getresult, →
-using SimpleWorkflows: Workflow, AutosaveWorkflow
-
 @testset "Test joining two `Workflow`s" begin
     function f₁()
         println("Start job `i`!")
