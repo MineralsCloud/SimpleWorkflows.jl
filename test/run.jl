@@ -1,5 +1,6 @@
-using EasyJobsBase: SUCCEEDED, Job, StronglyDependentJob, run!, liststatus, getresult, →
-using SimpleWorkflows: Workflow, AutosaveWorkflow
+using EasyJobsBase:
+    SUCCEEDED, Job, WeaklyDependentJob, StronglyDependentJob, run!, getresult, →
+using SimpleWorkflows: Workflow, AutosaveWorkflow, liststatus
 
 @testset "Test running a `Workflow`" begin
     function f₁()
@@ -55,17 +56,16 @@ using SimpleWorkflows: Workflow, AutosaveWorkflow
     end
 end
 
-@testset "Test running a `Workflow` with `DependentJob`s" begin
+@testset "Test running a `Workflow` with `WeaklyDependentJob`s" begin
     f₁(x) = write("file", string(x))
     f₂() = read("file", String)
-    f₃() = rm("file")
+    h = Job(Thunk(sleep, 3); username="me", name="h")
     i = Job(Thunk(f₁, 1001); username="me", name="i")
-    j = DependentJob(Thunk(f₂); username="he", name="j")
-    k = DependentJob(Thunk(f₃); username="she", name="k")
-    i ↠ j ↠ k
-    wf = Workflow(k)
+    j = WeaklyDependentJob(Thunk(map, f₂); username="he", name="j")
+    [h, i] .→ Ref(j)
+    wf = Workflow(j)
     run!(wf)
-    @test all(==(SUCCEEDED), getstatus(wf))
+    @test all(==(SUCCEEDED), liststatus(wf))
     @test getresult(j) == Some("1001")
 end
 
