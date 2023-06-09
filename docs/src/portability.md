@@ -48,12 +48,12 @@ wf = Workflow(k)
 ```
 
 To save the `Workflow` instance to disk while running in case it failed or is interrupted,
-use the `AutosaveWorkflow` type.
+use the `serialize` function.
 
 ```@repl wf
-using SimpleWorkflows: AutosaveWorkflow
-wf = AutosaveWorkflow("saved.jls", k)
-run!(wf; δt = 0, n = 1)
+using Serialization: serialize
+wf = serialize("wf.jls", wf)
+run!(wf)
 ```
 
 After the above steps are finished, a `saved.jls` file is saved to your local file system.
@@ -66,7 +66,7 @@ julia> using SimpleWorkflows
 
 julia> using Serialization: deserialize
 
-julia> deserialize("saved.jls")
+julia> deserialize("wf.jls")
 ```
 
 And voilà!
