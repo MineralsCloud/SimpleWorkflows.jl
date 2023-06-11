@@ -9,12 +9,12 @@ struct Executor{T<:AbstractWorkflow}
     wf::T
     maxattempts::UInt64
     interval::Real
-    waitfor::Real
-    function Executor(wf::T; maxattempts=1, interval=1, waitfor=0) where {T}
+    delay::Real
+    function Executor(wf::T; maxattempts=1, interval=1, delay=0) where {T}
         @assert maxattempts >= 1
         @assert interval >= zero(interval)
-        @assert waitfor >= zero(waitfor)
-        return new{T}(wf, maxattempts, interval, waitfor)
+        @assert delay >= zero(delay)
+        return new{T}(wf, maxattempts, interval, delay)
     end
 end
 
