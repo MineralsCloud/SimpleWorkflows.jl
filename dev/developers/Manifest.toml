@@ -260,7 +260,7 @@ version = "0.9.4"
 
 [[deps.SimpleWorkflows]]
 deps = ["Dates", "EasyJobsBase", "Graphs", "MetaGraphs", "Serialization", "Thinkers"]
-git-tree-sha1 = "e540aba805babb571356ca7ca0db420a02b760e7"
+git-tree-sha1 = "7fcecc5d2b074590b56036170f41a359aca3578a"
 repo-rev = "main"
 repo-url = "https://github.com/MineralsCloud/SimpleWorkflows.jl"
 uuid = "6a97d125-85da-4b66-b300-4bba10360563"
