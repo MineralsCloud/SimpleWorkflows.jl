@@ -1,6 +1,5 @@
 using Thinkers: Thunk
-using EasyJobsBase:
-    SUCCEEDED, Job, WeaklyDependentJob, StronglyDependentJob, run!, getresult, →
+using EasyJobsBase: SUCCEEDED, Job, ConditionalJob, ArgDependentJob, run!, getresult, →
 
 @testset "Test running a `Workflow`" begin
     function f₁()
@@ -54,12 +53,12 @@ using EasyJobsBase:
     @test something(getresult(n)) isa Base.ProcessChain
 end
 
-@testset "Test running a `Workflow` with `WeaklyDependentJob`s" begin
+@testset "Test running a `Workflow` with `ConditionalJob`s" begin
     f₁(x) = write("file", string(x))
     f₂() = read("file", String)
     h = Job(Thunk(sleep, 3); username="me", name="h")
     i = Job(Thunk(f₁, 1001); username="me", name="i")
-    j = WeaklyDependentJob(Thunk(map, f₂); username="he", name="j")
+    j = ConditionalJob(Thunk(map, f₂); username="he", name="j")
     [h, i] .→ Ref(j)
     wf = Workflow(j)
     run!(wf)
@@ -67,13 +66,13 @@ end
     @test getresult(j) == Some("1001")
 end
 
-@testset "Test running a `Workflow` with `StronglyDependentJob`s" begin
+@testset "Test running a `Workflow` with `ArgDependentJob`s" begin
     f₁(x) = x^2
     f₂(y) = y + 1
     f₃(z) = z / 2
     i = Job(Thunk(f₁, 5); username="me", name="i")
-    j = StronglyDependentJob(Thunk(f₂, 3); username="he", name="j")
-    k = StronglyDependentJob(Thunk(f₃, 6); username="she", name="k")
+    j = ArgDependentJob(Thunk(f₂, 3); username="he", name="j")
+    k = ArgDependentJob(Thunk(f₃, 6); username="she", name="k")
     i → j → k
     wf = Workflow(k)
     run!(wf)
@@ -83,7 +82,7 @@ end
     @test getresult(k) == Some(13.0)
 end
 
-@testset "Test running a `Workflow` with a `StronglyDependentJob` with more than one parent" begin
+@testset "Test running a `Workflow` with a `ArgDependentJob` with more than one parent" begin
     f₁(x) = x^2
     f₂(y) = y + 1
     f₃(z) = z / 2
@@ -91,7 +90,7 @@ end
     i = Job(Thunk(f₁, 5); username="me", name="i")
     j = Job(Thunk(f₂, 3); username="he", name="j")
     k = Job(Thunk(f₃, 6); username="she", name="k")
-    l = StronglyDependentJob(Thunk(f₄, ()); username="she", name="me")
+    l = ArgDependentJob(Thunk(f₄, ()); username="she", name="me")
     for job in (i, j, k)
         job → l
     end
