@@ -48,7 +48,7 @@ function execute!(exec::Executor)
             execs = collect(
                 JobExecutor(job; maxattempts=1, interval=0, delay=0) for job in jobs
             )  # Job executors
-            graph = copy(getgraph(exec.wf))
+            graph = copy(exec.wf.graph)
             run_kahn_algo!(execs, graph)
             return exec
         end

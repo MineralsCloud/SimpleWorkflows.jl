@@ -89,8 +89,6 @@ findjob(wf::Workflow, job::AbstractJob) = findjob(wf, job.id)
 
 listjobs(wf::Workflow) = wf.jobs
 
-getgraph(wf::Workflow) = wf.graph
-
 include("eachjob.jl")
 include("operations.jl")
 include("run.jl")
