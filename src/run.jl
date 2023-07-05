@@ -41,14 +41,14 @@ have succeeded, the function will stop immediately. Otherwise, it will wait for 
 `interval` before the next attempt.
 """
 function execute!(exec::Executor)
-    jobs = getjobs(exec.wf)
+    jobs = listjobs(exec.wf)
     for _ in Base.OneTo(exec.maxattempts)
         if any(!issucceeded(job) for job in jobs)
             # This separation is necessary, since `run_kahn_algo!` modfiies the graph.
             execs = collect(
                 JobExecutor(job; maxattempts=1, interval=0, delay=0) for job in jobs
             )  # Job executors
-            graph = copy(getgraph(exec.wf))
+            graph = copy(exec.wf.graph)
             run_kahn_algo!(execs, graph)
             return exec
         end
