@@ -7,7 +7,7 @@ using Graphs:
     DiGraph, add_edge!, nv, is_cyclic, is_connected, has_edge, topological_sort_by_dfs
 using Serialization: serialize
 
-export Workflow
+export Workflow, findjob
 
 abstract type AbstractWorkflow end
 
@@ -76,6 +76,16 @@ function Workflow(jobs::AbstractJob...)
     end
     return Workflow(foundjobs, graph)
 end
+
+function findjob(wf::Workflow, id)
+    for (i, job) in enumerate(eachjob(wf))
+        if job.uuid == id
+            return i
+        end
+    end
+    return nothing
+end
+findjob(wf::Workflow, job::AbstractJob) = findjob(wf, job.id)
 
 getjobs(wf::Workflow) = wf.jobs
 
