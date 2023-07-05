@@ -91,8 +91,6 @@ listjobs(wf::Workflow) = wf.jobs
 
 getgraph(wf::Workflow) = wf.graph
 
-save(::Workflow) = nothing
-
 include("eachjob.jl")
 include("operations.jl")
 include("run.jl")
