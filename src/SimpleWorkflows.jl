@@ -87,7 +87,7 @@ function findjob(wf::Workflow, id)
 end
 findjob(wf::Workflow, job::AbstractJob) = findjob(wf, job.id)
 
-getjobs(wf::Workflow) = wf.jobs
+listjobs(wf::Workflow) = wf.jobs
 
 getgraph(wf::Workflow) = wf.graph
 
