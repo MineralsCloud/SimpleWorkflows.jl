@@ -5,7 +5,6 @@ using EasyJobsBase:
     AbstractJob, ispending, isrunning, starttimeof, endtimeof, timecostof, printf
 using Graphs:
     DiGraph, add_edge!, nv, is_cyclic, is_connected, has_edge, topological_sort_by_dfs
-using Serialization: serialize
 
 export Workflow, findjob
 
