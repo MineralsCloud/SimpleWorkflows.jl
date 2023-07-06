@@ -76,7 +76,7 @@ end
 
 function findjob(wf::Workflow, id)
     for (i, job) in enumerate(eachjob(wf))
-        if job.uuid == id
+        if job.id == id
             return i
         end
     end
