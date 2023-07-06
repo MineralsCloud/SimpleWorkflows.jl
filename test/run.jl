@@ -75,6 +75,7 @@ end
     k = ArgDependentJob(Thunk(f₃, 6); username="she", name="k")
     i → j → k
     wf = Workflow(k)
+    @test map(job -> findjob(wf, job), [i, j, k]) == 1:3
     run!(wf)
     @test all(==(SUCCEEDED), liststatus(wf))
     @test getresult(i) == Some(25)
