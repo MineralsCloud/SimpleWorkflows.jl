@@ -5,50 +5,48 @@ import EasyJobsBase: run!, execute!
 
 export run!, execute!
 
-struct Executor{T<:AbstractWorkflow}
-    wf::T
+struct Executor
     maxattempts::UInt64
     interval::Real
     delay::Real
-    function Executor(wf::T; maxattempts=1, interval=1, delay=0) where {T}
+    function Executor(maxattempts=1, interval=1, delay=0)
         @assert maxattempts >= 1
         @assert interval >= zero(interval)
         @assert delay >= zero(delay)
-        return new{T}(wf, maxattempts, interval, delay)
+        return new(maxattempts, interval, delay)
     end
 end
+Executor(; maxattempts=1, interval=1, delay=0) = Executor(maxattempts, interval, delay)
 
 """
-    run!(wf::Workflow; n=5, δt=1, Δt=1)
+    run!(wf::Workflow; maxattempts=5, interval=1, delay=0)
 
-Run a `Workflow` with maximum `n` attempts, with each attempt separated by `Δt` seconds.
-
-Cool down for `δt` seconds after each `Job` in the `Workflow`.
+Run a `Workflow` with maximum number of attempts, with each attempt separated by a few seconds.
 """
 function run!(wf::AbstractWorkflow; kwargs...)
-    exec = Executor(wf; kwargs...)
-    execute!(exec)
+    exec = Executor(; kwargs...)
+    execute!(wf, exec)
     return exec
 end
 
 """
-    execute!(exec::Executor)
+    execute!(workflow::AbstractWorkflow, exec::Executor)
 
 Executes the jobs from the workflow of the provided Executor instance.
 
-The function will attempt to execute all the jobs up to `maxattempts` times. If all jobs
-have succeeded, the function will stop immediately. Otherwise, it will wait for a given
-`interval` before the next attempt.
+The function will attempt to execute all the jobs up to `exec.maxattempts` times. If all jobs
+have succeeded, the function will stop immediately. Otherwise, it will wait for a duration equal
+to `exec.interval` before the next attempt.
 """
-function execute!(exec::Executor)
-    jobs = listjobs(exec.wf)
+function execute!(workflow::AbstractWorkflow, exec::Executor)
+    jobs = listjobs(workflow)
     for _ in Base.OneTo(exec.maxattempts)
         if any(!issucceeded(job) for job in jobs)
             # This separation is necessary, since `run_kahn_algo!` modfiies the graph.
             execs = collect(
                 JobExecutor(job; maxattempts=1, interval=0, delay=0) for job in jobs
             )  # Job executors
-            graph = copy(exec.wf.graph)
+            graph = copy(workflow.graph)
             run_kahn_algo!(execs, graph)
             return exec
         end
