@@ -26,8 +26,8 @@ Run a `Workflow` with maximum `n` attempts, with each attempt separated by `Δt`
 Cool down for `δt` seconds after each `Job` in the `Workflow`.
 """
 function run!(wf::AbstractWorkflow; kwargs...)
-    exec = Executor(wf; kwargs...)
-    execute!(exec)
+    exec = Executor(; kwargs...)
+    execute!(wf, exec)
     return exec
 end
 
@@ -40,15 +40,15 @@ The function will attempt to execute all the jobs up to `maxattempts` times. If 
 have succeeded, the function will stop immediately. Otherwise, it will wait for a given
 `interval` before the next attempt.
 """
-function execute!(exec::Executor)
-    jobs = listjobs(exec.wf)
+function execute!(workflow::AbstractWorkflow, exec::Executor)
+    jobs = listjobs(workflow)
     for _ in Base.OneTo(exec.maxattempts)
         if any(!issucceeded(job) for job in jobs)
             # This separation is necessary, since `run_kahn_algo!` modfiies the graph.
             execs = collect(
                 JobExecutor(job; maxattempts=1, interval=0, delay=0) for job in jobs
             )  # Job executors
-            graph = copy(exec.wf.graph)
+            graph = copy(workflow.graph)
             run_kahn_algo!(execs, graph)
             return exec
         end
