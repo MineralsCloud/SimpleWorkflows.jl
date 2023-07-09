@@ -6,17 +6,17 @@ import EasyJobsBase: run!, execute!
 export run!, execute!
 
 struct Executor{T<:AbstractWorkflow}
-    wf::T
     maxattempts::UInt64
     interval::Real
     delay::Real
-    function Executor(wf::T; maxattempts=1, interval=1, delay=0) where {T}
+    function Executor(maxattempts=1, interval=1, delay=0)
         @assert maxattempts >= 1
         @assert interval >= zero(interval)
         @assert delay >= zero(delay)
-        return new{T}(wf, maxattempts, interval, delay)
+        return new(maxattempts, interval, delay)
     end
 end
+Executor(; maxattempts=1, interval=1, delay=0) = Executor(maxattempts, interval, delay)
 
 """
     run!(wf::Workflow; n=5, δt=1, Δt=1)
