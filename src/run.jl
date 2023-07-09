@@ -19,11 +19,9 @@ end
 Executor(; maxattempts=1, interval=1, delay=0) = Executor(maxattempts, interval, delay)
 
 """
-    run!(wf::Workflow; n=5, δt=1, Δt=1)
+    run!(wf::Workflow; maxattempts=5, interval=1, delay=0)
 
-Run a `Workflow` with maximum `n` attempts, with each attempt separated by `Δt` seconds.
-
-Cool down for `δt` seconds after each `Job` in the `Workflow`.
+Run a `Workflow` with maximum number of attempts, with each attempt separated by a few seconds.
 """
 function run!(wf::AbstractWorkflow; kwargs...)
     exec = Executor(; kwargs...)
@@ -32,13 +30,13 @@ function run!(wf::AbstractWorkflow; kwargs...)
 end
 
 """
-    execute!(exec::Executor)
+    execute!(workflow::AbstractWorkflow, exec::Executor)
 
 Executes the jobs from the workflow of the provided Executor instance.
 
-The function will attempt to execute all the jobs up to `maxattempts` times. If all jobs
-have succeeded, the function will stop immediately. Otherwise, it will wait for a given
-`interval` before the next attempt.
+The function will attempt to execute all the jobs up to `exec.maxattempts` times. If all jobs
+have succeeded, the function will stop immediately. Otherwise, it will wait for a duration equal
+to `exec.interval` before the next attempt.
 """
 function execute!(workflow::AbstractWorkflow, exec::Executor)
     jobs = listjobs(workflow)
