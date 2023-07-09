@@ -5,18 +5,20 @@ import EasyJobsBase: run!, execute!
 
 export run!, execute!
 
-struct Executor
+abstract type Executor end
+struct AsyncExecutor <: Executor
     maxattempts::UInt64
     interval::Real
     delay::Real
-    function Executor(maxattempts=1, interval=1, delay=0)
+    function AsyncExecutor(maxattempts=1, interval=1, delay=0)
         @assert maxattempts >= 1
         @assert interval >= zero(interval)
         @assert delay >= zero(delay)
         return new(maxattempts, interval, delay)
     end
 end
-Executor(; maxattempts=1, interval=1, delay=0) = Executor(maxattempts, interval, delay)
+AsyncExecutor(; maxattempts=1, interval=1, delay=0) =
+    AsyncExecutor(maxattempts, interval, delay)
 
 """
     run!(wf::Workflow; maxattempts=5, interval=1, delay=0)
