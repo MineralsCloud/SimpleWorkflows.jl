@@ -5,7 +5,7 @@ import EasyJobsBase: run!, execute!
 
 export run!, execute!
 
-struct Executor{T<:AbstractWorkflow}
+struct Executor
     maxattempts::UInt64
     interval::Real
     delay::Real
