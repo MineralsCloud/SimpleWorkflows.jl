@@ -108,9 +108,9 @@ uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 
 [[deps.JLD2]]
 deps = ["FileIO", "MacroTools", "Mmap", "OrderedCollections", "Pkg", "Printf", "Reexport", "Requires", "TranscodingStreams", "UUIDs"]
-git-tree-sha1 = "42c17b18ced77ff0be65957a591d34f4ed57c631"
+git-tree-sha1 = "5df8278ad24772c0c6dbbeb97b162ccf29ced2a9"
 uuid = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
-version = "0.4.31"
+version = "0.4.32"
 
 [[deps.JSON]]
 deps = ["Dates", "Mmap", "Parsers", "Unicode"]
@@ -260,7 +260,7 @@ version = "0.9.4"
 
 [[deps.SimpleWorkflows]]
 deps = ["Dates", "EasyJobsBase", "Graphs", "MetaGraphs"]
-git-tree-sha1 = "b7921db5c62ac1a93b212c35b85ce0f2f1e3ff85"
+git-tree-sha1 = "2a3b8cc2d808f399ceb90e561451ab051fc26b18"
 repo-rev = "main"
 repo-url = "https://github.com/MineralsCloud/SimpleWorkflows.jl"
 uuid = "6a97d125-85da-4b66-b300-4bba10360563"
