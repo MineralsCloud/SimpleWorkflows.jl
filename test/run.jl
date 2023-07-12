@@ -1,34 +1,45 @@
 using Thinkers: Thunk
-using EasyJobsBase: SUCCEEDED, Job, ConditionalJob, ArgDependentJob, run!, getresult, →
+using EasyJobsBase: Job, ConditionalJob, ArgDependentJob, run!, getresult, →
 
 @testset "Test running a `Workflow`" begin
     function f₁()
         println("Start job `i`!")
-        return sleep(5)
+        sleep(5)
+        println("End job `i`!")
+        return nothing
     end
     function f₂(n)
         println("Start job `j`!")
         sleep(n)
-        return exp(2)
+        a = exp(2)
+        println("End job `j`!")
+        return a
     end
     function f₃(n)
         println("Start job `k`!")
-        return sleep(n)
+        sleep(n)
+        println("End job `k`!")
+        return nothing
     end
     function f₄()
         println("Start job `l`!")
-        return run(`sleep 3`)
+        p = run(`sleep 3`)
+        println("End job `l`!")
+        return p
     end
     function f₅(n, x)
         println("Start job `m`!")
         sleep(n)
-        return sin(x)
+        a = sin(x)
+        println("End job `m`!")
+        return a
     end
     function f₆(n; x=1)
         println("Start job `n`!")
         sleep(n)
-        cos(x)
-        return run(`pwd` & `ls`)
+        p = run(`pwd` & `ls`)
+        println("End job `n`!")
+        return p
     end
     i = Job(Thunk(f₁); username="me", name="i")
     j = Job(Thunk(f₂, 3); username="he", name="j")
@@ -42,9 +53,9 @@ using EasyJobsBase: SUCCEEDED, Job, ConditionalJob, ArgDependentJob, run!, getre
     k → n
     wf = Workflow(k)
     @test Set(wf.jobs) == Set([i, k, j, l, n, m])
-    run!(wf)
+    run!(wf; wait=true)
     @test Set(wf.jobs) == Set([i, k, j, l, n, m])  # Test they are still the same
-    @test all(==(SUCCEEDED), liststatus(wf))
+    @test issucceeded(wf)
     @test something(getresult(i)) === nothing
     @test something(getresult(j)) == 7.38905609893065
     @test something(getresult(k)) === nothing
@@ -61,8 +72,8 @@ end
     j = ConditionalJob(Thunk(map, f₂); username="he", name="j")
     [h, i] .→ Ref(j)
     wf = Workflow(j)
-    run!(wf)
-    @test all(==(SUCCEEDED), liststatus(wf))
+    run!(wf; wait=true)
+    @test issucceeded(wf)
     @test getresult(j) == Some("1001")
 end
 
@@ -76,8 +87,8 @@ end
     i → j → k
     wf = Workflow(k)
     @test map(job -> findjob(wf, job), [i, j, k]) == 1:3
-    run!(wf)
-    @test all(==(SUCCEEDED), liststatus(wf))
+    run!(wf; wait=true)
+    @test issucceeded(wf)
     @test getresult(i) == Some(25)
     @test getresult(j) == Some(26)
     @test getresult(k) == Some(13.0)
@@ -96,8 +107,8 @@ end
         job → l
     end
     wf = Workflow(k)
-    run!(wf)
-    @test all(==(SUCCEEDED), liststatus(wf))
+    run!(wf; wait=true)
+    @test issucceeded(wf)
     @test getresult(i) == Some(25)
     @test getresult(j) == Some(4)
     @test getresult(k) == Some(3.0)
