@@ -1,4 +1,3 @@
-using EasyJobsBase: Executor as JobExecutor
 using Graphs: indegree, rem_vertices!
 
 import EasyJobsBase: run!, execute!
