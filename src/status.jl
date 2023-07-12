@@ -2,6 +2,12 @@ using MetaGraphs: MetaDiGraph, get_prop, set_prop!
 
 import EasyJobsBase:
     getstatus,
+    ispending,
+    isrunning,
+    isexited,
+    issucceeded,
+    isfailed,
+    isinterrupted,
     listpending,
     listrunning,
     listexited,
@@ -10,6 +16,12 @@ import EasyJobsBase:
     listinterrupted
 
 export getstatus,
+    ispending,
+    isrunning,
+    isexited,
+    issucceeded,
+    isfailed,
+    isinterrupted,
     liststatus,
     listpending,
     listrunning,
@@ -40,6 +52,16 @@ See also [`getstatus`](@ref).
 """
 liststatus(wf::AbstractWorkflow) =
     collect(get_prop(getstatus(wf), i, :status) for i in 1:nv(getstatus(wf)))
+
+ispending(wf::AbstractWorkflow) = all(ispending, eachjob(wf))
+
+isrunning(wf::AbstractWorkflow) = any(isrunning, eachjob(wf))
+
+isexited(wf::AbstractWorkflow) = all(isexited, eachjob(wf))
+
+issucceeded(wf::AbstractWorkflow) = all(issucceeded, eachjob(wf))
+
+isfailed(wf::AbstractWorkflow) = isexited(wf) && any(isfailed, eachjob(wf))
 
 # See https://docs.julialang.org/en/v1/manual/documentation/#Advanced-Usage
 for (func, adj) in zip(
