@@ -51,7 +51,7 @@ The function will attempt to execute all the jobs up to `exec.maxattempts` times
 have succeeded, the function will stop immediately. Otherwise, it will wait for a duration equal
 to `exec.interval` before the next attempt.
 """
-function execute!(wf::AbstractWorkflow, exec::SerialExecutor)
+function execute!(wf::AbstractWorkflow, exec::Executor)
     task = if issucceeded(wf)
         @task wf  # Just return the job if it has succeeded
     else
