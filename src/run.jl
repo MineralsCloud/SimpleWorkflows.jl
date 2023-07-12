@@ -36,11 +36,7 @@ end
 
 Run a `Workflow` with maximum number of attempts, with each attempt separated by a few seconds.
 """
-function run!(wf::AbstractWorkflow; kwargs...)
-    exec = AsyncExecutor(; kwargs...)
-    execute!(wf, exec)
-    return exec
-end
+run!(wf::AbstractWorkflow; kwargs...) = execute!(wf, AsyncExecutor(; kwargs...))
 
 """
     execute!(workflow::AbstractWorkflow, exec::Executor)
