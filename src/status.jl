@@ -65,15 +65,8 @@ isfailed(wf::AbstractWorkflow) = isexited(wf) && any(isfailed, eachjob(wf))
 
 # See https://docs.julialang.org/en/v1/manual/documentation/#Advanced-Usage
 for (func, adj) in zip(
-    (
-        :listpending,
-        :listrunning,
-        :listexited,
-        :listsucceeded,
-        :listfailed,
-        :listinterrupted,
-    ),
-    ("pending", "running", "exited", "succeeded", "failed", "interrupted"),
+    (:listpending, :listrunning, :listexited, :listsucceeded, :listfailed),
+    ("pending", "running", "exited", "succeeded", "failed"),
 )
     name = string(func)
     @eval begin
@@ -82,6 +75,6 @@ for (func, adj) in zip(
 
         Filter only the $($adj) jobs in a `Workflow`.
         """
-        $func(wf::Workflow) = $func(wf.jobs)
+        $func(wf::Workflow) = $func(eachjob(wf))
     end
 end
