@@ -26,7 +26,7 @@ AsyncExecutor(; maxattempts=1, interval=1, delay=0) =
 Run a `Workflow` with maximum number of attempts, with each attempt separated by a few seconds.
 """
 function run!(wf::AbstractWorkflow; kwargs...)
-    exec = Executor(; kwargs...)
+    exec = AsyncExecutor(; kwargs...)
     execute!(wf, exec)
     return exec
 end
@@ -40,7 +40,7 @@ The function will attempt to execute all the jobs up to `exec.maxattempts` times
 have succeeded, the function will stop immediately. Otherwise, it will wait for a duration equal
 to `exec.interval` before the next attempt.
 """
-function execute!(workflow::AbstractWorkflow, exec::Executor)
+function execute!(workflow::AbstractWorkflow, exec::AsyncExecutor)
     jobs = listjobs(workflow)
     for _ in Base.OneTo(exec.maxattempts)
         if !issucceeded(workflow)
