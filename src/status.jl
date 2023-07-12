@@ -7,13 +7,11 @@ import EasyJobsBase:
     isexited,
     issucceeded,
     isfailed,
-    isinterrupted,
     listpending,
     listrunning,
     listexited,
     listsucceeded,
-    listfailed,
-    listinterrupted
+    listfailed
 
 export getstatus,
     ispending,
@@ -21,14 +19,12 @@ export getstatus,
     isexited,
     issucceeded,
     isfailed,
-    isinterrupted,
     liststatus,
     listpending,
     listrunning,
     listexited,
     listsucceeded,
-    listfailed,
-    listinterrupted
+    listfailed
 
 """
     getstatus(wf::AbstractWorkflow)
