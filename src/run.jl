@@ -21,15 +21,13 @@ struct AsyncExecutor <: Executor
     maxattempts::UInt64
     interval::Real
     delay::Real
-    function AsyncExecutor(maxattempts=1, interval=1, delay=0)
-        @assert maxattempts >= 1
-        @assert interval >= zero(interval)
-        @assert delay >= zero(delay)
-        return new(maxattempts, interval, delay)
-    end
 end
-AsyncExecutor(; maxattempts=1, interval=1, delay=0) =
-    AsyncExecutor(maxattempts, interval, delay)
+function AsyncExecutor(; maxattempts=1, interval=1, delay=0)
+    @assert maxattempts >= 1
+    @assert interval >= zero(interval)
+    @assert delay >= zero(delay)
+    return AsyncExecutor(maxattempts, interval, delay)
+end
 
 """
     run!(wf::Workflow; maxattempts=5, interval=1, delay=0)
