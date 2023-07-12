@@ -6,6 +6,17 @@ import EasyJobsBase: run!, execute!
 export run!, execute!
 
 abstract type Executor end
+struct SerialExecutor <: Executor
+    maxattempts::UInt64
+    interval::Real
+    delay::Real
+end
+function SerialExecutor(; maxattempts=1, interval=1, delay=0)
+    @assert maxattempts >= 1
+    @assert interval >= zero(interval)
+    @assert delay >= zero(delay)
+    return SerialExecutor(maxattempts, interval, delay)
+end
 struct AsyncExecutor <: Executor
     maxattempts::UInt64
     interval::Real
