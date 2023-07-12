@@ -43,7 +43,7 @@ to `exec.interval` before the next attempt.
 function execute!(workflow::AbstractWorkflow, exec::Executor)
     jobs = listjobs(workflow)
     for _ in Base.OneTo(exec.maxattempts)
-        if any(!issucceeded(job) for job in jobs)
+        if !issucceeded(workflow)
             # This separation is necessary, since `run_kahn_algo!` modfiies the graph.
             execs = collect(
                 JobExecutor(job; maxattempts=1, interval=0, delay=0) for job in jobs
@@ -52,11 +52,7 @@ function execute!(workflow::AbstractWorkflow, exec::Executor)
             run_kahn_algo!(execs, graph)
             return exec
         end
-        if all(issucceeded(job) for job in jobs)
-            break  # Stop immediately
-        else
-            sleep(exec.interval)
-        end
+        issucceeded(workflow) ? break : sleep(exec.interval)
     end
     return exec
 end
