@@ -40,19 +40,19 @@ The function will attempt to execute all the jobs up to `exec.maxattempts` times
 have succeeded, the function will stop immediately. Otherwise, it will wait for a duration equal
 to `exec.interval` before the next attempt.
 """
-function execute!(workflow::AbstractWorkflow, exec::AsyncExecutor)
-    jobs = listjobs(workflow)
+function execute!(wf::AbstractWorkflow, exec::AsyncExecutor)
+    jobs = listjobs(wf)
     for _ in Base.OneTo(exec.maxattempts)
-        if !issucceeded(workflow)
+        if !issucceeded(wf)
             # This separation is necessary, since `run_kahn_algo!` modfiies the graph.
             execs = collect(
                 JobExecutor(job; maxattempts=1, interval=0, delay=0) for job in jobs
             )  # Job executors
-            graph = copy(workflow.graph)
+            graph = copy(wf.graph)
             run_kahn_algo!(execs, graph)
             return exec
         end
-        issucceeded(workflow) ? break : sleep(exec.interval)
+        issucceeded(wf) ? break : sleep(exec.interval)
     end
     return exec
 end
