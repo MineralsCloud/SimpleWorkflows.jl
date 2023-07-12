@@ -74,6 +74,15 @@ function dispatch!(wf::AbstractWorkflow, exec::SerialExecutor)
     end
     return wf
 end
+function dispatch!(wf::AbstractWorkflow, exec::AsyncExecutor)
+    for _ in Base.OneTo(exec.maxattempts)
+        jobs = copy(listjobs(wf))
+        graph = copy(wf.graph)
+        run_kahn_algo!(jobs, graph)
+        issucceeded(wf) ? break : sleep(exec.interval)
+    end
+    return wf
+end
 
 # This function `run_kahn_algo!` is an implementation of Kahn's algorithm for job scheduling.
 # `graph` is a directed acyclic graph representing dependencies between jobs.
