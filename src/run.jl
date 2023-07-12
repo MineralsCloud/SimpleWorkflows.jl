@@ -1,4 +1,4 @@
-using EasyJobsBase: Executor as JobExecutor, issucceeded
+using EasyJobsBase: Executor as JobExecutor
 using Graphs: indegree, rem_vertices!
 
 import EasyJobsBase: run!, execute!
@@ -63,22 +63,6 @@ function execute!(wf::AbstractWorkflow, exec::SerialExecutor)
         wait(task)
     end
     return task
-end
-function execute!(wf::AbstractWorkflow, exec::AsyncExecutor)
-    jobs = listjobs(wf)
-    for _ in Base.OneTo(exec.maxattempts)
-        if !issucceeded(wf)
-            # This separation is necessary, since `run_kahn_algo!` modfiies the graph.
-            execs = collect(
-                JobExecutor(job; maxattempts=1, interval=0, delay=0) for job in jobs
-            )  # Job executors
-            graph = copy(wf.graph)
-            run_kahn_algo!(execs, graph)
-            return exec
-        end
-        issucceeded(wf) ? break : sleep(exec.interval)
-    end
-    return exec
 end
 
 function dispatch!(wf::AbstractWorkflow, exec::SerialExecutor)
