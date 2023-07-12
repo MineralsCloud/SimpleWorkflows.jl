@@ -10,23 +10,25 @@ struct SerialExecutor <: Executor
     maxattempts::UInt64
     interval::Real
     delay::Real
+    wait::Bool
 end
-function SerialExecutor(; maxattempts=1, interval=1, delay=0)
+function SerialExecutor(; maxattempts=1, interval=1, delay=0, wait=false)
     @assert maxattempts >= 1
     @assert interval >= zero(interval)
     @assert delay >= zero(delay)
-    return SerialExecutor(maxattempts, interval, delay)
+    return SerialExecutor(maxattempts, interval, delay, wait)
 end
 struct AsyncExecutor <: Executor
     maxattempts::UInt64
     interval::Real
     delay::Real
+    wait::Bool
 end
-function AsyncExecutor(; maxattempts=1, interval=1, delay=0)
+function AsyncExecutor(; maxattempts=1, interval=1, delay=0, wait=false)
     @assert maxattempts >= 1
     @assert interval >= zero(interval)
     @assert delay >= zero(delay)
-    return AsyncExecutor(maxattempts, interval, delay)
+    return AsyncExecutor(maxattempts, interval, delay, wait)
 end
 
 """
