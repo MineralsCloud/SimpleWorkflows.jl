@@ -29,7 +29,7 @@ export getstatus,
 """
     getstatus(wf::AbstractWorkflow)
 
-Get the current status of `Job`s in a `AbstractWorkflow` as a graph.
+Get the current status of jobs in a `AbstractWorkflow` as a graph.
 """
 function getstatus(wf::Workflow)
     graph = MetaDiGraph(wf.graph)
@@ -42,21 +42,56 @@ end
 """
     liststatus(wf::AbstractWorkflow)
 
-List the current status of `Job`s in a `AbstractWorkflow` as a vector.
+List the current status of jobs in a `AbstractWorkflow` as a vector.
 
 See also [`getstatus`](@ref).
 """
 liststatus(wf::AbstractWorkflow) =
     collect(get_prop(getstatus(wf), i, :status) for i in 1:nv(getstatus(wf)))
 
+"""
+    ispending(wf::AbstractWorkflow)
+
+Check if all jobs in the `AbstractWorkflow` are in a pending state.
+
+Return `true` if all jobs are pending, otherwise, return `false`.
+"""
 ispending(wf::AbstractWorkflow) = all(ispending, eachjob(wf))
 
+"""
+    isrunning(wf::AbstractWorkflow)
+
+Check if any job in the `AbstractWorkflow` is currently running.
+
+Return `true` if at least one job is running, otherwise, return `false`.
+"""
 isrunning(wf::AbstractWorkflow) = any(isrunning, eachjob(wf))
 
+"""
+    isexited(wf::AbstractWorkflow)
+
+Check if all jobs in the `AbstractWorkflow` have exited.
+
+Return `true` if all jobs have exited, otherwise, return `false`.
+"""
 isexited(wf::AbstractWorkflow) = all(isexited, eachjob(wf))
 
+"""
+    issucceeded(wf::AbstractWorkflow)
+
+Check if all jobs in the `AbstractWorkflow` have successfully completed.
+
+Return `true` if all jobs have succeeded, otherwise, return `false`.
+"""
 issucceeded(wf::AbstractWorkflow) = all(issucceeded, eachjob(wf))
 
+"""
+    isfailed(wf::AbstractWorkflow)
+
+Check if any job in the `AbstractWorkflow` has failed, given that all jobs have exited.
+
+Return `true` if any job has failed after all jobs have exited, otherwise, return `false`.
+"""
 isfailed(wf::AbstractWorkflow) = isexited(wf) && any(isfailed, eachjob(wf))
 
 # See https://docs.julialang.org/en/v1/manual/documentation/#Advanced-Usage
