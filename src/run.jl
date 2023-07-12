@@ -51,6 +51,19 @@ The function will attempt to execute all the jobs up to `exec.maxattempts` times
 have succeeded, the function will stop immediately. Otherwise, it will wait for a duration equal
 to `exec.interval` before the next attempt.
 """
+function execute!(wf::AbstractWorkflow, exec::SerialExecutor)
+    task = if issucceeded(wf)
+        @task wf  # Just return the job if it has succeeded
+    else
+        sleep(exec.delay)
+        @task dispatch!(wf, exec)
+    end
+    schedule(task)
+    if exec.wait
+        wait(task)
+    end
+    return task
+end
 function execute!(wf::AbstractWorkflow, exec::AsyncExecutor)
     jobs = listjobs(wf)
     for _ in Base.OneTo(exec.maxattempts)
@@ -66,6 +79,16 @@ function execute!(wf::AbstractWorkflow, exec::AsyncExecutor)
         issucceeded(wf) ? break : sleep(exec.interval)
     end
     return exec
+end
+
+function dispatch!(wf::AbstractWorkflow, exec::SerialExecutor)
+    for _ in Base.OneTo(exec.maxattempts)
+        for job in Iterators.filter(!issucceeded, eachjob(wf))
+            run!(job; maxattempts=1, interval=0, delay=0, wait=true)  # Must wait for serial execution
+        end
+        issucceeded(wf) ? break : sleep(exec.interval)
+    end
+    return wf
 end
 
 # This function `run_kahn_algo!` is an implementation of Kahn's algorithm for job scheduling.
