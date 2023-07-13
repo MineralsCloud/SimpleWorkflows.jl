@@ -1,4 +1,6 @@
-![logo](https://raw.githubusercontent.com/MineralsCloud/SimpleWorkflows.jl/main/docs/src/assets/logo.png)
+<div align="center">
+  <img src="https://raw.githubusercontent.com/MineralsCloud/SimpleWorkflows.jl/main/docs/src/assets/logo.png" height="200"><br>
+</div>
 
 # SimpleWorkflows
 
