@@ -55,6 +55,9 @@ using EasyJobsBase: Job, ConditionalJob, ArgDependentJob, run!, getresult, →
     @test Set(wf.jobs) == Set([i, k, j, l, n, m])
     run!(wf; wait=true)
     @test Set(wf.jobs) == Set([i, k, j, l, n, m])  # Test they are still the same
+    for job in (i, j, k, l, n, m)
+        @test job in wf
+    end
     @test issucceeded(wf)
     @test something(getresult(i)) === nothing
     @test something(getresult(j)) == 7.38905609893065
@@ -88,6 +91,9 @@ end
     wf = Workflow(k)
     @test map(job -> findjob(wf, job), [i, j, k]) == 1:3
     run!(wf; wait=true)
+    for job in (i, j, k)
+        @test job in wf
+    end
     @test issucceeded(wf)
     @test getresult(i) == Some(25)
     @test getresult(j) == Some(26)
@@ -108,6 +114,9 @@ end
     end
     wf = Workflow(k)
     run!(wf; wait=true)
+    for job in (i, j, k)
+        @test job in wf
+    end
     @test issucceeded(wf)
     @test getresult(i) == Some(25)
     @test getresult(j) == Some(4)
