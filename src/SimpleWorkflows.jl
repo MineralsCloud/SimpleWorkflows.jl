@@ -74,15 +74,15 @@ function Workflow(jobs::AbstractJob...)
     return Workflow(foundjobs, graph)
 end
 
-function findjob(wf::Workflow, id)
+function findjob(id, wf::Workflow)
     for (i, job) in enumerate(eachjob(wf))
         if job.id == id
             return i
         end
     end
-    return nothing
+    return 0
 end
-findjob(wf::Workflow, job::AbstractJob) = findjob(wf, job.id)
+findjob(job::AbstractJob, wf::Workflow) = findjob(job.id, wf)
 
 Base.in(job::AbstractJob, wf::Workflow) = job in eachjob(wf)
 
