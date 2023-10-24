@@ -19,7 +19,7 @@ export getstatus,
     isexited,
     issucceeded,
     isfailed,
-    liststatus,
+    eachstatus,
     listpending,
     listrunning,
     listexited,
@@ -30,6 +30,8 @@ export getstatus,
     getstatus(wf::AbstractWorkflow)
 
 Get the current status of jobs in a `AbstractWorkflow` as a graph.
+
+See also [`eachstatus`](@ref).
 """
 function getstatus(wf::Workflow)
     graph = MetaDiGraph(wf.graph)
@@ -40,14 +42,14 @@ function getstatus(wf::Workflow)
 end
 
 """
-    liststatus(wf::AbstractWorkflow)
+    eachstatus(wf::AbstractWorkflow)
 
-List the current status of jobs in a `AbstractWorkflow` as a vector.
+Iterate status of jobs in an `AbstractWorkflow`.
 
 See also [`getstatus`](@ref).
 """
-liststatus(wf::AbstractWorkflow) =
-    collect(get_prop(getstatus(wf), i, :status) for i in 1:nv(getstatus(wf)))
+eachstatus(wf::AbstractWorkflow) =
+    (get_prop(getstatus(wf), i, :status) for i in 1:nv(getstatus(wf)))
 
 """
     ispending(wf::AbstractWorkflow)
