@@ -9,9 +9,9 @@ export Workflow, findjob
 abstract type AbstractWorkflow end
 
 # Create a `Workflow` from a list of `AbstractJob`s and a graph representing their relations.
-struct Workflow <: AbstractWorkflow
-    jobs::Vector{AbstractJob}
-    graph::DiGraph{Int}
+struct Workflow{T} <: AbstractWorkflow
+    jobs::Vector{T}
+    graph::DiGraph{Int64}
     function Workflow(jobs, graph)
         @assert !is_cyclic(graph) "`graph` must be acyclic"
         @assert is_connected(graph) "`graph` must be connected!"
@@ -35,7 +35,7 @@ struct Workflow <: AbstractWorkflow
                 end
             end
         end
-        return new(reordered_jobs, new_graph)
+        return new{eltype(reordered_jobs)}(reordered_jobs, new_graph)
     end
 end
 """
