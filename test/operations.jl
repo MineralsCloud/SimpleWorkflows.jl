@@ -43,5 +43,6 @@
     wf₂ = Workflow(n)
     wf₁ → wf₂
     wf = Workflow(k)
+    @test unique(wf) == collect(wf)
     run!(wf)
 end

@@ -52,6 +52,7 @@ using EasyJobsBase: Job, ConditionalJob, ArgDependentJob, run!, getresult, →
     j → l
     k → n
     wf = Workflow(k)
+    @test unique(wf) == collect(wf)
     @test Set(wf.jobs) == Set([i, k, j, l, n, m])
     run!(wf; wait=true)
     @test Set(wf.jobs) == Set([i, k, j, l, n, m])  # Test they are still the same
@@ -75,6 +76,7 @@ end
     j = ConditionalJob(Thunk(map, f₂); username="he", name="j")
     [h, i] .→ Ref(j)
     wf = Workflow(j)
+    @test unique(wf) == collect(wf)
     run!(wf; wait=true)
     @test issucceeded(wf)
     @test getresult(j) == Some("1001")
@@ -89,6 +91,7 @@ end
     k = ArgDependentJob(Thunk(f₃, 6); username="she", name="k")
     i → j → k
     wf = Workflow(k)
+    @test unique(wf) == collect(wf)
     @test indexin([i, j, k], wf) == 1:3
     run!(wf; wait=true)
     for job in (i, j, k)
@@ -113,6 +116,7 @@ end
         job → l
     end
     wf = Workflow(k)
+    @test unique(wf) == collect(wf)
     run!(wf; wait=true)
     for job in (i, j, k)
         @test job in wf
