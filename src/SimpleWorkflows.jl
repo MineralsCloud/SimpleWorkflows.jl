@@ -4,7 +4,7 @@ using EasyJobsBase: AbstractJob
 using Graphs:
     DiGraph, add_edge!, nv, is_cyclic, is_connected, has_edge, topological_sort_by_dfs
 
-export Workflow, findjob
+export Workflow
 
 abstract type AbstractWorkflow end
 
@@ -74,15 +74,7 @@ function Workflow(jobs::AbstractJob...)
     return Workflow(foundjobs, graph)
 end
 
-function findjob(id, wf::Workflow)
-    for (i, job) in enumerate(wf)
-        if job.id == id
-            return i
-        end
-    end
-    return 0
-end
-findjob(job::AbstractJob, wf::Workflow) = findjob(job.id, wf)
+Base.indexin(jobs, wf::Workflow) = Base.indexin(jobs, collect(wf))
 
 Base.in(job::AbstractJob, wf::Workflow) = job in wf.jobs
 
