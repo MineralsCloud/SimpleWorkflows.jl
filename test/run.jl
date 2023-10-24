@@ -89,7 +89,7 @@ end
     k = ArgDependentJob(Thunk(f₃, 6); username="she", name="k")
     i → j → k
     wf = Workflow(k)
-    @test map(job -> findjob(wf, job), [i, j, k]) == 1:3
+    @test indexin([i, j, k], wf) == 1:3
     run!(wf; wait=true)
     for job in (i, j, k)
         @test job in wf
