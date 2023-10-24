@@ -62,7 +62,7 @@ end
 
 function dispatch!(wf::AbstractWorkflow, exec::SerialExecutor)
     for _ in Base.OneTo(exec.maxattempts)
-        for job in Iterators.filter(!issucceeded, eachjob(wf))
+        for job in Iterators.filter(!issucceeded, wf)
             run!(job; maxattempts=1, interval=0, delay=0, wait=true)  # Must wait for serial execution
         end
         issucceeded(wf) ? break : sleep(exec.interval)

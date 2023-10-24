@@ -75,7 +75,7 @@ function Workflow(jobs::AbstractJob...)
 end
 
 function findjob(id, wf::Workflow)
-    for (i, job) in enumerate(eachjob(wf))
+    for (i, job) in enumerate(wf)
         if job.id == id
             return i
         end
@@ -84,9 +84,8 @@ function findjob(id, wf::Workflow)
 end
 findjob(job::AbstractJob, wf::Workflow) = findjob(job.id, wf)
 
-Base.in(job::AbstractJob, wf::Workflow) = job in eachjob(wf)
-
 listjobs(wf::Workflow) = wf.jobs
+Base.in(job::AbstractJob, wf::Workflow) = job in wf.jobs
 
 include("eachjob.jl")
 include("operations.jl")

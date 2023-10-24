@@ -1,22 +1,11 @@
-export eachjob
+Base.iterate(wf::Workflow, state=firstindex(wf)) = iterate(wf.jobs, state)
 
-struct EachJob{T<:AbstractWorkflow}
-    wf::T
-end
+Base.eltype(::Type{Workflow{T}}) where {T} = T
 
-eachjob(wf::AbstractWorkflow) = EachJob(wf)
+Base.length(wf::Workflow) = length(wf.jobs)
 
-Base.iterate(iter::EachJob) = iterate(listjobs(iter.wf))
-Base.iterate(iter::EachJob, state) = iterate(listjobs(iter.wf), state)
+Base.getindex(wf::Workflow, i) = getindex(wf.jobs, i)
 
-Base.eltype(iter::EachJob) = eltype(listjobs(iter.wf))
+Base.firstindex(wf::Workflow) = 1
 
-Base.length(iter::EachJob) = length(listjobs(iter.wf))
-
-Base.size(iter::EachJob, dim...) = size(listjobs(iter.wf), dim...)
-
-Base.getindex(iter::EachJob, i) = getindex(listjobs(iter.wf), i)
-
-Base.firstindex(iter::EachJob) = 1
-
-Base.lastindex(iter::EachJob) = length(iter)
+Base.lastindex(wf::Workflow) = length(wf.jobs)
