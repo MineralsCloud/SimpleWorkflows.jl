@@ -62,7 +62,7 @@ end
 
 function dispatch!(wf::AbstractWorkflow, exec::SerialExecutor)
     for _ in Base.OneTo(exec.maxattempts)
-        for job in Iterators.filter(!issucceeded, eachjob(wf))
+        for job in Iterators.filter(!issucceeded, wf)
             run!(job; maxattempts=1, interval=0, delay=0, wait=true)  # Must wait for serial execution
         end
         issucceeded(wf) ? break : sleep(exec.interval)
@@ -71,8 +71,7 @@ function dispatch!(wf::AbstractWorkflow, exec::SerialExecutor)
 end
 function dispatch!(wf::AbstractWorkflow, exec::AsyncExecutor)
     for _ in Base.OneTo(exec.maxattempts)
-        jobs = copy(listjobs(wf))
-        graph = copy(wf.graph)
+        jobs, graph = copy(wf.jobs), copy(wf.graph)
         run_kahn_algo!(jobs, graph)
         issucceeded(wf) ? break : sleep(exec.interval)
     end

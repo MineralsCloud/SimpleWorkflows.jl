@@ -4,14 +4,14 @@ using EasyJobsBase: AbstractJob
 using Graphs:
     DiGraph, add_edge!, nv, is_cyclic, is_connected, has_edge, topological_sort_by_dfs
 
-export Workflow, findjob
+export Workflow
 
 abstract type AbstractWorkflow end
 
 # Create a `Workflow` from a list of `AbstractJob`s and a graph representing their relations.
-struct Workflow <: AbstractWorkflow
-    jobs::Vector{AbstractJob}
-    graph::DiGraph{Int}
+struct Workflow{T} <: AbstractWorkflow
+    jobs::Vector{T}
+    graph::DiGraph{Int64}
     function Workflow(jobs, graph)
         @assert !is_cyclic(graph) "`graph` must be acyclic"
         @assert is_connected(graph) "`graph` must be connected!"
@@ -35,7 +35,7 @@ struct Workflow <: AbstractWorkflow
                 end
             end
         end
-        return new(reordered_jobs, new_graph)
+        return new{eltype(reordered_jobs)}(reordered_jobs, new_graph)
     end
 end
 """
@@ -74,21 +74,22 @@ function Workflow(jobs::AbstractJob...)
     return Workflow(foundjobs, graph)
 end
 
-function findjob(id, wf::Workflow)
-    for (i, job) in enumerate(eachjob(wf))
-        if job.id == id
-            return i
-        end
-    end
-    return 0
-end
-findjob(job::AbstractJob, wf::Workflow) = findjob(job.id, wf)
+Base.indexin(jobs, wf::Workflow) = Base.indexin(jobs, collect(wf))
 
-Base.in(job::AbstractJob, wf::Workflow) = job in eachjob(wf)
+Base.in(job::AbstractJob, wf::Workflow) = job in wf.jobs
 
-listjobs(wf::Workflow) = wf.jobs
+Base.iterate(wf::Workflow, state=firstindex(wf)) = iterate(wf.jobs, state)
 
-include("eachjob.jl")
+Base.eltype(::Type{Workflow{T}}) where {T} = T
+
+Base.length(wf::Workflow) = length(wf.jobs)
+
+Base.getindex(wf::Workflow, i) = getindex(wf.jobs, i)
+
+Base.firstindex(wf::Workflow) = 1
+
+Base.lastindex(wf::Workflow) = length(wf.jobs)
+
 include("operations.jl")
 include("run.jl")
 include("status.jl")
