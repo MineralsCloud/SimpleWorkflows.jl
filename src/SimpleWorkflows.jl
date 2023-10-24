@@ -84,7 +84,6 @@ function findjob(id, wf::Workflow)
 end
 findjob(job::AbstractJob, wf::Workflow) = findjob(job.id, wf)
 
-listjobs(wf::Workflow) = wf.jobs
 Base.in(job::AbstractJob, wf::Workflow) = job in wf.jobs
 
 include("eachjob.jl")
