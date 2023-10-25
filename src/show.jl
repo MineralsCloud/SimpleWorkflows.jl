@@ -13,7 +13,7 @@ function Base.show(io::IO, wf::Workflow)
 end
 function Base.show(io::IO, ::MIME"text/plain", wf::Workflow)
     println(io, summary(wf))
-    for (i, job) in enumerate(wf.jobs)
+    for (i, job) in enumerate(wf)
         println(io, " [", i, "] ", "id: ", job.id)
         if !isempty(job.description)
             print(io, ' '^5, "description: ")

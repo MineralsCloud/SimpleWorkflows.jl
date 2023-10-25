@@ -53,9 +53,9 @@ using EasyJobsBase: Job, ConditionalJob, ArgDependentJob, run!, getresult, →
     k → n
     wf = Workflow(k)
     @test unique(wf) == collect(wf)
-    @test Set(wf.jobs) == Set([i, k, j, l, n, m])
+    @test Set(wf) == Set([i, k, j, l, n, m])
     run!(wf; wait=true)
-    @test Set(wf.jobs) == Set([i, k, j, l, n, m])  # Test they are still the same
+    @test Set(wf) == Set([i, k, j, l, n, m])  # Test they are still the same
     for job in (i, j, k, l, n, m)
         @test job in wf
     end
