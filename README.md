@@ -27,6 +27,14 @@
 [style-img]: https://img.shields.io/badge/code%20style-blue-4495d1.svg
 [style-url]: https://github.com/invenia/BlueStyle
 
+The code, which is [hosted on GitHub](https://github.com/MineralsCloud/SimpleWorkflows.jl), is tested
+using various continuous integration services for its validity.
+
+This repository is created and maintained by
+[@singularitti](https://github.com/singularitti), and contributions are highly welcome.
+
+## Package features
+
 Build workflows from jobs. Run, monitor, and get results from them.
 This package takes inspiration from packages like
 [JobSchedulers](https://github.com/cihga39871/JobSchedulers.jl) and
@@ -54,22 +62,17 @@ The BibTeX format is:
 
 We also have an [arXiv prepint](https://arxiv.org/abs/2109.11724).
 
-The code is [hosted on GitHub](https://github.com/MineralsCloud/SimpleWorkflows.jl),
-with some continuous integration services to test its validity.
-
-This repository is created and maintained by [@singularitti](https://github.com/singularitti).
-You are very welcome to contribute.
-
 ## Installation
 
 The package can be installed with the Julia package manager.
-From the Julia REPL, type `]` to enter the Pkg REPL mode and run:
+From [the Julia REPL](https://docs.julialang.org/en/v1/stdlib/REPL/), type `]` to enter
+the [Pkg mode](https://docs.julialang.org/en/v1/stdlib/REPL/#Pkg-mode) and run:
 
-```
+```julia-repl
 pkg> add SimpleWorkflows
 ```
 
-Or, equivalently, via the [`Pkg` API](https://pkgdocs.julialang.org/v1/getting-started/):
+Or, equivalently, via [`Pkg.jl`](https://pkgdocs.julialang.org/v1/):
 
 ```julia
 julia> import Pkg; Pkg.add("SimpleWorkflows")
@@ -82,16 +85,15 @@ julia> import Pkg; Pkg.add("SimpleWorkflows")
 
 ## Project status
 
-The package is tested against, and being developed for, Julia `1.6` and above on Linux,
-macOS, and Windows.
+The package is developed for and tested against Julia `v1.6` and above on Linux, macOS, and
+Windows.
 
 ## Questions and contributions
 
-You are welcome to post usage questions on [our discussion page][discussions-url].
+You can post usage questions on
+[our discussion page](https://github.com/MineralsCloud/SimpleWorkflows.jl/discussions).
 
-Contributions are very welcome, as are feature requests and suggestions. Please open an
-[issue][issues-url] if you encounter any problems. The [Contributing](@ref) page has
-guidelines that should be followed when opening pull requests and contributing code.
-
-[discussions-url]: https://github.com/MineralsCloud/SimpleWorkflows.jl/discussions
-[issues-url]: https://github.com/MineralsCloud/SimpleWorkflows.jl/issues
+We welcome contributions, feature requests, and suggestions. If you encounter any problems,
+please open an [issue](https://github.com/MineralsCloud/SimpleWorkflows.jl/issues).
+The [Contributing](@ref) page has
+a few guidelines that should be followed when opening pull requests and contributing code.
