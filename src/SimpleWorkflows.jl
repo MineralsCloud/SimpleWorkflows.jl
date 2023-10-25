@@ -66,6 +66,28 @@ function Workflow(jobs::AbstractJob...)
 end
 Workflow(jobs::AbstractVector) = Workflow(jobs...)
 
+function topological_sort(jobs, graph)
+    order = topological_sort_by_dfs(graph)
+    sorted_jobs = collect(jobs[order])
+    n = length(sorted_jobs)
+    new_graph = DiGraph(n)
+    dict = IdDict(zip(sorted_jobs, 1:n))
+    # You must sort the graph too for `DependentJob`s to run in the correct order!
+    for (i, job) in enumerate(sorted_jobs)
+        for parent in eachparent(job)
+            if !has_edge(new_graph, dict[parent], i)
+                add_edge!(new_graph, dict[parent], i)
+            end
+        end
+        for child in eachchild(job)
+            if !has_edge(new_graph, i, dict[child])
+                add_edge!(new_graph, i, dict[child])
+            end
+        end
+    end
+    return sorted_jobs, new_graph
+end
+
 Base.indexin(jobs, wf::Workflow) = Base.indexin(jobs, collect(wf))
 
 Base.in(job::AbstractJob, wf::Workflow) = job in wf.jobs
