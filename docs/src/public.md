@@ -9,7 +9,7 @@ Workflow
 run!
 execute!
 getstatus
-liststatus
+eachstatus
 ispending
 isrunning
 isexited

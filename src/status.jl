@@ -1,5 +1,3 @@
-using MetaGraphs: MetaDiGraph, get_prop, set_prop!
-
 import EasyJobsBase:
     getstatus,
     ispending,
@@ -19,35 +17,11 @@ export getstatus,
     isexited,
     issucceeded,
     isfailed,
-    liststatus,
     listpending,
     listrunning,
     listexited,
     listsucceeded,
     listfailed
-
-"""
-    getstatus(wf::AbstractWorkflow)
-
-Get the current status of jobs in a `AbstractWorkflow` as a graph.
-"""
-function getstatus(wf::Workflow)
-    graph = MetaDiGraph(wf.graph)
-    for (i, job) in enumerate(wf.jobs)
-        set_prop!(graph, i, :status, getstatus(job))
-    end
-    return graph
-end
-
-"""
-    liststatus(wf::AbstractWorkflow)
-
-List the current status of jobs in a `AbstractWorkflow` as a vector.
-
-See also [`getstatus`](@ref).
-"""
-liststatus(wf::AbstractWorkflow) =
-    collect(get_prop(getstatus(wf), i, :status) for i in 1:nv(getstatus(wf)))
 
 """
     ispending(wf::AbstractWorkflow)
