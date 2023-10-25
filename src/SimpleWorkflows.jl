@@ -43,7 +43,7 @@ function Workflow(jobs::AbstractJob...)
         neighbors = union(eachparent(job), eachchild(job))
         for neighbor in neighbors
             if neighbor ∉ jobsfound
-                push!(jobsfound, neighbor)  # This will alter `all_possible_jobs` dynamically
+                push!(jobsfound, neighbor)  # This will alter `jobsfound` dynamically
             end
         end
     end
