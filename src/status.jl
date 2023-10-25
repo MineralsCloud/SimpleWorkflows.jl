@@ -80,6 +80,6 @@ for (func, adj) in zip(
 
         Filter only the $($adj) jobs in a `Workflow`.
         """
-        $func(wf::Workflow) = $func(wf)
+        $func(wf::Workflow) = $func.(wf)
     end
 end
