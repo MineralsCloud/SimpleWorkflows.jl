@@ -9,7 +9,7 @@ EasyJobsBase = "db8ca866-b61f-4bd1-a9b9-75c107d645d4"
 Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
 
 [compat]
-EasyJobsBase = "0.13, 0.14, 0.15"
+EasyJobsBase = "0.15"
 Graphs = "1"
 julia = "1"
 
