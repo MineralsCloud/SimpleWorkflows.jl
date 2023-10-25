@@ -26,12 +26,12 @@ struct Workflow{T} <: AbstractWorkflow
         @assert nv(graph) == length(jobs) "`graph` has different size from `jobs`!"
         @assert allunique(jobs) "at least two jobs are identical!"
         order = topological_sort_by_dfs(graph)
-        reordered_jobs = collect(jobs[order])
-        n = length(reordered_jobs)
+        sorted_jobs = collect(jobs[order])
+        n = length(sorted_jobs)
         new_graph = DiGraph(n)
-        dict = IdDict(zip(reordered_jobs, 1:n))
+        dict = IdDict(zip(sorted_jobs, 1:n))
         # You must sort the graph too for `DependentJob`s to run in the correct order!
-        for (i, job) in enumerate(reordered_jobs)
+        for (i, job) in enumerate(sorted_jobs)
             for parent in job.parents
                 if !has_edge(new_graph, dict[parent], i)
                     add_edge!(new_graph, dict[parent], i)
@@ -43,7 +43,7 @@ struct Workflow{T} <: AbstractWorkflow
                 end
             end
         end
-        return new{eltype(reordered_jobs)}(reordered_jobs, new_graph)
+        return new{eltype(sorted_jobs)}(sorted_jobs, new_graph)
     end
 end
 """
