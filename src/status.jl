@@ -1,5 +1,3 @@
-using MetaGraphs: MetaDiGraph, get_prop, set_prop!
-
 import EasyJobsBase:
     getstatus,
     ispending,
