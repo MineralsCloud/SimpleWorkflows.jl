@@ -18,7 +18,7 @@ abstract type AbstractWorkflow end
 # Create a `Workflow` from a list of `AbstractJob`s and a graph representing their relations.
 struct Workflow{T} <: AbstractWorkflow
     jobs::Vector{T}
-    graph::DiGraph{Int64}
+    graph::DiGraph{Int}
     function Workflow{T}(jobs, graph) where {T}
         @assert !is_cyclic(graph) "`graph` must be acyclic!"
         @assert is_directed(graph) "`graph` must be directed!"
