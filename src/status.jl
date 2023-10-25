@@ -5,11 +5,11 @@ import EasyJobsBase:
     isexited,
     issucceeded,
     isfailed,
-    listpending,
-    listrunning,
-    listexited,
-    listsucceeded,
-    listfailed
+    filterpending,
+    filterrunning,
+    filterexited,
+    filtersucceeded,
+    filterfailed
 
 export getstatus,
     ispending,
@@ -17,11 +17,11 @@ export getstatus,
     isexited,
     issucceeded,
     isfailed,
-    listpending,
-    listrunning,
-    listexited,
-    listsucceeded,
-    listfailed
+    filterpending,
+    filterrunning,
+    filterexited,
+    filtersucceeded,
+    filterfailed
 
 """
     ispending(wf::AbstractWorkflow)
@@ -70,7 +70,7 @@ isfailed(wf::AbstractWorkflow) = isexited(wf) && any(isfailed, wf)
 
 # See https://docs.julialang.org/en/v1/manual/documentation/#Advanced-Usage
 for (func, adj) in zip(
-    (:listpending, :listrunning, :listexited, :listsucceeded, :listfailed),
+    (:filterpending, :filterrunning, :filterexited, :filtersucceeded, :filterfailed),
     ("pending", "running", "exited", "succeeded", "failed"),
 )
     name = string(func)
@@ -80,6 +80,6 @@ for (func, adj) in zip(
 
         Filter only the $($adj) jobs in a `Workflow`.
         """
-        $func(wf::Workflow) = $func(wf)
+        $func(wf::Workflow) = $func(collect(wf))
     end
 end
