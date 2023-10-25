@@ -19,15 +19,15 @@ abstract type AbstractWorkflow end
 struct Workflow{T} <: AbstractWorkflow
     jobs::Vector{T}
     graph::DiGraph{Int64}
-    function Workflow(jobs, graph)
+    function Workflow{T}(jobs, graph) where {T}
+        n = length(jobs)
         @assert !is_cyclic(graph) "`graph` must be acyclic!"
         @assert is_directed(graph) "`graph` must be directed!"
         @assert is_connected(graph) "`graph` must be connected!"
-        @assert nv(graph) == length(jobs) "`graph` has different size from `jobs`!"
+        @assert nv(graph) == n "`graph` has different size from `jobs`!"
         @assert allunique(jobs) "at least two jobs are identical!"
         order = topological_sort_by_dfs(graph)
         sorted_jobs = collect(jobs[order])
-        n = length(sorted_jobs)
         new_graph = DiGraph(n)
         dict = IdDict(zip(sorted_jobs, 1:n))
         # You must sort the graph too for `DependentJob`s to run in the correct order!
@@ -43,9 +43,10 @@ struct Workflow{T} <: AbstractWorkflow
                 end
             end
         end
-        return new{eltype(sorted_jobs)}(sorted_jobs, new_graph)
+        return new(sorted_jobs, new_graph)
     end
 end
+Workflow(jobs::AbstractVector{T}, graph) where {T} = Workflow{T}(jobs, graph)
 """
     Workflow(jobs::AbstractJob...)
 
