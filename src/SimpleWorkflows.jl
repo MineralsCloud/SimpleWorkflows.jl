@@ -2,7 +2,14 @@ module SimpleWorkflows
 
 using EasyJobsBase: AbstractJob
 using Graphs:
-    DiGraph, add_edge!, nv, is_cyclic, is_connected, has_edge, topological_sort_by_dfs
+    DiGraph,
+    add_edge!,
+    nv,
+    is_cyclic,
+    is_directed,
+    is_connected,
+    has_edge,
+    topological_sort_by_dfs
 
 export Workflow
 
@@ -13,7 +20,8 @@ struct Workflow{T} <: AbstractWorkflow
     jobs::Vector{T}
     graph::DiGraph{Int64}
     function Workflow(jobs, graph)
-        @assert !is_cyclic(graph) "`graph` must be acyclic"
+        @assert !is_cyclic(graph) "`graph` must be acyclic!"
+        @assert is_directed(graph) "`graph` must be directed!"
         @assert is_connected(graph) "`graph` must be connected!"
         @assert nv(graph) == length(jobs) "`graph` has different size from `jobs`!"
         @assert allunique(jobs) "at least two jobs are identical!"
