@@ -15,9 +15,9 @@ isrunning
 isexited
 issucceeded
 isfailed
-listpending
-listrunning
-listexited
-listsucceeded
-listfailed
+filterpending
+filterrunning
+filterexited
+filtersucceeded
+filterfailed
 ```
