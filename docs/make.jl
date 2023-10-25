@@ -18,16 +18,22 @@ makedocs(;
     pages=[
         "Home" => "index.md",
         "Manual" => [
-            "Installation guide" => "installation.md",
-            "Portability" => "portability.md",
+            "Installation Guide" => "man/installation.md",
+            "Portability" => "man/portability.md",
+            "Troubleshooting" => "man/troubleshooting.md",
         ],
-        "Public API" => "public.md",
+        "Reference" => Any[
+            "Public API" => "lib/public.md",
+            "Internals" => map(
+                s -> "lib/internals/$(s)",
+                sort(readdir(joinpath(@__DIR__, "src/lib/internals")))
+            ),
+        ],
         "Developer Docs" => [
             "Contributing" => "developers/contributing.md",
             "Style Guide" => "developers/style-guide.md",
             "Design Principles" => "developers/design-principles.md",
         ],
-        "Troubleshooting" => "troubleshooting.md",
     ],
 )
 

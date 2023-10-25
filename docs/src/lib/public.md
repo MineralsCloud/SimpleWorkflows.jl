@@ -1,8 +1,19 @@
-```@meta
-CurrentModule = SimpleWorkflows
+# Public API
+
+## Contents
+
+```@contents
+Pages = ["public.md"]
+Depth = 2
 ```
 
-# Public API
+## Index
+
+```@index
+Pages = ["public.md"]
+```
+
+## Public interface
 
 ```@docs
 Workflow
