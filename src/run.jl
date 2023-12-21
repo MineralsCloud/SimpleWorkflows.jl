@@ -51,6 +51,8 @@ end
 Run a `Workflow` with maximum number of attempts, with each attempt separated by a few seconds.
 """
 run!(wf::AbstractWorkflow; kwargs...) = execute!(wf, AsyncExecutor(; kwargs...))
+run!(wf::AbstractWorkflow, workers::Vector; kwargs...) =
+    execute!(wf, ParallelExecutor(workers; kwargs...))
 
 """
     execute!(workflow::AbstractWorkflow, exec::Executor)
@@ -92,6 +94,14 @@ function dispatch!(wf::AbstractWorkflow, exec::AsyncExecutor)
     end
     return wf
 end
+function dispatch!(wf::AbstractWorkflow, exec::ParallelExecutor)
+    for _ in Base.OneTo(exec.maxattempts)
+        jobs, graph, workers = copy(wf.jobs), copy(wf.graph), copy(exec.workers)
+        run_kahn_algo2!(jobs, graph, workers)
+        issucceeded(wf) ? break : sleep(exec.interval)
+    end
+    return wf
+end
 
 # This function `run_kahn_algo!` is an implementation of Kahn's algorithm for job scheduling.
 # `graph` is a directed acyclic graph representing dependencies between jobs.
@@ -120,6 +130,22 @@ function run_kahn_algo!(jobs, graph)  # Do not export!
         # Recursively call the `run_kahn_algo!` with the updated jobs list and graph.
         # This will continue the execution with the remaining jobs that are now without prerequisites.
         return run_kahn_algo!(jobs, graph)
+    else
+        throw(ArgumentError("something went wrong when running Kahn's algorithm!"))
+    end
+end
+function run_kahn_algo2!(jobs, graph, workers)  # Do not export!
+    if isempty(jobs) && iszero(nv(graph)) && isempty(workers)  # Stopping criterion
+        return nothing
+    elseif length(jobs) == nv(graph) == length(workers)
+        queue = findall(iszero, indegree(graph))
+        @sync for (job, worker) in zip(jobs[queue], workers)
+            @async run!(job, worker; maxattempts=1, interval=0, delay=0, wait=true)
+        end
+        rem_vertices!(graph, queue; keep_order=true)
+        deleteat!(jobs, queue)
+        deleteat!(workers, queue)
+        return run_kahn_algo!(jobs, graph, workers)
     else
         throw(ArgumentError("something went wrong when running Kahn's algorithm!"))
     end
