@@ -5,6 +5,7 @@ version = "0.29.0"
 
 [deps]
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 EasyJobsBase = "db8ca866-b61f-4bd1-a9b9-75c107d645d4"
 Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
 
