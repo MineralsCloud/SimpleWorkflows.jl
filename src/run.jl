@@ -1,3 +1,4 @@
+using Distributed: nprocs, workers
 using Graphs: indegree, rem_vertices!
 
 import EasyJobsBase: run!, execute!
@@ -28,6 +29,20 @@ function AsyncExecutor(; maxattempts=1, interval=1, delay=0, wait=false)
     @assert interval >= zero(interval)
     @assert delay >= zero(delay)
     return AsyncExecutor(maxattempts, interval, delay, wait)
+end
+struct ParallelExecutor <: Executor
+    workers::Vector{UInt64}
+    maxattempts::UInt64
+    interval::Real
+    delay::Real
+    wait::Bool
+end
+function ParallelExecutor(wks=workers(); maxattempts=1, interval=1, delay=0, wait=false)
+    @assert 1 <= maximum(wks) <= nprocs()
+    @assert maxattempts >= 1
+    @assert interval >= zero(interval)
+    @assert delay >= zero(delay)
+    return ParallelExecutor(wks, maxattempts, interval, delay, wait)
 end
 
 """
