@@ -73,7 +73,7 @@ end
     f₂() = read("file", String)
     h = Job(Thunk(sleep, 3); username="me", name="h")
     i = Job(Thunk(f₁, 1001); username="me", name="i")
-    j = ConditionalJob(Thunk(map, f₂); username="he", name="j")
+    j = ConditionalJob(Thunk(f₂); username="he", name="j")
     [h, i] .→ Ref(j)
     wf = Workflow(j)
     @test unique(wf) == collect(wf)
