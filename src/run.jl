@@ -51,8 +51,9 @@ end
 Run a `Workflow` with maximum number of attempts, with each attempt separated by a few seconds.
 """
 run!(wf::AbstractWorkflow; kwargs...) = execute!(wf, AsyncExecutor(; kwargs...))
-run!(wf::AbstractWorkflow, workers::Vector; kwargs...) =
-    execute!(wf, ParallelExecutor(workers; kwargs...))
+run!(wf::AbstractWorkflow, workers::Vector; kwargs...) = execute!(
+    wf, ParallelExecutor(workers; kwargs...)
+)
 
 """
     execute!(workflow::AbstractWorkflow, exec::Executor)
